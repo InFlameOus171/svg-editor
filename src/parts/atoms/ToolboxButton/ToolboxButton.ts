@@ -1,8 +1,9 @@
 import { html, LitElement } from 'lit';
-import { property } from 'lit/decorators.js';
+import { customElement, property } from 'lit/decorators.js';
 import { ToolboxStyle } from './ToolboxButton.styles';
 import { IToolboxButtonProps } from './ToolboxButton.types';
 
+@customElement('toolbox-button')
 export class ToolboxButton extends LitElement {
   static styles = ToolboxStyle;
 

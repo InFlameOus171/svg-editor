@@ -1,11 +1,23 @@
 import { html, LitElement } from 'lit';
+import { customElement } from 'lit/decorators.js';
 import { IToolboxButtonProps } from '../../atoms/ToolboxButton/ToolboxButton.types';
-import { layoutStyle } from './EditorLayout.styles';
+import {
+  layoutContentStyle,
+  layoutHeaderStyle,
+  layoutStyle,
+  responsiveStyles,
+} from './EditorLayout.styles';
 import { IEditorLayoutState } from './EditorLayout.types';
-import { getButtonColumn, generateTools } from './EditorLayout.util';
+import { generateTools } from './EditorLayout.util';
 
+@customElement('editor-layout')
 export class EditorLayout extends LitElement {
-  static styles = layoutStyle;
+  static styles = [
+    layoutStyle,
+    layoutHeaderStyle,
+    layoutContentStyle,
+    responsiveStyles,
+  ];
 
   state: IEditorLayoutState = { selectedTool: null };
 
@@ -13,29 +25,15 @@ export class EditorLayout extends LitElement {
     const tools: IToolboxButtonProps[] = generateTools(id => {
       this.state.selectedTool = id;
     });
-    const toolCount = tools.length;
-    const leftColumnInterval: [number, number] = [
-      0,
-      (toolCount + (toolCount % 2)) / 2,
-    ];
-    const rightColumnInterval: [number, number] = [
-      (toolCount + (toolCount % 2)) / 2,
-      toolCount,
-    ];
 
     return html`
-      <div id="layout">
-        <div id="header">Header</div>
-        <div id="toolbox">
-          <div class="col-0">${getButtonColumn(tools, leftColumnInterval)}</div>
-          <div class="col-1">
-            ${getButtonColumn(tools, rightColumnInterval)}
-          </div>
-        </div>
+      <div id="header">Header</div>
+      <div id="content">
+        <tool-box .props=${{ tools }}></tool-box>
         <div id="drawzone">drawzone</div>
         <div id="connection-info">connection-info</div>
-        <div id="footer">footer</div>
       </div>
+      <div id="footer">footer</div>
     `;
   }
 }

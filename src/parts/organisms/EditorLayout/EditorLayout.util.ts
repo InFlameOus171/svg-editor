@@ -1,4 +1,3 @@
-import { html } from 'lit';
 import { ToolGeneratorFunction } from './EditorLayout.types';
 
 export const generateTools: ToolGeneratorFunction = handleToolSelection => [
@@ -10,16 +9,3 @@ export const generateTools: ToolGeneratorFunction = handleToolSelection => [
   { title: 'Tool 5', onClick: handleToolSelection, id: '5' },
   { title: 'Tool 6', onClick: handleToolSelection, id: '6' },
 ];
-
-export const getButtonColumn = (
-  tools: Array<any>,
-  interval: [number, number]
-) =>
-  tools
-    .slice(interval[0], interval[1])
-    .map(
-      (tool, index) =>
-        html`<span class="colum-${index % 2}"
-          ><toolbox-button .props=${tool}></toolbox-button
-        ></span>`
-    );
