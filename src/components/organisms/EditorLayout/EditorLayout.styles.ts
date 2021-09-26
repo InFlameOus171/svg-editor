@@ -33,7 +33,7 @@ export const layoutContentStyle = css`
     gap: 30px;
   }
 
-  #drawzone {
+  draw-zone {
     height: 40vh;
     max-width: 1920px;
     width: 100%;
@@ -55,19 +55,19 @@ export const responsiveStyles = css`
   }
 
   @media all and (min-width: 1024px) {
-    :host #content #drawzone {
+    :host #content draw-zone {
       height: 55vh;
     }
   }
 
   @media all and (min-width: 1200px) {
-    :host #content #drawzone {
+    :host #content draw-zone {
       height: 70vh;
     }
   }
 
   @media all and (min-width: 1440px) {
-    :host #content #drawzone {
+    :host #content draw-zone {
       height: 85vh;
     }
   }

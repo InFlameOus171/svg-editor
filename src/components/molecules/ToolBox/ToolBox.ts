@@ -27,7 +27,6 @@ export class ToolBox extends LitElement {
       toolCount,
     ];
     return html`
-      <div class="vertical-indicator"></div>
       <div class="col-0">${getButtonColumn(leftColumnInterval, tools)}</div>
       <div class="col-1">${getButtonColumn(rightColumnInterval, tools)}</div>
     `;

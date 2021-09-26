@@ -30,7 +30,7 @@ export class EditorLayout extends LitElement {
       <div id="header">Header</div>
       <div id="content">
         <tool-box .props=${{ tools }}></tool-box>
-        <div id="drawzone">drawzone</div>
+        <draw-zone></draw-zone>
         <div id="connection-info">connection-info</div>
       </div>
       <div id="footer">footer</div>
