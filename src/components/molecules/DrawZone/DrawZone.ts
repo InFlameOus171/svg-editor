@@ -1,10 +1,16 @@
-import { LitElement, html } from 'lit';
+import { SVG } from '@svgdotjs/svg.js';
+import { LitElement, html, PropertyValues } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { NullableNumber } from '../../../types/types';
 import { drawZoneStyles } from './DrawZone.styles';
 
 @customElement('draw-zone')
 export class DrawZone extends LitElement {
+  constructor() {
+    super();
+    new ResizeObserver(this.#updateResize).observe(this);
+  }
+
   static styles = [drawZoneStyles];
 
   @property({ type: Number })
@@ -28,7 +34,7 @@ export class DrawZone extends LitElement {
     | undefined;
 
   @property()
-  openedFile?: string;
+  openedFile?: string = '';
 
   setCurrentMousePosition = (event: MouseEvent) => {
     const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
@@ -46,18 +52,16 @@ export class DrawZone extends LitElement {
     this.height = parseFloat(getComputedStyle(this).getPropertyValue('height'));
   };
 
-  constructor() {
-    super();
-    new ResizeObserver(this.#updateResize).observe(this);
-  }
-
-  updated = () => {
-    if (
-      this.openedFile &&
-      this.shadowRoot !== null &&
-      this.shadowRoot?.getElementById('drawzone') !== null
-    ) {
-      this.shadowRoot.getElementById('drawzone')!.innerHTML = this.openedFile;
+  updated = (changedProperties: PropertyValues) => {
+    if (changedProperties.has('openedFile')) {
+      const containerElement = this.shadowRoot?.getElementById('drawzone');
+      if (this.openedFile && containerElement) {
+        if (containerElement.innerHTML) {
+          containerElement.innerHTML = '';
+        }
+        const svgData = SVG(containerElement);
+        svgData.svg(this.openedFile);
+      }
     }
   };
 
@@ -67,9 +71,6 @@ export class DrawZone extends LitElement {
       @mousemove=${this.setCurrentMousePosition}
       @mouseout=${this.cancelDrawMode}
       @blur=${this.cancelDrawMode}
-    >
-      <p>${this.width}_${this.height}</p>
-      <p>${this.mouseX}_${this.mouseY}</p>
-    </div>`;
+    ></div>`;
   }
 }

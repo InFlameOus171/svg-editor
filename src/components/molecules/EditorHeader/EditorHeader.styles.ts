@@ -12,4 +12,7 @@ export const editorHeaderStyles = css`
     background-color: white;
     padding: 10px 15px;
   }
+  #open-svg-button:hover {
+    background-color: cyan;
+  }
 `;

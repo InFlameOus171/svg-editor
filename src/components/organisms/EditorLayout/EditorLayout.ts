@@ -26,13 +26,48 @@ export class EditorLayout extends LitElement {
 
   @state()
   tools: IToolboxButtonProps[] = [
-    { title: 'Tool 0', onClick: this.handleSelectTool, id: '0' },
-    { title: 'Tool 1', onClick: this.handleSelectTool, id: '1' },
-    { title: 'Tool 2', onClick: this.handleSelectTool, id: '2' },
-    { title: 'Tool 3', onClick: this.handleSelectTool, id: '3' },
-    { title: 'Tool 4', onClick: this.handleSelectTool, id: '4' },
-    { title: 'Tool 5', onClick: this.handleSelectTool, id: '5' },
-    { title: 'Tool 6', onClick: this.handleSelectTool, id: '6' },
+    {
+      title: 'Tool 0',
+      onClick: this.handleSelectTool,
+      id: '0',
+      isSelected: false,
+    },
+    {
+      title: 'Tool 1',
+      onClick: this.handleSelectTool,
+      id: '1',
+      isSelected: false,
+    },
+    {
+      title: 'Tool 2',
+      onClick: this.handleSelectTool,
+      id: '2',
+      isSelected: false,
+    },
+    {
+      title: 'Tool 3',
+      onClick: this.handleSelectTool,
+      id: '3',
+      isSelected: false,
+    },
+    {
+      title: 'Tool 4',
+      onClick: this.handleSelectTool,
+      id: '4',
+      isSelected: false,
+    },
+    {
+      title: 'Tool 5',
+      onClick: this.handleSelectTool,
+      id: '5',
+      isSelected: false,
+    },
+    {
+      title: 'Tool 6',
+      onClick: this.handleSelectTool,
+      id: '6',
+      isSelected: false,
+    },
   ];
 
   @state()
@@ -45,7 +80,7 @@ export class EditorLayout extends LitElement {
   private selectedTool: NullableString = null;
 
   @state()
-  private openedFile?: string;
+  private openedFile?: string = '';
 
   private handlePositionChange = (value: {
     xPosition: NullableNumber;
