@@ -1,27 +1,34 @@
 import { LitElement, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
+import { NullableNumber } from '../../../types/types';
 import { drawZoneStyles } from './DrawZone.styles';
 
 @customElement('draw-zone')
 export class DrawZone extends LitElement {
   static styles = [drawZoneStyles];
 
+  @property({ type: Number })
+  mouseX: NullableNumber = null;
+
+  @property({ type: Number })
+  mouseY: NullableNumber = null;
+
+  @state()
+  width: NullableNumber = null;
+
+  @state()
+  height: NullableNumber = null;
+
   @property()
   onPositionChange:
-    | ((value: { xPosition: number | null; yPosition: number | null }) => void)
+    | ((value: {
+        xPosition: NullableNumber;
+        yPosition: NullableNumber;
+      }) => void)
     | undefined;
 
-  @state()
-  width = 0;
-
-  @state()
-  height = 0;
-
-  @property({ type: Number })
-  mouseX: number | null = null;
-
-  @property({ type: Number })
-  mouseY: number | null = null;
+  @property()
+  openedFile?: string;
 
   setCurrentMousePosition = (event: MouseEvent) => {
     const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
@@ -31,8 +38,7 @@ export class DrawZone extends LitElement {
   };
 
   cancelDrawMode = () => {
-    this.mouseX = null;
-    this.mouseY = null;
+    this.onPositionChange?.({ xPosition: null, yPosition: null });
   };
 
   #updateResize = () => {
@@ -44,6 +50,16 @@ export class DrawZone extends LitElement {
     super();
     new ResizeObserver(this.#updateResize).observe(this);
   }
+
+  updated = () => {
+    if (
+      this.openedFile &&
+      this.shadowRoot !== null &&
+      this.shadowRoot?.getElementById('drawzone') !== null
+    ) {
+      this.shadowRoot.getElementById('drawzone')!.innerHTML = this.openedFile;
+    }
+  };
 
   render() {
     return html`<div

@@ -1,5 +1,6 @@
-import './components/templates/SvgEditor.js';
-import './components/organisms/EditorLayout/EditorLayout.js';
-import './components/atoms/ToolboxButton/ToolboxButton.js';
-import './components/molecules/ToolBox/ToolBox.js';
-import './components/molecules/DrawZone/DrawZone.js';
+import './components/templates/SvgEditor';
+import './components/organisms/EditorLayout';
+import './components/atoms/ToolboxButton';
+import './components/molecules/ToolBox';
+import './components/molecules/DrawZone';
+import './components/molecules/EditorHeader';

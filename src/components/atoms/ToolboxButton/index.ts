@@ -1,1 +1,1 @@
-export { ToolboxButton } from './ToolboxButton.js';
+export { ToolboxButton } from './ToolboxButton';

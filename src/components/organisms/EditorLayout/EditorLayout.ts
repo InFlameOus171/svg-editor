@@ -1,5 +1,6 @@
 import { html, LitElement } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
+import { NullableNumber, NullableString } from '../../../types/types.js';
 import { IToolboxButtonProps } from '../../atoms/ToolboxButton/ToolboxButton.types';
 import {
   layoutContentStyle,
@@ -12,36 +13,65 @@ import { generateTools } from './EditorLayout.util';
 export class EditorLayout extends LitElement {
   static styles = [layoutStyle, layoutHeaderStyle, layoutContentStyle];
 
-  @state()
-  xPos: number | null = null;
+  private handleSelectTool = (id: string) => {
+    this.selectedTool = id;
+    this.tools = this.tools.map(tool => {
+      if (tool.id === id) {
+        return { ...tool, isSelected: !tool.isSelected };
+      } else {
+        return { ...tool, isSelected: false };
+      }
+    });
+  };
 
   @state()
-  yPos: number | null = null;
+  tools: IToolboxButtonProps[] = [
+    { title: 'Tool 0', onClick: this.handleSelectTool, id: '0' },
+    { title: 'Tool 1', onClick: this.handleSelectTool, id: '1' },
+    { title: 'Tool 2', onClick: this.handleSelectTool, id: '2' },
+    { title: 'Tool 3', onClick: this.handleSelectTool, id: '3' },
+    { title: 'Tool 4', onClick: this.handleSelectTool, id: '4' },
+    { title: 'Tool 5', onClick: this.handleSelectTool, id: '5' },
+    { title: 'Tool 6', onClick: this.handleSelectTool, id: '6' },
+  ];
 
   @state()
-  selectedTool: string | null = null;
+  private xPos: NullableNumber = null;
 
-  #handlePositionChange = (value: {
-    xPosition: number | null;
-    yPosition: number | null;
+  @state()
+  private yPos: NullableNumber = null;
+
+  @state()
+  private selectedTool: NullableString = null;
+
+  @state()
+  private openedFile?: string;
+
+  private handlePositionChange = (value: {
+    xPosition: NullableNumber;
+    yPosition: NullableNumber;
   }) => {
     this.xPos = value.xPosition;
     this.yPos = value.yPosition;
   };
 
-  render() {
-    const tools: IToolboxButtonProps[] = generateTools(id => {
-      this.selectedTool = id;
-    });
+  private openFile = (file: string) => {
+    this.openedFile = file;
+  };
 
+  render() {
     return html`
-      <div id="header">Header</div>
+      <editor-header .onSelectSvgFile=${this.openFile}></editor-header>
       <div id="content">
-        <tool-box .props=${{ tools }}></tool-box>
+        <tool-box
+          .selectedTool=${this.selectedTool}
+          .tools=${this.tools}
+        ></tool-box>
         <draw-zone
-          .onPositionChange=${this.#handlePositionChange}
+          .onPositionChange=${this.handlePositionChange}
           .mouseX=${this.xPos}
           .mouseY=${this.yPos}
+          .openedFile=${this.openedFile}
         ></draw-zone>
         <div id="connection-info">connection-info</div>
       </div>

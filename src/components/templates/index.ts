@@ -1,1 +1,1 @@
-export { SvgEditor } from './SvgEditor.js';
+export { SvgEditor } from './SvgEditor';
