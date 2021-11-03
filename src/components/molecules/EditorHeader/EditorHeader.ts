@@ -24,7 +24,7 @@ export class EditorHeader extends LitElement {
   };
 
   render() {
-    return html`<div id="header">
+    return html`
       <label id="open-svg-button">
         Open
         <input
@@ -35,6 +35,6 @@ export class EditorHeader extends LitElement {
           accept="image/svg+xml"
         />
       </label>
-    </div>`;
+    `;
   }
 }
