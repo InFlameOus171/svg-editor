@@ -5,18 +5,19 @@ export class ResizeTool extends Tool {
   constructor(target: Node, self: EditorLayout) {
     super(target, self);
   }
-
+  selectedSVG: any;
   executeAction = (e: MouseEvent) => {
     if (e.buttons !== 1) return;
-
-    const rect = e.target as HTMLElement;
-    const rectPosition = rect?.getBoundingClientRect();
+    if (!this.selectedSVG) {
+      this.selectedSVG = e.target;
+    }
+    const rectPosition = this.selectedSVG?.getBoundingClientRect();
 
     const xPos = e.clientX - rectPosition.x;
     const yPos = e.clientY - rectPosition.y;
 
-    const rectWidth = rect?.getAttribute('width');
-    const rectHeight = rect?.getAttribute('height');
+    const rectWidth = this.selectedSVG?.getAttribute('width');
+    const rectHeight = this.selectedSVG?.getAttribute('height');
     if (rectHeight && rectWidth) {
       this.self.mouseX = xPos;
       this.self.mouseY = yPos;
@@ -26,11 +27,8 @@ export class ResizeTool extends Tool {
       width = this.self.mouseX + 2;
       height = this.self.mouseY + 2;
 
-      console.log(rectPosition);
-
-      console.log(this.self.mouseX, this.self.mouseY);
-      rect.setAttribute('width', width.toString());
-      rect.setAttribute('height', height.toString());
+      this.selectedSVG.setAttribute('width', width.toString());
+      this.selectedSVG.setAttribute('height', height.toString());
 
       this.self.mouseX = xPos;
       this.self.mouseY = yPos;

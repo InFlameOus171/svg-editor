@@ -43,6 +43,10 @@ export class Editor {
   }
 
   setSVG(svg: Document) {
+    if (this.svg?.style.width && this.svg?.style.height) {
+      svg.documentElement.setAttribute('width', this.svg?.style.width);
+      svg.documentElement.setAttribute('height', this.svg?.style.height);
+    }
     if (this.svg) this.svg.innerHTML = svg.documentElement.innerHTML;
   }
 

@@ -64,12 +64,16 @@ export class EditorLayout extends LitElement {
     this.editor?.useSelectedTool(event);
   };
 
-  handleSelectResize = () => {
+  checkForEditor = () => {
     if (!this.editor) {
       this.editor = new Editor(
         this.shadowRoot?.getElementById('drawzone') as unknown as SVGRectElement
       );
     }
+  };
+
+  handleSelectResize = () => {
+    this.checkForEditor();
     this.editor?.selectTool(this, Tools_List.RESIZE);
   };
 
@@ -133,8 +137,9 @@ export class EditorLayout extends LitElement {
 
   editor: Editor | null = null;
 
-  private openFile = (file: string) => {
-    this.openedFile = file;
+  private openFile = (file: Document) => {
+    this.checkForEditor();
+    this.editor?.setSVG(file);
   };
 
   updateResize = () => {
@@ -148,6 +153,9 @@ export class EditorLayout extends LitElement {
       <div id="content">
         <tool-box .tools=${this.tools}></tool-box>
         <svg
+          height="1000"
+          width="1000"
+          viewBox="0 0 1000 1000"
           id="drawzone"
           @mousemove=${this.mousemove}
           @mouseup=${this.editor?.deselectTool}

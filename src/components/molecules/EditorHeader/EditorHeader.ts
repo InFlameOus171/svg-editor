@@ -7,7 +7,7 @@ export class EditorHeader extends LitElement {
   static styles = [editorHeaderStyles];
 
   @property()
-  onSelectSvgFile?: (data: string) => void;
+  onSelectSvgFile?: (data: Document) => void;
 
   private handleSelectFile = (event: Event) => {
     const fileInputElement = event.target as HTMLInputElement;
@@ -16,11 +16,15 @@ export class EditorHeader extends LitElement {
       return;
     }
     const reader = new FileReader();
-    reader.readAsText(file);
-    reader.addEventListener('load', () => {
+    reader.addEventListener('load', readerEvent => {
       // TODO - Validate file
-      if ('isValid') this.onSelectSvgFile?.(reader.result as string);
+      const content = readerEvent.target?.result;
+      if (typeof content === 'string')
+        this.onSelectSvgFile?.(
+          new DOMParser().parseFromString(content, 'image/svg+xml')
+        );
     });
+    reader.readAsText(file);
   };
 
   render() {
