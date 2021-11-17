@@ -2,14 +2,40 @@
  * @author mrdoob / http://mrdoob.com
  */
 
-export class Editor {
-  svg?: SVGRectElement;
+import { EditorLayout } from '../components/organisms/EditorLayout';
+import { Tool } from './Tool';
+import { ResizeTool } from './Tools/ResizeTool';
 
+export enum Tools_List {
+  RESIZE,
+}
+
+export class Editor {
+  private svg?: SVGRectElement;
+  private selectedTool: Tool | null = null;
   constructor(svg?: SVGRectElement | null) {
     if (svg) {
       this.svg = svg;
     }
   }
+
+  selectTool = (self: EditorLayout, tool: Tools_List) => {
+    console.log(self, tool);
+    if (this.svg) {
+      switch (tool) {
+        case Tools_List.RESIZE: {
+          this.selectedTool = new ResizeTool(this.svg, self);
+          break;
+        }
+      }
+    }
+  };
+
+  deselectTool = () => {
+    this.selectedTool = null;
+  };
+
+  useSelectedTool = (event: Event) => this.selectedTool?.executeAction?.(event);
 
   addElement(element: SVGRectElement) {
     this.svg?.appendChild(element);

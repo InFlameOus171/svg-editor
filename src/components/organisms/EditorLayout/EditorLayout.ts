@@ -1,17 +1,19 @@
 import { html, LitElement } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 import { NullableNumber, NullableString } from '../../../types/types.js';
 import { IToolboxButtonProps } from '../../atoms/ToolboxButton/ToolboxButton.types';
-import { Editor } from '../../../util/Editor';
+import { Editor, Tools_List } from '../../../util/Editor';
 import {
   layoutContentStyle,
   layoutHeaderStyle,
   layoutStyle,
 } from './EditorLayout.styles';
+import { Tool } from '../../../util/Tool.js';
 
 @customElement('editor-layout')
 export class EditorLayout extends LitElement {
   static styles = [layoutStyle, layoutHeaderStyle, layoutContentStyle];
+
   constructor() {
     super();
     const element = this.shadowRoot?.getElementById(
@@ -19,12 +21,9 @@ export class EditorLayout extends LitElement {
     ) as unknown as SVGRectElement;
     if (element) {
       new ResizeObserver(this.updateResize).observe(element);
-      this.editor = new Editor(element);
     }
   }
-
   private handleSelectTool = (id: string) => {
-    this.selectedTool = id;
     this.tools = this.tools.map(tool => {
       if (tool.id === id) {
         return { ...tool, isSelected: !tool.isSelected };
@@ -34,12 +33,12 @@ export class EditorLayout extends LitElement {
     });
   };
 
-  randomColor() {
+  randomColor = () => {
     return '#' + Math.floor(Math.random() * 16777215).toString(16);
-  }
+  };
 
   createRectangle = () => {
-    var element = document.createElementNS(
+    const element = document.createElementNS(
       'http://www.w3.org/2000/svg',
       'rect'
     );
@@ -55,17 +54,36 @@ export class EditorLayout extends LitElement {
     ed.addElement(element);
   };
 
+  @property({ type: Number })
+  mouseX: number = 0;
+
+  @property({ type: Number })
+  mouseY: number = 0;
+
+  mousemove = (event: any) => {
+    this.editor?.useSelectedTool(event);
+  };
+
+  handleSelectResize = () => {
+    if (!this.editor) {
+      this.editor = new Editor(
+        this.shadowRoot?.getElementById('drawzone') as unknown as SVGRectElement
+      );
+    }
+    this.editor?.selectTool(this, Tools_List.RESIZE);
+  };
+
   @state()
   tools: IToolboxButtonProps[] = [
     {
-      title: 'Tool 0',
+      title: 'Create Rectangle',
       onClick: this.createRectangle,
       id: '0',
       isSelected: false,
     },
     {
-      title: 'Tool 1',
-      onClick: this.handleSelectTool,
+      title: 'Resize',
+      onClick: this.handleSelectResize,
       id: '1',
       isSelected: false,
     },
@@ -102,13 +120,7 @@ export class EditorLayout extends LitElement {
   ];
 
   @state()
-  private xPos: NullableNumber = null;
-
-  @state()
-  private yPos: NullableNumber = null;
-
-  @state()
-  private selectedTool: NullableString = null;
+  private selectedTool: Tool | null = null;
 
   @state()
   private openedFile?: string = '';
@@ -134,15 +146,15 @@ export class EditorLayout extends LitElement {
     return html`
       <editor-header .onSelectSvgFile=${this.openFile}></editor-header>
       <div id="content">
-        <tool-box
-          .selectedTool=${this.selectedTool}
-          .tools=${this.tools}
-        ></tool-box>
-        <!-- @TODO: add command pattern for different selectable tools -->
-        <!-- <svg id="drawzone" @click=this.selectedTool.executeAction></svg> -->
+        <tool-box .tools=${this.tools}></tool-box>
+        <svg
+          id="drawzone"
+          @mousemove=${this.mousemove}
+          @mouseup=${this.editor?.deselectTool}
+        ></svg>
         <div id="connection-info">connection-info</div>
       </div>
-      <div id="footer">current position: ${this.xPos} - ${this.yPos}</div>
+      <div id="footer">current position: ${this.mouseX} - ${this.mouseY}</div>
     `;
   }
 }
