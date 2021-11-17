@@ -2,16 +2,26 @@ import { html, LitElement } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { NullableNumber, NullableString } from '../../../types/types.js';
 import { IToolboxButtonProps } from '../../atoms/ToolboxButton/ToolboxButton.types';
+import { Editor } from '../../../util/Editor';
 import {
   layoutContentStyle,
   layoutHeaderStyle,
   layoutStyle,
 } from './EditorLayout.styles';
-import { generateTools } from './EditorLayout.util';
 
 @customElement('editor-layout')
 export class EditorLayout extends LitElement {
   static styles = [layoutStyle, layoutHeaderStyle, layoutContentStyle];
+  constructor() {
+    super();
+    const element = this.shadowRoot?.getElementById(
+      'drawzone'
+    ) as unknown as SVGRectElement;
+    if (element) {
+      new ResizeObserver(this.updateResize).observe(element);
+      this.editor = new Editor(element);
+    }
+  }
 
   private handleSelectTool = (id: string) => {
     this.selectedTool = id;
@@ -24,11 +34,32 @@ export class EditorLayout extends LitElement {
     });
   };
 
+  randomColor() {
+    return '#' + Math.floor(Math.random() * 16777215).toString(16);
+  }
+
+  createRectangle = () => {
+    var element = document.createElementNS(
+      'http://www.w3.org/2000/svg',
+      'rect'
+    );
+    element.setAttribute('x', (Math.random() * (this.width ?? 0)).toString());
+    element.setAttribute('y', (Math.random() * (this.height ?? 0)).toString());
+    element.setAttribute('width', (Math.random() * 100).toString());
+    element.setAttribute('height', (Math.random() * 100).toString());
+    element.style.stroke = 'black';
+    element.style.fill = this.randomColor();
+    const ed = new Editor(
+      this.shadowRoot?.getElementById('drawzone') as unknown as SVGRectElement
+    );
+    ed.addElement(element);
+  };
+
   @state()
   tools: IToolboxButtonProps[] = [
     {
       title: 'Tool 0',
-      onClick: this.handleSelectTool,
+      onClick: this.createRectangle,
       id: '0',
       isSelected: false,
     },
@@ -82,16 +113,21 @@ export class EditorLayout extends LitElement {
   @state()
   private openedFile?: string = '';
 
-  private handlePositionChange = (value: {
-    xPosition: NullableNumber;
-    yPosition: NullableNumber;
-  }) => {
-    this.xPos = value.xPosition;
-    this.yPos = value.yPosition;
-  };
+  @state()
+  width: NullableNumber = null;
+
+  @state()
+  height: NullableNumber = null;
+
+  editor: Editor | null = null;
 
   private openFile = (file: string) => {
     this.openedFile = file;
+  };
+
+  updateResize = () => {
+    this.width = parseFloat(getComputedStyle(this).getPropertyValue('width'));
+    this.height = parseFloat(getComputedStyle(this).getPropertyValue('height'));
   };
 
   render() {
@@ -102,12 +138,8 @@ export class EditorLayout extends LitElement {
           .selectedTool=${this.selectedTool}
           .tools=${this.tools}
         ></tool-box>
-        <draw-zone
-          .onPositionChange=${this.handlePositionChange}
-          .mouseX=${this.xPos}
-          .mouseY=${this.yPos}
-          .openedFile=${this.openedFile}
-        ></draw-zone>
+        <!-- @TODO: add command pattern for different selectable tools -->
+        <!-- <svg id="drawzone" @click=this.selectedTool.executeAction></svg> -->
         <div id="connection-info">connection-info</div>
       </div>
       <div id="footer">current position: ${this.xPos} - ${this.yPos}</div>

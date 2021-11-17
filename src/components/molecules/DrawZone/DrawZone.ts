@@ -66,11 +66,6 @@ export class DrawZone extends LitElement {
   };
 
   render() {
-    return html`<div
-      id="drawzone"
-      @mousemove=${this.setCurrentMousePosition}
-      @mouseout=${this.cancelDrawMode}
-      @blur=${this.cancelDrawMode}
-    ></div>`;
+    return html`<div id="drawzone"></div>`;
   }
 }
