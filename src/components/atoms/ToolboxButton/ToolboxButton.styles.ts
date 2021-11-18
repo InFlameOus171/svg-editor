@@ -2,7 +2,7 @@ import { css } from 'lit';
 
 export const toolBoxButtonStyles = css`
   :host {
-    min-width: 47.6px;
+    min-width: 75px;
     display: block;
   }
 

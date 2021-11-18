@@ -3,28 +3,53 @@
  */
 
 import { EditorLayout } from '../components/organisms/EditorLayout';
+import { Coordinates, Shape } from '../types/types';
 import { Tool } from './Tool';
-import { ResizeTool } from './Tools/ResizeTool';
+import { DrawTool } from './Tools/DrawTool';
+import { LineTool } from './Tools/LineTool';
 
 export enum Tools_List {
-  RESIZE,
+  DRAW,
+  LINE,
 }
 
 export class Editor {
-  private svg?: SVGRectElement;
   private selectedTool: Tool | null = null;
-  constructor(svg?: SVGRectElement | null) {
-    if (svg) {
-      this.svg = svg;
-    }
+  private canvas: HTMLCanvasElement | null = null;
+  private previewLayer: HTMLCanvasElement | null = null;
+  private self: EditorLayout;
+  private offset: Coordinates;
+  private shapes: Shape[] = [];
+
+  constructor(
+    canvas: HTMLCanvasElement,
+    previewLayer: HTMLCanvasElement,
+    offset: Coordinates,
+    self: EditorLayout
+  ) {
+    this.canvas = canvas;
+    this.previewLayer = previewLayer;
+    this.self = self;
+    this.offset = offset;
   }
 
-  selectTool = (self: EditorLayout, tool: Tools_List) => {
-    console.log(self, tool);
-    if (this.svg) {
+  selectTool = (tool: Tools_List) => {
+    if (this.selectedTool) this.deselectTool();
+    if (this.canvas && this.previewLayer) {
       switch (tool) {
-        case Tools_List.RESIZE: {
-          this.selectedTool = new ResizeTool(this.svg, self);
+        case Tools_List.DRAW: {
+          this.selectedTool = new DrawTool(this.canvas, this.self, this.offset);
+          this.selectedTool.executeAction();
+          break;
+        }
+        case Tools_List.LINE: {
+          this.selectedTool = new LineTool(
+            this.canvas,
+            this.previewLayer,
+            this.self,
+            this.offset
+          );
+          this.selectedTool.executeAction();
           break;
         }
       }
@@ -32,34 +57,16 @@ export class Editor {
   };
 
   deselectTool = () => {
-    this.selectedTool = null;
+    if (this.selectedTool) {
+      this.shapes.push(...this.selectedTool?.destroy());
+      this.selectedTool = null;
+    }
+    console.log(this.shapes);
   };
 
-  useSelectedTool = (event: Event) => this.selectedTool?.executeAction?.(event);
+  useSelectedTool = (event: Event) => this.selectedTool?.executeAction?.();
 
   addElement(element: SVGRectElement) {
-    this.svg?.appendChild(element);
-    this.svg?.appendChild(document.createTextNode('\n'));
-  }
-
-  setSVG(svg: Document) {
-    if (this.svg?.style.width && this.svg?.style.height) {
-      svg.documentElement.setAttribute('width', this.svg?.style.width);
-      svg.documentElement.setAttribute('height', this.svg?.style.height);
-    }
-    if (this.svg) this.svg.innerHTML = svg.documentElement.innerHTML;
-  }
-
-  clear() {
-    if (this.svg) this.svg.textContent = '';
-  }
-
-  toString() {
-    return [
-      '<?xml version="1.0" encoding="UTF-8"?>\n',
-      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400">\n',
-      this.svg?.innerHTML,
-      '</svg>',
-    ].join('');
+    throw new Error('Not implemented');
   }
 }

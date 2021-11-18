@@ -2,11 +2,10 @@ import { css } from 'lit';
 
 export const layoutStyle = css`
   :host {
+    height: 100%;
     transition: all 1s;
-    padding: 5px;
     display: flex;
     flex-direction: column;
-    gap: 5px;
     background-color: #2196f3;
   }
 
@@ -25,7 +24,20 @@ export const layoutContentStyle = css`
   #content {
     display: flex;
     flex-wrap: nowrap;
-    gap: 5px;
+  }
+
+  #draw-container {
+    margin: 0;
+    padding: 0;
+    top: 0;
+    left: 0;
+    position: relative;
+  }
+
+  #drawzone {
+    top: 0;
+    left: 0;
+    position: absolute;
   }
 
   #connection-info {

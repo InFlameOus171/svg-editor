@@ -8,161 +8,110 @@ import {
   layoutHeaderStyle,
   layoutStyle,
 } from './EditorLayout.styles';
-import { Tool } from '../../../util/Tool.js';
 
 @customElement('editor-layout')
 export class EditorLayout extends LitElement {
-  static styles = [layoutStyle, layoutHeaderStyle, layoutContentStyle];
-
-  constructor() {
-    super();
-    const element = this.shadowRoot?.getElementById(
+  async firstUpdated() {
+    this.updateResize();
+    const canvas = this.shadowRoot?.getElementById(
       'drawzone'
-    ) as unknown as SVGRectElement;
-    if (element) {
-      new ResizeObserver(this.updateResize).observe(element);
-    }
-  }
-  private handleSelectTool = (id: string) => {
-    this.tools = this.tools.map(tool => {
-      if (tool.id === id) {
-        return { ...tool, isSelected: !tool.isSelected };
-      } else {
-        return { ...tool, isSelected: false };
-      }
-    });
-  };
-
-  randomColor = () => {
-    return '#' + Math.floor(Math.random() * 16777215).toString(16);
-  };
-
-  createRectangle = () => {
-    const element = document.createElementNS(
-      'http://www.w3.org/2000/svg',
-      'rect'
-    );
-    element.setAttribute('x', (Math.random() * (this.width ?? 0)).toString());
-    element.setAttribute('y', (Math.random() * (this.height ?? 0)).toString());
-    element.setAttribute('width', (Math.random() * 100).toString());
-    element.setAttribute('height', (Math.random() * 100).toString());
-    element.style.stroke = 'black';
-    element.style.fill = this.randomColor();
-    const ed = new Editor(
-      this.shadowRoot?.getElementById('drawzone') as unknown as SVGRectElement
-    );
-    ed.addElement(element);
-  };
-
-  @property({ type: Number })
-  mouseX: number = 0;
-
-  @property({ type: Number })
-  mouseY: number = 0;
-
-  mousemove = (event: any) => {
-    this.editor?.useSelectedTool(event);
-  };
-
-  checkForEditor = () => {
-    if (!this.editor) {
+    ) as HTMLCanvasElement;
+    const previewLayer = this.shadowRoot?.getElementById(
+      'preview-layer'
+    ) as HTMLCanvasElement;
+    if (previewLayer) console.log(previewLayer);
+    if (canvas) {
+      console.log(this.height, this.width);
+      console.log('drin');
+      console.log(canvas);
+      new ResizeObserver(this.updateResize).observe(canvas);
       this.editor = new Editor(
-        this.shadowRoot?.getElementById('drawzone') as unknown as SVGRectElement
+        canvas,
+        previewLayer,
+        { x: previewLayer.offsetLeft, y: previewLayer.offsetTop },
+        this
       );
     }
-  };
+  }
 
-  handleSelectResize = () => {
-    this.checkForEditor();
-    this.editor?.selectTool(this, Tools_List.RESIZE);
-  };
+  // connectedCallback(): void {
+  //   super.connectedCallback();
+
+  // }
+
+  static styles = [layoutStyle, layoutHeaderStyle, layoutContentStyle];
+  @state()
+  width: number = 0;
+  @state()
+  height: number = 0;
 
   @state()
+  editor: Editor | null = null;
+
+  handleSelectTool = () => {
+    console.log('selected');
+  };
+
+  handleSelectDraw = () => {
+    this.editor?.selectTool(Tools_List.DRAW);
+  };
+  handleSelectLine = () => {
+    this.editor?.selectTool(Tools_List.LINE);
+  };
+
+  deselectTool = () => {
+    this.editor?.deselectTool();
+  };
+
   tools: IToolboxButtonProps[] = [
     {
-      title: 'Create Rectangle',
-      onClick: this.createRectangle,
+      title: 'Draw Tool',
+      onClick: this.handleSelectDraw,
       id: '0',
       isSelected: false,
     },
     {
-      title: 'Resize',
-      onClick: this.handleSelectResize,
+      title: 'Line Tool',
+      onClick: this.handleSelectLine,
       id: '1',
       isSelected: false,
     },
     {
-      title: 'Tool 2',
-      onClick: this.handleSelectTool,
+      title: 'Deselect',
+      onClick: this.deselectTool,
       id: '2',
-      isSelected: false,
-    },
-    {
-      title: 'Tool 3',
-      onClick: this.handleSelectTool,
-      id: '3',
-      isSelected: false,
-    },
-    {
-      title: 'Tool 4',
-      onClick: this.handleSelectTool,
-      id: '4',
-      isSelected: false,
-    },
-    {
-      title: 'Tool 5',
-      onClick: this.handleSelectTool,
-      id: '5',
-      isSelected: false,
-    },
-    {
-      title: 'Tool 6',
-      onClick: this.handleSelectTool,
-      id: '6',
       isSelected: false,
     },
   ];
 
-  @state()
-  private selectedTool: Tool | null = null;
-
-  @state()
-  private openedFile?: string = '';
-
-  @state()
-  width: NullableNumber = null;
-
-  @state()
-  height: NullableNumber = null;
-
-  editor: Editor | null = null;
-
-  private openFile = (file: Document) => {
-    this.checkForEditor();
-    this.editor?.setSVG(file);
-  };
-
   updateResize = () => {
-    this.width = parseFloat(getComputedStyle(this).getPropertyValue('width'));
-    this.height = parseFloat(getComputedStyle(this).getPropertyValue('height'));
+    this.width = parseInt(getComputedStyle(this).getPropertyValue('width'));
+    this.height = parseInt(getComputedStyle(this).getPropertyValue('height'));
   };
 
   render() {
     return html`
-      <editor-header .onSelectSvgFile=${this.openFile}></editor-header>
       <div id="content">
+        <div id="draw-container">
+          <canvas
+            id="drawzone"
+            height=${window.innerHeight / 1.5}
+            width=${window.innerHeight / 1.5}
+          ></canvas>
+          <canvas
+            id="preview-layer"
+            height=${window.innerHeight / 1.5}
+            width=${window.innerHeight / 1.5}
+          ></canvas>
+        </div>
         <tool-box .tools=${this.tools}></tool-box>
-        <svg
-          height="1000"
-          width="1000"
-          viewBox="0 0 1000 1000"
-          id="drawzone"
-          @mousemove=${this.mousemove}
-          @mouseup=${this.editor?.deselectTool}
-        ></svg>
-        <div id="connection-info">connection-info</div>
+
+        <!-- <div id="connection-info">connection-info</div> -->
       </div>
-      <div id="footer">current position: ${this.mouseX} - ${this.mouseY}</div>
+
+      <editor-header></editor-header>
+
+      <div id="footer"></div>
     `;
   }
 }

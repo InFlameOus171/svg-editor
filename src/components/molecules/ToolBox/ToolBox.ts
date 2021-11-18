@@ -8,7 +8,7 @@ import { getButtonColumn } from './ToolBox.util';
 @customElement('tool-box')
 export class ToolBox extends LitElement {
   @property({ type: Array })
-  tools?: Array<IToolboxButtonProps>;
+  tools?: Array<any>;
 
   @property({ type: String })
   selectedTool?: NullableString;

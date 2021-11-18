@@ -22,7 +22,6 @@ export class ToolboxButton extends LitElement {
   }
 
   render() {
-    console.log(this.children);
     return html`<button
       class=${this.isSelected ? 'isSelected' : ''}
       @click=${this.handleClick}
