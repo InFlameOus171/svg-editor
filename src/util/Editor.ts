@@ -10,12 +10,14 @@ import { CircleTool } from './Tools/CircleTool';
 import { DrawTool } from './Tools/DrawTool';
 import { LineTool } from './Tools/LineTool';
 import { RectangleTool } from './Tools/RectangleTool';
+import { SelectTool } from './Tools/SelectTool';
 
 export enum Tools_List {
   DRAW,
   LINE,
   RECT,
   CIRCLE,
+  SELECT,
 }
 
 export class Editor {
@@ -44,7 +46,6 @@ export class Editor {
       switch (tool) {
         case Tools_List.DRAW: {
           this.selectedTool = new DrawTool(this.canvas, this.self, this.offset);
-          this.selectedTool.executeAction();
           break;
         }
         case Tools_List.LINE: {
@@ -54,7 +55,6 @@ export class Editor {
             this.self,
             this.offset
           );
-          this.selectedTool.executeAction();
           break;
         }
         case Tools_List.RECT: {
@@ -64,7 +64,6 @@ export class Editor {
             this.self,
             this.offset
           );
-          this.selectedTool.executeAction();
           break;
         }
         case Tools_List.CIRCLE: {
@@ -74,10 +73,20 @@ export class Editor {
             this.self,
             this.offset
           );
-          this.selectedTool.executeAction();
+          break;
+        }
+        case Tools_List.SELECT: {
+          this.selectedTool = new SelectTool(
+            this.canvas,
+            this.previewLayer,
+            this.self,
+            this.offset,
+            this.shapes
+          );
           break;
         }
       }
+      this.selectedTool?.executeAction();
     }
   };
 

@@ -1,9 +1,11 @@
 import { Coordinates } from '../../types/types';
 import { Line } from './Line';
+import { Shape } from './Shape';
 
-export class FreehandedShape {
+export class FreehandedShape extends Shape {
   points: Coordinates[] = [];
   constructor(startingPoint: Coordinates) {
+    super();
     this.points.push(startingPoint);
   }
   addPoint = (newPoint: Coordinates) => {

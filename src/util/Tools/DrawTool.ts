@@ -15,12 +15,12 @@ export class DrawTool extends Tool<FreehandedShape> {
   }
 
   draw = () => {
-    this.pen.drawLine(
-      this.previousCoordinates,
-      this.currentCoordinates,
-      this.context
-    );
-    this.resetPreview();
+    console.log(this.previousCoordinates, this.currentCoordinates);
+    this.context?.beginPath();
+    this.context?.moveTo(...this.previousCoordinates);
+    this.context?.lineTo(...this.currentCoordinates);
+    this.context?.stroke();
+    this.context?.closePath();
   };
 
   executeAction = () => {
@@ -49,7 +49,6 @@ export class DrawTool extends Tool<FreehandedShape> {
 
   private onDown = (e: MouseEvent) => {
     this.previousCoordinates = this.currentCoordinates;
-    console.log('dafuq');
     this.currentCoordinates = this.getCoords(e);
     this.currentShape = new FreehandedShape(this.currentCoordinates);
     this.currentShape.addPoint([
@@ -63,7 +62,6 @@ export class DrawTool extends Tool<FreehandedShape> {
     if (this.currentShape) {
       this.allShapes.push(this.currentShape);
     }
-    console.log(this.allShapes.forEach(shape => console.log(shape.toLines())));
     this.isDrawing = false;
   };
 
@@ -72,7 +70,9 @@ export class DrawTool extends Tool<FreehandedShape> {
   };
 
   private onMove = (e: MouseEvent) => {
-    this.resetPreview();
+    if (!this.isDrawing || this.shallWait) return;
+    this.previousCoordinates = this.currentCoordinates;
+    this.currentCoordinates = this.getCoords(e);
     this.draw();
     this.shallWait = true;
     setTimeout(() => {
