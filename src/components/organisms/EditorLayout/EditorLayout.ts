@@ -28,7 +28,7 @@ export class EditorLayout extends LitElement {
       this.editor = new Editor(
         canvas,
         previewLayer,
-        { x: previewLayer.offsetLeft, y: previewLayer.offsetTop },
+        [previewLayer.offsetLeft, previewLayer.offsetTop],
         this
       );
     }
@@ -58,6 +58,12 @@ export class EditorLayout extends LitElement {
   handleSelectLine = () => {
     this.editor?.selectTool(Tools_List.LINE);
   };
+  handleSelectRect = () => {
+    this.editor?.selectTool(Tools_List.RECT);
+  };
+  handleSelectCircle = () => {
+    this.editor?.selectTool(Tools_List.CIRCLE);
+  };
 
   deselectTool = () => {
     this.editor?.deselectTool();
@@ -74,6 +80,18 @@ export class EditorLayout extends LitElement {
       title: 'Line Tool',
       onClick: this.handleSelectLine,
       id: '1',
+      isSelected: false,
+    },
+    {
+      title: 'Rect Tool',
+      onClick: this.handleSelectRect,
+      id: '2',
+      isSelected: false,
+    },
+    {
+      title: 'Circle Tool',
+      onClick: this.handleSelectCircle,
+      id: '3',
       isSelected: false,
     },
     {

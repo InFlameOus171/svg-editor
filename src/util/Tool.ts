@@ -1,21 +1,23 @@
 import { EditorLayout } from '../components/organisms/EditorLayout';
-import { Coordinates, Shape } from '../types/types';
+import { Shape } from '../types/shapes';
+import { Coordinates } from '../types/types';
+import { Pen } from './Pen';
 
-export abstract class Tool {
-  target: HTMLCanvasElement;
+export abstract class Tool<T = Shape> {
+  drawLayer: HTMLCanvasElement;
   previewLayer?: HTMLCanvasElement;
   self: EditorLayout;
-  shape: Shape = {};
-  shapes: Shape[] = [];
-  timesPerSecond: number = 30;
-  wait: boolean = false;
-  ctx?: CanvasRenderingContext2D;
-  previewCtx?: CanvasRenderingContext2D;
+  currentShape?: T;
+  allShapes: T[] = [];
+  shallWait: boolean = false;
+  context?: CanvasRenderingContext2D;
+  previewContext?: CanvasRenderingContext2D;
+  pen = Pen;
 
   offset: Coordinates;
-  drawing: boolean = false;
-  prev: [number, number] = [0, 0];
-  curr: [number, number] = [0, 0];
+  isDrawing: boolean = false;
+  previousCoordinates: [number, number] = [0, 0];
+  currentCoordinates: [number, number] = [0, 0];
 
   constructor(
     target: HTMLCanvasElement,
@@ -23,35 +25,43 @@ export abstract class Tool {
     offset: Coordinates,
     previewLayer?: HTMLCanvasElement
   ) {
-    this.target = target;
+    this.drawLayer = target;
     this.self = self;
     this.offset = offset;
     this.previewLayer = previewLayer;
-    const renderingContext = this.target.getContext('2d');
+    const renderingContext = this.drawLayer.getContext('2d');
     if (renderingContext) {
-      this.ctx = renderingContext;
+      this.context = renderingContext;
     }
     const previewContext = this.previewLayer?.getContext('2d');
     if (previewContext) {
-      this.previewCtx = previewContext;
+      this.previewContext = previewContext;
     }
   }
 
-  getCoords = (e: MouseEvent): [number, number] => {
-    return [e.clientX - this.offset.x, e.clientY - this.offset.y];
+  resetPreview = () => {
+    if (this.previewLayer) {
+      this.previewContext?.clearRect(
+        0,
+        0,
+        this.previewLayer?.width,
+        this.previewLayer.height
+      );
+    }
   };
 
-  draw = () => {
-    this.ctx?.beginPath();
-    this.ctx?.moveTo(...this.prev);
-    this.ctx?.lineTo(...this.curr);
-    this.ctx?.stroke();
-    this.ctx?.closePath();
+  getCoords = (e: MouseEvent): [number, number] => {
+    return [e.clientX - this.offset[0], e.clientY - this.offset[1]];
   };
+
+  draw = (): void => {
+    throw new Error('not implemented');
+  };
+
   executeAction = (): void => {
-    throw new Error('unimplemented');
+    throw new Error('not implemented');
   };
   destroy = (): Shape[] => {
-    throw new Error('unimplemented');
+    throw new Error('not implemented');
   };
 }

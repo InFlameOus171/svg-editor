@@ -1,8 +1,11 @@
 import { EditorLayout } from '../../components/organisms/EditorLayout';
 import { Coordinates } from '../../types/types';
+import { FreehandedShape } from '../Shapes/FreehandedShape';
 import { Tool } from '../Tool';
 
-export class DrawTool extends Tool {
+export class DrawTool extends Tool<FreehandedShape> {
+  timesPerSecond: number = 30;
+
   constructor(
     target: HTMLCanvasElement,
     self: EditorLayout,
@@ -11,59 +14,69 @@ export class DrawTool extends Tool {
     super(target, self, offset);
   }
 
+  draw = () => {
+    this.pen.drawLine(
+      this.previousCoordinates,
+      this.currentCoordinates,
+      this.context
+    );
+    this.resetPreview();
+  };
+
   executeAction = () => {
-    this.target.addEventListener('mousemove', this.onMove);
-    this.target.addEventListener('mousedown', this.onDown);
-    this.target.addEventListener('mouseup', this.onUp);
-    this.target.addEventListener('mouseout', this.onOut);
+    this.drawLayer.addEventListener('mousemove', this.onMove);
+    this.drawLayer.addEventListener('mousedown', this.onDown);
+    this.drawLayer.addEventListener('mouseup', this.onUp);
+    this.drawLayer.addEventListener('mouseout', this.onOut);
     this.setDrawTool();
   };
 
   destroy = () => {
-    this.target.removeEventListener('mousemove', this.onMove);
-    this.target.removeEventListener('mousedown', this.onDown);
-    this.target.removeEventListener('mouseup', this.onUp);
-    this.target.removeEventListener('mouseout', this.onOut);
-    return this.shapes;
+    this.drawLayer.removeEventListener('mousemove', this.onMove);
+    this.drawLayer.removeEventListener('mousedown', this.onDown);
+    this.drawLayer.removeEventListener('mouseup', this.onUp);
+    this.drawLayer.removeEventListener('mouseout', this.onOut);
+    return this.allShapes;
   };
 
   private setDrawTool = () => {
-    if (this.ctx) {
-      this.ctx.strokeStyle = 'red';
-      this.ctx.lineWidth = 2;
-      this.ctx.fillStyle = 'red';
+    if (this.context) {
+      this.context.strokeStyle = 'red';
+      this.context.lineWidth = 2;
+      this.context.fillStyle = 'red';
     }
   };
 
   private onDown = (e: MouseEvent) => {
-    this.prev = this.curr;
+    this.previousCoordinates = this.currentCoordinates;
     console.log('dafuq');
-    this.curr = this.getCoords(e);
-    this.shape.name = `free-${Date.now()}`;
-    this.shape.coordinates = [{ x: this.curr[0], y: this.curr[1] }];
-    this.drawing = true;
+    this.currentCoordinates = this.getCoords(e);
+    this.currentShape = new FreehandedShape(this.currentCoordinates);
+    this.currentShape.addPoint([
+      this.currentCoordinates[0],
+      this.currentCoordinates[1],
+    ]);
+    this.isDrawing = true;
   };
 
   private onUp = () => {
-    console.log('dafuq');
-
-    this.shapes.push(this.shape);
-    this.drawing = false;
+    if (this.currentShape) {
+      this.allShapes.push(this.currentShape);
+    }
+    console.log(this.allShapes.forEach(shape => console.log(shape.toLines())));
+    this.isDrawing = false;
   };
 
   private onOut = () => {
-    this.drawing = false;
+    this.isDrawing = false;
   };
 
   private onMove = (e: MouseEvent) => {
-    if (!this.drawing || this.wait) return;
-    this.prev = this.curr;
-    this.curr = this.getCoords(e);
-    this.shape.coordinates?.push({ x: this.curr[0], y: this.curr[1] });
+    this.resetPreview();
     this.draw();
-    this.wait = true;
+    this.shallWait = true;
     setTimeout(() => {
-      this.wait = false;
+      this.shallWait = false;
     }, 1000 / this.timesPerSecond);
   };
 }

@@ -3,14 +3,19 @@
  */
 
 import { EditorLayout } from '../components/organisms/EditorLayout';
-import { Coordinates, Shape } from '../types/types';
+import { Shape } from '../types/shapes';
+import { Coordinates } from '../types/types';
 import { Tool } from './Tool';
+import { CircleTool } from './Tools/CircleTool';
 import { DrawTool } from './Tools/DrawTool';
 import { LineTool } from './Tools/LineTool';
+import { RectangleTool } from './Tools/RectangleTool';
 
 export enum Tools_List {
   DRAW,
   LINE,
+  RECT,
+  CIRCLE,
 }
 
 export class Editor {
@@ -44,6 +49,26 @@ export class Editor {
         }
         case Tools_List.LINE: {
           this.selectedTool = new LineTool(
+            this.canvas,
+            this.previewLayer,
+            this.self,
+            this.offset
+          );
+          this.selectedTool.executeAction();
+          break;
+        }
+        case Tools_List.RECT: {
+          this.selectedTool = new RectangleTool(
+            this.canvas,
+            this.previewLayer,
+            this.self,
+            this.offset
+          );
+          this.selectedTool.executeAction();
+          break;
+        }
+        case Tools_List.CIRCLE: {
+          this.selectedTool = new CircleTool(
             this.canvas,
             this.previewLayer,
             this.self,

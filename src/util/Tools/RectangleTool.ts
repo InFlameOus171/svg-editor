@@ -1,9 +1,11 @@
 import { EditorLayout } from '../../components/organisms/EditorLayout';
-import { Coordinates } from '../../types/types';
+import { Coordinates, RectangleComponents } from '../../types/types';
+import { getEdgesFromPoints } from '../helper/coordinates';
 import { Line } from '../Shapes/Line';
+import { Rectangle } from '../Shapes/Rectangle';
 import { Tool } from '../Tool';
 
-export class LineTool extends Tool<Line> {
+export class RectangleTool extends Tool<Rectangle> {
   constructor(
     target: HTMLCanvasElement,
     previewLayer: HTMLCanvasElement,
@@ -18,7 +20,7 @@ export class LineTool extends Tool<Line> {
   }
 
   draw = () => {
-    this.pen.drawLine(
+    this.pen.drawRectangle(
       this.previousCoordinates,
       this.currentCoordinates,
       this.context
@@ -46,22 +48,31 @@ export class LineTool extends Tool<Line> {
   onUp = (event: MouseEvent) => {
     this.isDrawing = false;
     this.currentCoordinates = this.getCoords(event);
-    this.currentShape = new Line(
-      [this.previousCoordinates[0], this.previousCoordinates[1]],
-      [this.currentCoordinates[0], this.currentCoordinates[1]]
+    const edges = getEdgesFromPoints(
+      this.previousCoordinates,
+      this.currentCoordinates
     );
+    this.currentShape = new Rectangle(edges);
     this.allShapes.push(this.currentShape);
     this.draw();
   };
 
   onMove = (event: MouseEvent) => {
-    this.resetPreview();
+    this.currentCoordinates = this.getCoords(event);
+
     if (this.isDrawing && this.previewLayer) {
-      this.currentCoordinates = this.getCoords(event);
-      this.previewContext?.beginPath();
-      this.previewContext?.moveTo(...this.previousCoordinates);
-      this.previewContext?.lineTo(...this.currentCoordinates);
-      this.previewContext?.stroke();
+      this.previewContext?.clearRect(
+        0,
+        0,
+        this.previewLayer?.width,
+        this.previewLayer.height
+      );
+
+      this.pen.drawRectangle(
+        this.previousCoordinates,
+        this.currentCoordinates,
+        this.previewContext
+      );
     }
   };
 }
