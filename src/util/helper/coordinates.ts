@@ -82,10 +82,3 @@ export const sumOfVectors = (vectorCoordinates: VectorCoordinates[]) => {
     [0, 0] as Coordinates
   );
 };
-
-export const flattenArray = (array: any[]): Coordinates[] => {
-  const flatArray = array.flat();
-  return flatArray.every(entry => !Array.isArray(entry))
-    ? flatArray
-    : flattenArray(flatArray);
-};

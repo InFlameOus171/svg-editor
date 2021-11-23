@@ -64,6 +64,9 @@ export class EditorLayout extends LitElement {
   handleSelectCircle = () => {
     this.editor?.selectTool(Tools_List.CIRCLE);
   };
+  handleSelectSelect = () => {
+    this.editor?.selectTool(Tools_List.SELECT);
+  };
 
   deselectTool = () => {
     this.editor?.deselectTool();
@@ -92,6 +95,12 @@ export class EditorLayout extends LitElement {
       title: 'Circle Tool',
       onClick: this.handleSelectCircle,
       id: '3',
+      isSelected: false,
+    },
+    {
+      title: 'Select Tool',
+      onClick: this.handleSelectSelect,
+      id: '4',
       isSelected: false,
     },
     {

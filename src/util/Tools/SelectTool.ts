@@ -38,7 +38,44 @@ export class SelectTool extends Tool<Shape> {
   };
 
   onClick = (event: MouseEvent) => {
-    this.allShapes.forEach;
+    this.currentCoordinates = this.getCoords(event);
+    const selectableShapes = this.allShapes.filter(shape => {
+      if (shape.boundary) {
+        const xMax = Math.max.apply(
+          Math,
+          shape.boundary.map(coords => coords[0])
+        );
+        const yMax = Math.max.apply(
+          Math,
+          shape.boundary.map(coords => coords[1])
+        );
+        const xMin = Math.min.apply(
+          Math,
+          shape.boundary.map(coords => coords[0])
+        );
+        const yMin = Math.min.apply(
+          Math,
+          shape.boundary.map(coords => coords[1])
+        );
+        // const allXCoords = shape.boundary.map(coords => coords[0]);
+        // const allYCoords = shape.boundary.map(coords => coords[1]);
+        // const xMax = Math.max(...allXCoords);
+        // const yMax = Math.max(...allYCoords);
+        // const xMin = Math.min(...allXCoords);
+        // const yMin = Math.min(...allYCoords);
+        const [currentX, currentY] = this.currentCoordinates;
+        return (
+          currentX < xMax &&
+          currentX > xMin &&
+          currentY < yMax &&
+          currentY > yMin
+        );
+      }
+    });
+    const selectedShape = selectableShapes.reduce((acc, shape) =>
+      shape.index > acc.index ? acc : shape
+    );
+    console.log(selectedShape);
   };
 
   onDown = (event: MouseEvent) => {

@@ -1,9 +1,4 @@
-import {
-  RectangleComponents,
-  Coordinates,
-  BoundaryCoordinates,
-} from '../../types/types';
-import { flattenArray } from '../helper/coordinates';
+import { BoundaryCoordinates, RectangleComponents } from '../../types/types';
 import { Shape } from './Shape';
 
 export class Rectangle extends Shape {
@@ -12,7 +7,7 @@ export class Rectangle extends Shape {
   constructor(edges: RectangleComponents, dontCountUp?: boolean) {
     super(dontCountUp);
     this.edges = edges;
-    const points = flattenArray(edges);
+    const points = edges.map(edge => edge.points).flat();
     const uniquePoints = [...new Set(points)];
     this.boundary = uniquePoints as BoundaryCoordinates;
   }
