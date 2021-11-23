@@ -49,6 +49,7 @@ export class RectangleTool extends Tool<Rectangle> {
       this.createRectangle();
       this.allShapes.push(this.currentShape);
     }
+    this.resetPreview();
     this.draw();
   };
 
