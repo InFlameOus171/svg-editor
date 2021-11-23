@@ -10,13 +10,13 @@ import { Line } from '../Shapes/Line';
 export const getEdgesFromPoints = (
   startPoint: Coordinates,
   endPoint: Coordinates,
-  isPreview?: boolean
+  dontCountUp?: boolean
 ): RectangleComponents => {
   const corner1: Coordinates = startPoint;
   const corner2: Coordinates = [endPoint[0], startPoint[1]];
   const corner3: Coordinates = endPoint;
   const corner4: Coordinates = [startPoint[0], endPoint[1]];
-  const edge1 = new Line(corner1, corner2, isPreview);
+  const edge1 = new Line(corner1, corner2, dontCountUp);
   const edge2 = new Line(corner2, corner3, true);
   const edge3 = new Line(corner3, corner4, true);
   const edge4 = new Line(corner4, corner1, true);
@@ -36,7 +36,7 @@ export const calculateDistanceBetweenPoints = (
 export const generateEllipsis = (
   startCoordinates: [number, number],
   endCoordinates: [number, number],
-  isPreview?: boolean
+  dontCountUp?: boolean
 ) => {
   const center: Coordinates = [
     (startCoordinates[0] + endCoordinates[0]) / 2,
@@ -50,20 +50,20 @@ export const generateEllipsis = (
     (startCoordinates[0] + endCoordinates[0]) / 2,
     endCoordinates[1],
   ]);
-  return new Ellipsis(center, radiusX, radiusY, isPreview);
+  return new Ellipsis(center, radiusX, radiusY, dontCountUp);
 };
 
 export const generateCircle = (
   startCoordinates: [number, number],
   endCoordinates: [number, number],
-  isPreview?: boolean
+  dontCountUp?: boolean
 ) => {
   const center: Coordinates = startCoordinates;
   const radius = calculateDistanceBetweenPoints(
     startCoordinates,
     endCoordinates
   );
-  return new Ellipsis(center, radius, radius, isPreview);
+  return new Ellipsis(center, radius, radius, dontCountUp);
 };
 
 export const calculateVectorFromCoordinates = (

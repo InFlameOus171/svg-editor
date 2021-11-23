@@ -15,7 +15,6 @@ export class Ellipsis extends Shape {
     this.center = center;
     this.radiusX = radiusX;
     this.radiusY = radiusY;
-
     const topLeftCorner: Coordinates = [
       this.center[0] - this.radiusX,
       this.center[1] + this.radiusY,

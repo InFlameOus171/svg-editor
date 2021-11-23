@@ -94,13 +94,13 @@ export class SelectTool extends Tool<Shape> {
   };
 
   onMove = (event: MouseEvent) => {
-    this.currentCoordinates = this.getCoords(event);
-    const edges = getEdgesFromPoints(
-      this.previousCoordinates,
-      this.currentCoordinates
-    );
-    this.currentShape = new Rectangle(edges);
     if (this.isDrawing && this.previewLayer) {
+      this.currentCoordinates = this.getCoords(event);
+      const edges = getEdgesFromPoints(
+        this.previousCoordinates,
+        this.currentCoordinates
+      );
+      this.currentShape = new Rectangle(edges, false);
       this.resetPreview();
       this.pen.drawRectangle(this.currentShape, this.previewContext);
     }

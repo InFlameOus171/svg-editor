@@ -9,6 +9,7 @@ export abstract class Shape {
     if (!dontCountUp) {
       Shape.#counter++;
     }
+    console.log(Shape.#counter, dontCountUp);
     this.index = Shape.#counter;
   }
 }
