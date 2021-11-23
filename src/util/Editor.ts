@@ -1,11 +1,7 @@
-/**
- * @author mrdoob / http://mrdoob.com
- */
-
 import { EditorLayout } from '../components/organisms/EditorLayout';
 import { Shape } from '../types/shapes';
 import { Coordinates } from '../types/types';
-import { Tool } from './Tool';
+import { Tool } from './Tools/Tool';
 import { CircleTool } from './Tools/CircleTool';
 import { DrawTool } from './Tools/DrawTool';
 import { LineTool } from './Tools/LineTool';
@@ -21,7 +17,7 @@ export enum Tools_List {
 }
 
 export class Editor {
-  private selectedTool: Tool | null = null;
+  private selectedTool: Tool<Shape> | null = null;
   private canvas: HTMLCanvasElement | null = null;
   private previewLayer: HTMLCanvasElement | null = null;
   private self: EditorLayout;
@@ -92,7 +88,12 @@ export class Editor {
 
   deselectTool = () => {
     if (this.selectedTool) {
-      this.shapes.push(...this.selectedTool?.destroy());
+      const result = this.selectedTool?.destroy();
+      if (Array.isArray(result)) {
+        this.shapes.push(...result);
+      } else {
+        result && this.shapes.push(result);
+      }
       this.selectedTool = null;
     }
     console.log(this.shapes);

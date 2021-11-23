@@ -1,7 +1,7 @@
 import { EditorLayout } from '../../components/organisms/EditorLayout';
 import { Coordinates } from '../../types/types';
 import { Line } from '../Shapes/Line';
-import { Tool } from '../Tool';
+import { Tool } from './Tool';
 
 export class LineTool extends Tool<Line> {
   constructor(
@@ -18,11 +18,7 @@ export class LineTool extends Tool<Line> {
   }
 
   draw = () => {
-    this.pen.drawLine(
-      this.previousCoordinates,
-      this.currentCoordinates,
-      this.context
-    );
+    this.currentShape && this.pen.drawLine(this.currentShape, this.context);
   };
 
   executeAction = () => {

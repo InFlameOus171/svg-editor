@@ -1,5 +1,4 @@
-import { SVG } from '@svgdotjs/svg.js';
-import { LitElement, html, PropertyValues } from 'lit';
+import { LitElement, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { NullableNumber } from '../../../types/types';
 import { drawZoneStyles } from './DrawZone.styles';
@@ -50,19 +49,6 @@ export class DrawZone extends LitElement {
   #updateResize = () => {
     this.width = parseFloat(getComputedStyle(this).getPropertyValue('width'));
     this.height = parseFloat(getComputedStyle(this).getPropertyValue('height'));
-  };
-
-  updated = (changedProperties: PropertyValues) => {
-    if (changedProperties.has('openedFile')) {
-      const containerElement = this.shadowRoot?.getElementById('drawzone');
-      if (this.openedFile && containerElement) {
-        if (containerElement.innerHTML) {
-          containerElement.innerHTML = '';
-        }
-        const svgData = SVG(containerElement);
-        svgData.svg(this.openedFile);
-      }
-    }
   };
 
   render() {

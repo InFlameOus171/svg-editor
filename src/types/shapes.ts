@@ -1,6 +1,6 @@
 import { Ellipsis } from '../util/Shapes/Ellipsis';
-import { FreehandedShape } from '../util/Shapes/FreehandedShape';
+import { Freehand } from '../util/Shapes/Freehand';
 import { Line } from '../util/Shapes/Line';
 import { Rectangle } from '../util/Shapes/Rectangle';
 
-export type Shape = Ellipsis | Rectangle | FreehandedShape | Line;
+export type Shape = Ellipsis | Rectangle | Line | Freehand;

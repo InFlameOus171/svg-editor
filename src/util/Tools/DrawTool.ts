@@ -1,11 +1,12 @@
 import { EditorLayout } from '../../components/organisms/EditorLayout';
 import { Coordinates } from '../../types/types';
-import { FreehandedShape } from '../Shapes/FreehandedShape';
-import { Tool } from '../Tool';
+import { Freehand } from '../Shapes/Freehand';
+import { Line } from '../Shapes/Line';
+import { Tool } from './Tool';
 
-export class DrawTool extends Tool<FreehandedShape> {
+export class DrawTool extends Tool<Freehand, Line> {
   timesPerSecond: number = 30;
-
+  currentShapeComponents: Line[] = [];
   constructor(
     target: HTMLCanvasElement,
     self: EditorLayout,
@@ -14,32 +15,27 @@ export class DrawTool extends Tool<FreehandedShape> {
     super(target, self, offset);
   }
 
-  draw = () => {
-    console.log(this.previousCoordinates, this.currentCoordinates);
-    this.context?.beginPath();
-    this.context?.moveTo(...this.previousCoordinates);
-    this.context?.lineTo(...this.currentCoordinates);
-    this.context?.stroke();
-    this.context?.closePath();
+  #draw = () => {
+    this.currentShape && this.pen.drawLine(this.currentShape, this.context);
   };
 
   executeAction = () => {
-    this.drawLayer.addEventListener('mousemove', this.onMove);
-    this.drawLayer.addEventListener('mousedown', this.onDown);
-    this.drawLayer.addEventListener('mouseup', this.onUp);
-    this.drawLayer.addEventListener('mouseout', this.onOut);
-    this.setDrawTool();
+    this.drawLayer.addEventListener('mousemove', this.#onMove);
+    this.drawLayer.addEventListener('mousedown', this.#onDown);
+    this.drawLayer.addEventListener('mouseup', this.#onUp);
+    this.drawLayer.addEventListener('mouseout', this.#onOut);
+    this.#setDrawTool();
   };
 
   destroy = () => {
-    this.drawLayer.removeEventListener('mousemove', this.onMove);
-    this.drawLayer.removeEventListener('mousedown', this.onDown);
-    this.drawLayer.removeEventListener('mouseup', this.onUp);
-    this.drawLayer.removeEventListener('mouseout', this.onOut);
+    this.drawLayer.removeEventListener('mousemove', this.#onMove);
+    this.drawLayer.removeEventListener('mousedown', this.#onDown);
+    this.drawLayer.removeEventListener('mouseup', this.#onUp);
+    this.drawLayer.removeEventListener('mouseout', this.#onOut);
     return this.allShapes;
   };
 
-  private setDrawTool = () => {
+  #setDrawTool = () => {
     if (this.context) {
       this.context.strokeStyle = 'red';
       this.context.lineWidth = 2;
@@ -47,36 +43,50 @@ export class DrawTool extends Tool<FreehandedShape> {
     }
   };
 
-  private onDown = (e: MouseEvent) => {
+  #onDown = (e: MouseEvent) => {
     this.previousCoordinates = this.currentCoordinates;
     this.currentCoordinates = this.getCoords(e);
-    this.currentShape = new FreehandedShape(this.currentCoordinates);
-    this.currentShape.addPoint([
-      this.currentCoordinates[0],
-      this.currentCoordinates[1],
-    ]);
     this.isDrawing = true;
   };
 
-  private onUp = () => {
-    if (this.currentShape) {
-      this.allShapes.push(this.currentShape);
-    }
+  #onUp = () => {
+    const newLines = this.currentShapeComponents.map(
+      (component, index) => new Line(...component.points, index !== 0)
+    );
+    this.allShapes.push(new Freehand(newLines, true));
     this.isDrawing = false;
   };
 
-  private onOut = () => {
+  #onOut = () => {
     this.isDrawing = false;
   };
 
-  private onMove = (e: MouseEvent) => {
-    if (!this.isDrawing || this.shallWait) return;
+  #updateShapeData = (newCoordinates: Coordinates) => {
     this.previousCoordinates = this.currentCoordinates;
-    this.currentCoordinates = this.getCoords(e);
-    this.draw();
+    this.currentCoordinates = newCoordinates;
+    const newShape = new Line(
+      this.previousCoordinates,
+      this.currentCoordinates,
+      true
+    );
+    this.currentShapeComponents.push(newShape);
+    this.currentShape = newShape;
+  };
+
+  #handleTimeOut = () => {
     this.shallWait = true;
     setTimeout(() => {
       this.shallWait = false;
     }, 1000 / this.timesPerSecond);
+  };
+
+  #onMove = (e: MouseEvent) => {
+    if (!this.isDrawing || this.shallWait) {
+      return;
+    }
+    const newCoordinates = this.getCoords(e);
+    this.#updateShapeData(newCoordinates);
+    this.#draw();
+    this.#handleTimeOut();
   };
 }

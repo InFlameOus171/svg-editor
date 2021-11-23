@@ -1,9 +1,8 @@
 import { EditorLayout } from '../../components/organisms/EditorLayout';
-import { Coordinates, RectangleComponents } from '../../types/types';
+import { Coordinates } from '../../types/types';
 import { getEdgesFromPoints } from '../helper/coordinates';
-import { Line } from '../Shapes/Line';
 import { Rectangle } from '../Shapes/Rectangle';
-import { Tool } from '../Tool';
+import { Tool } from './Tool';
 
 export class RectangleTool extends Tool<Rectangle> {
   constructor(
@@ -20,11 +19,10 @@ export class RectangleTool extends Tool<Rectangle> {
   }
 
   draw = () => {
-    this.pen.drawRectangle(
-      this.previousCoordinates,
-      this.currentCoordinates,
-      this.context
-    );
+    if (this.currentShape) {
+      this.pen.drawRectangle(this.currentShape, this.context);
+    }
+    this.resetPreview();
   };
 
   executeAction = () => {
@@ -45,34 +43,32 @@ export class RectangleTool extends Tool<Rectangle> {
     this.isDrawing = true;
   };
 
-  onUp = (event: MouseEvent) => {
+  onUp = () => {
     this.isDrawing = false;
-    this.currentCoordinates = this.getCoords(event);
-    const edges = getEdgesFromPoints(
-      this.previousCoordinates,
-      this.currentCoordinates
-    );
-    this.currentShape = new Rectangle(edges);
-    this.allShapes.push(this.currentShape);
+    if (this.currentShape) {
+      this.createRectangle();
+      this.allShapes.push(this.currentShape);
+    }
     this.draw();
   };
 
+  createRectangle = (isPreview?: boolean) => {
+    const edges = getEdgesFromPoints(
+      this.previousCoordinates,
+      this.currentCoordinates,
+      isPreview
+    );
+    this.currentShape = new Rectangle(edges, true);
+  };
+
   onMove = (event: MouseEvent) => {
-    this.currentCoordinates = this.getCoords(event);
-
-    if (this.isDrawing && this.previewLayer) {
-      this.previewContext?.clearRect(
-        0,
-        0,
-        this.previewLayer?.width,
-        this.previewLayer.height
-      );
-
-      this.pen.drawRectangle(
-        this.previousCoordinates,
-        this.currentCoordinates,
-        this.previewContext
-      );
+    if (this.isDrawing) {
+      this.currentCoordinates = this.getCoords(event);
+      this.createRectangle(true);
+      if (this.currentShape) {
+        this.resetPreview();
+        this.pen.drawRectangle(this.currentShape, this.previewContext);
+      }
     }
   };
 }

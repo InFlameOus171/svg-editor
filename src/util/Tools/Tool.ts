@@ -1,13 +1,13 @@
-import { EditorLayout } from '../components/organisms/EditorLayout';
-import { Shape } from '../types/shapes';
-import { Coordinates } from '../types/types';
-import { Pen } from './Pen';
+import { EditorLayout } from '../../components/organisms/EditorLayout';
+import { Shape } from '../../types/shapes';
+import { Coordinates } from '../../types/types';
+import { Pen } from '../Pen';
 
-export abstract class Tool<T = Shape> {
+export abstract class Tool<T extends Shape, V extends Shape = T> {
   drawLayer: HTMLCanvasElement;
   previewLayer?: HTMLCanvasElement;
   self: EditorLayout;
-  currentShape?: T;
+  currentShape?: V;
   allShapes: T[] = [];
   shallWait: boolean = false;
   context?: CanvasRenderingContext2D;
@@ -50,6 +50,10 @@ export abstract class Tool<T = Shape> {
     }
   };
 
+  updateShapeData = (newCoordinates: Coordinates): void => {
+    throw new Error('not implemented');
+  };
+
   getCoords = (e: MouseEvent): [number, number] => {
     return [e.clientX - this.offset[0], e.clientY - this.offset[1]];
   };
@@ -61,7 +65,7 @@ export abstract class Tool<T = Shape> {
   executeAction = (): void => {
     throw new Error('not implemented');
   };
-  destroy = (): Shape[] => {
+  destroy = (): T[] => {
     throw new Error('not implemented');
   };
 }

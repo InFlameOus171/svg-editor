@@ -1,14 +1,8 @@
 import { EditorLayout } from '../../components/organisms/EditorLayout';
 import { Coordinates } from '../../types/types';
-import {
-  calculateDistanceBetweenPoints,
-  generateCircle,
-  generateEllipsis,
-  getEdgesFromPoints,
-} from '../helper/coordinates';
+import { generateCircle, generateEllipsis } from '../helper/coordinates';
 import { Ellipsis } from '../Shapes/Ellipsis';
-import { Rectangle } from '../Shapes/Rectangle';
-import { Tool } from '../Tool';
+import { Tool } from './Tool';
 
 export class CircleTool extends Tool<Ellipsis> {
   constructor(
@@ -25,19 +19,7 @@ export class CircleTool extends Tool<Ellipsis> {
   }
 
   draw = () => {
-    if (this.isCircle) {
-      const previewShape = generateCircle(
-        this.previousCoordinates,
-        this.currentCoordinates
-      );
-      this.pen.drawOval(previewShape, this.context);
-    } else {
-      const previewShape = generateEllipsis(
-        this.previousCoordinates,
-        this.currentCoordinates
-      );
-      this.pen.drawOval(previewShape, this.context);
-    }
+    this.currentShape && this.pen.drawOval(this.currentShape, this.context);
     this.resetPreview();
   };
 
@@ -66,10 +48,17 @@ export class CircleTool extends Tool<Ellipsis> {
   onUp = (event: MouseEvent) => {
     this.isDrawing = false;
     this.currentCoordinates = this.getCoords(event);
-    this.currentShape = generateEllipsis(
-      this.previousCoordinates,
-      this.currentCoordinates
-    );
+    if (this.isCircle) {
+      this.currentShape = generateCircle(
+        this.previousCoordinates,
+        this.currentCoordinates
+      );
+    } else {
+      this.currentShape = generateEllipsis(
+        this.previousCoordinates,
+        this.currentCoordinates
+      );
+    }
     this.allShapes.push(this.currentShape);
     this.draw();
   };
@@ -93,14 +82,18 @@ export class CircleTool extends Tool<Ellipsis> {
       if (this.isCircle) {
         const previewShape = generateCircle(
           this.previousCoordinates,
-          this.currentCoordinates
+          this.currentCoordinates,
+          true
         );
+        this.currentShape = previewShape;
         this.pen.drawOval(previewShape, this.previewContext);
       } else {
         const previewShape = generateEllipsis(
           this.previousCoordinates,
-          this.currentCoordinates
+          this.currentCoordinates,
+          true
         );
+        this.currentShape = previewShape;
         this.pen.drawOval(previewShape, this.previewContext);
       }
     }
