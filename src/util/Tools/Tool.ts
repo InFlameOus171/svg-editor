@@ -50,6 +50,11 @@ export abstract class Tool<T extends Shape, V extends Shape = T> {
     }
   };
 
+  resetCoordinates = () => {
+    this.previousCoordinates = [0, 0];
+    this.currentCoordinates = [0, 0];
+  };
+
   updateShapeData = (newCoordinates: Coordinates): void => {
     throw new Error('not implemented');
   };

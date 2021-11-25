@@ -39,4 +39,12 @@ export class Ellipsis extends Shape {
       bottomRightCorner,
     ];
   }
+  toString = () => {
+    return JSON.stringify({
+      type: 'Circle',
+      center: this.center,
+      radiusX: this.radiusX,
+      radiusY: this.radiusY,
+    });
+  };
 }

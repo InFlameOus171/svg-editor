@@ -3,7 +3,6 @@ import {
   RectangleComponents,
   VectorCoordinates,
 } from '../../types/types';
-import { Circle } from '../Shapes/Circle';
 import { Ellipsis } from '../Shapes/Ellipsis';
 import { Line } from '../Shapes/Line';
 

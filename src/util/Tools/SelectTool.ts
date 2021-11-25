@@ -5,6 +5,7 @@ import { getEdgesFromPoints } from '../helper/coordinates';
 import { Rectangle } from '../Shapes/Rectangle';
 import { Tool } from './Tool';
 import { RectangleTool } from './RectangleTool';
+import { typeofShape } from '../helper/typeguards';
 
 export class SelectTool extends Tool<Shape> {
   constructor(
@@ -75,6 +76,8 @@ export class SelectTool extends Tool<Shape> {
     const selectedShape = selectableShapes.reduce((acc, shape) =>
       shape.index > acc.index ? acc : shape
     );
+    this.self.selectedElement = selectedShape.toString();
+    this.self.requestUpdate();
     console.log(selectedShape);
   };
 

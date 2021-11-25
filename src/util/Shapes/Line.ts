@@ -22,4 +22,10 @@ export class Line extends Shape {
       bottomRightCorner,
     ];
   }
+  toString = () => {
+    return JSON.stringify({
+      start: { x: this.points[0][0], y: this.points[0][1] },
+      end: { x: this.points[1][0], y: this.points[1][1] },
+    });
+  };
 }

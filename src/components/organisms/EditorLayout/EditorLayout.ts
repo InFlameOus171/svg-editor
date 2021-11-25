@@ -8,6 +8,7 @@ import {
   layoutHeaderStyle,
   layoutStyle,
 } from './EditorLayout.styles';
+import { Shape } from '../../../types/shapes.js';
 
 @customElement('editor-layout')
 export class EditorLayout extends LitElement {
@@ -47,6 +48,9 @@ export class EditorLayout extends LitElement {
 
   @state()
   editor: Editor | null = null;
+
+  @state()
+  selectedElement: string | null = null;
 
   handleSelectTool = () => {
     console.log('selected');
@@ -138,7 +142,9 @@ export class EditorLayout extends LitElement {
 
       <editor-header></editor-header>
 
-      <div id="footer"></div>
+      <textarea rows="5" id="footer" disabled>
+${JSON.stringify(this.selectedElement)}</textarea
+      >
     `;
   }
 }
