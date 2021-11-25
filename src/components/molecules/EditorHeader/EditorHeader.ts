@@ -9,7 +9,7 @@ export class EditorHeader extends LitElement {
   @property()
   onSelectSvgFile?: (data: Document) => void;
 
-  private handleSelectFile = (event: Event) => {
+  #handleSelectFile = (event: Event) => {
     const fileInputElement = event.target as HTMLInputElement;
     const file = fileInputElement?.files?.[0];
     if (!file) {
@@ -35,7 +35,7 @@ export class EditorHeader extends LitElement {
           id="open-file"
           type="file"
           hidden
-          .onchange=${this.handleSelectFile}
+          .onchange=${this.#handleSelectFile}
           accept="image/svg+xml"
         />
       </label>

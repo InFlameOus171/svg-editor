@@ -15,7 +15,7 @@ export class ToolboxButton extends LitElement {
 
   static styles = [toolBoxButtonStyles];
 
-  private handleClick() {
+  #handleClick() {
     if (this.buttonId) {
       this.onClick?.(this.buttonId);
     }
@@ -24,7 +24,7 @@ export class ToolboxButton extends LitElement {
   render() {
     return html`<button
       class=${this.isSelected ? 'isSelected' : ''}
-      @click=${this.handleClick}
+      @click=${this.#handleClick}
     >
       ${this.title}
     </button>`;
