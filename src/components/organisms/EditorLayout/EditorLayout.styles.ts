@@ -31,7 +31,8 @@ export const layoutContentStyle = css`
     padding: 0;
     top: 0;
     left: 0;
-    position: relative;
+    background-color: rgba(255, 255, 255, 1);
+    display: flex;
   }
 
   #drawzone {

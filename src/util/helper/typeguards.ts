@@ -1,5 +1,39 @@
-import { Circle } from '../Shapes/Circle';
+import { Shape } from '../../types/shapes';
+import { Ellipsis } from '../Shapes/Ellipsis';
+import { Freehand } from '../Shapes/Freehand';
+import { Line } from '../Shapes/Line';
+import { Rectangle } from '../Shapes/Rectangle';
 
-export const isCircle = (shape: Object): shape is Circle => {
-  return (shape as Circle).radius !== undefined;
+export const isEllipsis = (shape: Object): shape is Ellipsis => {
+  return (
+    (shape as Ellipsis).radiusX !== undefined ||
+    (shape as Ellipsis).radiusY !== undefined
+  );
+};
+
+export const isRectangle = (shape: Object): shape is Rectangle => {
+  return (shape as Rectangle).edges !== undefined;
+};
+
+export const isLine = (shape: Object): shape is Line => {
+  return (shape as Line).points !== undefined;
+};
+
+export const isFreehand = (shape: Object): shape is Freehand => {
+  return (shape as Freehand).lines !== undefined;
+};
+
+export const typeofShape = (shape: Shape) => {
+  if (isRectangle(shape)) {
+    return 'Rectangle';
+  }
+  if (isEllipsis(shape)) {
+    return 'Ellipsis';
+  }
+  if (isFreehand(shape)) {
+    return 'Freehand';
+  }
+  if (isLine(shape)) {
+    return 'Line';
+  }
 };

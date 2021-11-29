@@ -17,12 +17,12 @@ export enum Tools_List {
 }
 
 export class Editor {
-  private selectedTool: Tool<Shape> | null = null;
-  private canvas: HTMLCanvasElement | null = null;
-  private previewLayer: HTMLCanvasElement | null = null;
-  private self: EditorLayout;
-  private offset: Coordinates;
-  private shapes: Shape[] = [];
+  #selectedTool: Tool<Shape> | null = null;
+  #canvas: HTMLCanvasElement | null = null;
+  #previewLayer: HTMLCanvasElement | null = null;
+  #self: EditorLayout;
+  #offset: Coordinates;
+  #shapes: Shape[] = [];
 
   constructor(
     canvas: HTMLCanvasElement,
@@ -30,76 +30,80 @@ export class Editor {
     offset: Coordinates,
     self: EditorLayout
   ) {
-    this.canvas = canvas;
-    this.previewLayer = previewLayer;
-    this.self = self;
-    this.offset = offset;
+    this.#canvas = canvas;
+    this.#previewLayer = previewLayer;
+    this.#self = self;
+    this.#offset = offset;
   }
 
   selectTool = (tool: Tools_List) => {
-    if (this.selectedTool) this.deselectTool();
-    if (this.canvas && this.previewLayer) {
+    if (this.#selectedTool) this.deselectTool();
+    if (this.#canvas && this.#previewLayer) {
       switch (tool) {
         case Tools_List.DRAW: {
-          this.selectedTool = new DrawTool(this.canvas, this.self, this.offset);
+          this.#selectedTool = new DrawTool(
+            this.#canvas,
+            this.#self,
+            this.#offset
+          );
           break;
         }
         case Tools_List.LINE: {
-          this.selectedTool = new LineTool(
-            this.canvas,
-            this.previewLayer,
-            this.self,
-            this.offset
+          this.#selectedTool = new LineTool(
+            this.#canvas,
+            this.#previewLayer,
+            this.#self,
+            this.#offset
           );
           break;
         }
         case Tools_List.RECT: {
-          this.selectedTool = new RectangleTool(
-            this.canvas,
-            this.previewLayer,
-            this.self,
-            this.offset
+          this.#selectedTool = new RectangleTool(
+            this.#canvas,
+            this.#previewLayer,
+            this.#self,
+            this.#offset
           );
           break;
         }
         case Tools_List.CIRCLE: {
-          this.selectedTool = new CircleTool(
-            this.canvas,
-            this.previewLayer,
-            this.self,
-            this.offset
+          this.#selectedTool = new CircleTool(
+            this.#canvas,
+            this.#previewLayer,
+            this.#self,
+            this.#offset
           );
           break;
         }
         case Tools_List.SELECT: {
-          this.selectedTool = new SelectTool(
-            this.canvas,
-            this.previewLayer,
-            this.self,
-            this.offset,
-            this.shapes
+          this.#selectedTool = new SelectTool(
+            this.#canvas,
+            this.#previewLayer,
+            this.#self,
+            this.#offset,
+            this.#shapes
           );
           break;
         }
       }
-      this.selectedTool?.executeAction();
+      this.#selectedTool?.executeAction();
     }
   };
 
   deselectTool = () => {
-    if (this.selectedTool) {
-      const result = this.selectedTool?.destroy();
+    if (this.#selectedTool) {
+      const result = this.#selectedTool?.destroy();
       if (Array.isArray(result)) {
-        this.shapes.push(...result);
+        this.#shapes.push(...result);
       } else {
-        result && this.shapes.push(result);
+        result && this.#shapes.push(result);
       }
-      this.selectedTool = null;
+      this.#selectedTool = null;
     }
-    console.log(this.shapes);
+    console.log(this.#shapes);
   };
 
-  useSelectedTool = (event: Event) => this.selectedTool?.executeAction?.();
+  useSelectedTool = (event: Event) => this.#selectedTool?.executeAction?.();
 
   addElement(element: SVGRectElement) {
     throw new Error('Not implemented');

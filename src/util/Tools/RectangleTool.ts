@@ -51,6 +51,7 @@ export class RectangleTool extends Tool<Rectangle> {
     }
     this.resetPreview();
     this.draw();
+    this.resetCoordinates();
   };
 
   createRectangle = (isPreview?: boolean) => {

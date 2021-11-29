@@ -7,4 +7,8 @@ export class Freehand extends Shape {
     super(dontCountUp);
     this.lines = lines;
   }
+  toString = () => {
+    const lines = this.lines.map(line => line.toString());
+    return JSON.stringify(lines);
+  };
 }

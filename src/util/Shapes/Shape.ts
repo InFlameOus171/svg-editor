@@ -12,4 +12,8 @@ export abstract class Shape {
     console.log(Shape.#counter, dontCountUp);
     this.index = Shape.#counter;
   }
+
+  toString = (): string => {
+    throw new Error('not implemented');
+  };
 }

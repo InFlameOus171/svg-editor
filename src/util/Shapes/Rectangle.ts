@@ -11,4 +11,7 @@ export class Rectangle extends Shape {
     const uniquePoints = [...new Set(points)];
     this.boundary = uniquePoints as BoundaryCoordinates;
   }
+  toString = () => {
+    return JSON.stringify(this.boundary);
+  };
 }
