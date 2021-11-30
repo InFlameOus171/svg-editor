@@ -1,8 +1,10 @@
+import { Shape } from '../../types/shapes';
 import {
   Coordinates,
   RectangleComponents,
   VectorCoordinates,
 } from '../../types/types';
+import { Partition } from '../../types/util.types';
 import { Ellipsis } from '../Shapes/Ellipsis';
 import { Line } from '../Shapes/Line';
 
@@ -81,3 +83,64 @@ export const sumOfVectors = (vectorCoordinates: VectorCoordinates[]) => {
     [0, 0] as Coordinates
   );
 };
+
+export const partitionCoordinates = (coordinates: Coordinates[]) => {
+  return coordinates.reduce(
+    (acc: Partition<number>, coordinate): Partition<number> => [
+      [...acc[0], coordinate[0]],
+      [...acc[1], coordinate[1]],
+    ],
+    [[], []]
+  );
+};
+
+const betweenHelper = (coordinateToCheck: Coordinates) => {
+  return (smallerCoordinate: Coordinates, biggerCoordinate: Coordinates) => {
+    return (
+      coordinateToCheck[0] >= smallerCoordinate[0] &&
+      coordinateToCheck[1] >= smallerCoordinate[1] &&
+      coordinateToCheck[0] <= biggerCoordinate[0] &&
+      coordinateToCheck[1] <= biggerCoordinate[1]
+    );
+  };
+};
+
+const isBetweenTwoCoordinates =
+  (firstCoord: Coordinates, secondCoord: Coordinates) =>
+  (coordinateToCheck: Coordinates) => {
+    const isCoordinateBetween = betweenHelper(coordinateToCheck);
+    if (firstCoord[0] <= secondCoord[0] && firstCoord[1] <= secondCoord[1]) {
+      return isCoordinateBetween(firstCoord, secondCoord);
+    } else {
+      isCoordinateBetween(firstCoord, firstCoord);
+    }
+  };
+
+export const isPointInsideAnotherShape =
+  (point: Coordinates) => (shape: Shape) =>
+    isShapeInsideAnotherShape(shape)({
+      boundary: [point, point, point, point],
+    } as Shape);
+
+export const isShapeInsideAnotherShape =
+  (potentiallyBiggerShape?: Shape) => (potentiallySmallerShape: Shape) => {
+    console.log(potentiallyBiggerShape, potentiallySmallerShape);
+    if (!potentiallyBiggerShape) {
+      return false;
+    }
+    const { boundary: potentiallyBiggerCoordinates } = potentiallyBiggerShape;
+    if (potentiallyBiggerCoordinates) {
+      const [bigX, bigY] = partitionCoordinates(potentiallyBiggerCoordinates);
+      const minCoordinates: Coordinates = [
+        Math.min(...bigX),
+        Math.min(...bigY),
+      ];
+      const maxCoordinates: Coordinates = [
+        Math.max(...bigX),
+        Math.max(...bigY),
+      ];
+      return potentiallySmallerShape.boundary?.every(
+        isBetweenTwoCoordinates(minCoordinates, maxCoordinates)
+      );
+    }
+  };

@@ -1,5 +1,6 @@
 import { EditorLayout } from '../../components/organisms/EditorLayout';
 import { Coordinates } from '../../types/types';
+import { Tools_List } from '../Editor';
 import { Freehand } from '../Shapes/Freehand';
 import { Line } from '../Shapes/Line';
 import { Tool } from './Tool';
@@ -13,6 +14,7 @@ export class DrawTool extends Tool<Freehand, Line> {
     offset: Coordinates
   ) {
     super(target, self, offset);
+    this.toolName = Tools_List.DRAW;
   }
 
   #draw = () => {
@@ -37,9 +39,11 @@ export class DrawTool extends Tool<Freehand, Line> {
 
   #setDrawTool = () => {
     if (this.context) {
-      this.context.strokeStyle = 'red';
-      this.context.lineWidth = 2;
-      this.context.fillStyle = 'red';
+      console.log(
+        this.context.strokeStyle,
+        this.context.lineWidth,
+        this.context.fillStyle
+      );
     }
   };
 

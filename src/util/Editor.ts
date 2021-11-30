@@ -7,6 +7,7 @@ import { DrawTool } from './Tools/DrawTool';
 import { LineTool } from './Tools/LineTool';
 import { RectangleTool } from './Tools/RectangleTool';
 import { SelectTool } from './Tools/SelectTool';
+import { MoveTool } from './Tools/MoveTool';
 
 export enum Tools_List {
   DRAW,
@@ -14,6 +15,7 @@ export enum Tools_List {
   RECT,
   CIRCLE,
   SELECT,
+  MOVE,
 }
 
 export class Editor {
@@ -23,6 +25,7 @@ export class Editor {
   #self: EditorLayout;
   #offset: Coordinates;
   #shapes: Shape[] = [];
+  #selectedShape?: Shape;
 
   constructor(
     canvas: HTMLCanvasElement,
@@ -85,6 +88,16 @@ export class Editor {
           );
           break;
         }
+        case Tools_List.MOVE: {
+          this.#selectedTool = new MoveTool(
+            this.#canvas,
+            this.#previewLayer,
+            this.#self,
+            this.#offset,
+            this.#selectedShape
+          );
+          break;
+        }
       }
       this.#selectedTool?.executeAction();
     }
@@ -92,15 +105,13 @@ export class Editor {
 
   deselectTool = () => {
     if (this.#selectedTool) {
-      const result = this.#selectedTool?.destroy();
-      if (Array.isArray(result)) {
-        this.#shapes.push(...result);
-      } else {
-        result && this.#shapes.push(result);
+      if (this.#selectedTool.toolName === Tools_List.SELECT) {
+        this.#selectedShape = this.#selectedTool?.destroy().shift();
       }
+      const result = this.#selectedTool?.destroy();
+      this.#shapes.push(...result);
       this.#selectedTool = null;
     }
-    console.log(this.#shapes);
   };
 
   useSelectedTool = (event: Event) => this.#selectedTool?.executeAction?.();

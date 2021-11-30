@@ -1,5 +1,6 @@
 import { EditorLayout } from '../../components/organisms/EditorLayout';
 import { Coordinates } from '../../types/types';
+import { Tools_List } from '../Editor';
 import { generateCircle, generateEllipsis } from '../helper/coordinates';
 import { Ellipsis } from '../Shapes/Ellipsis';
 import { Tool } from './Tool';
@@ -12,6 +13,7 @@ export class CircleTool extends Tool<Ellipsis> {
     offset: Coordinates
   ) {
     super(target, self, offset, previewLayer);
+    this.toolName = Tools_List.CIRCLE;
     const renderingContext = this.drawLayer.getContext('2d');
     if (renderingContext) {
       this.context = renderingContext;

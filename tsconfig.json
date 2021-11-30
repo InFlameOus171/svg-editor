@@ -15,10 +15,11 @@
     "inlineSources": true,
     "rootDir": "./",
     "declaration": true,
+    "skipLibCheck": true,
     "incremental": true
   },
   "include": [
-    "**/*.ts",
+    "src/**/*.ts",
     "src/components/templates/index.js",
     "src/components/atoms/ToolboxButton/index.js"
   ]

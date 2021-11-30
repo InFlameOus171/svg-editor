@@ -1,4 +1,4 @@
-import { Shape } from '../../types/shapes';
+import { Shape, Shapes } from '../../types/shapes';
 import { Ellipsis } from '../Shapes/Ellipsis';
 import { Freehand } from '../Shapes/Freehand';
 import { Line } from '../Shapes/Line';
@@ -23,17 +23,15 @@ export const isFreehand = (shape: Object): shape is Freehand => {
   return (shape as Freehand).lines !== undefined;
 };
 
-export const typeofShape = (shape: Shape) => {
+export const typeofShape = (shape: Shape): Shapes => {
   if (isRectangle(shape)) {
     return 'Rectangle';
   }
   if (isEllipsis(shape)) {
     return 'Ellipsis';
   }
-  if (isFreehand(shape)) {
-    return 'Freehand';
-  }
   if (isLine(shape)) {
     return 'Line';
   }
+  return 'Freehand';
 };

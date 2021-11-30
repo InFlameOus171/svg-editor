@@ -22,9 +22,6 @@ export class EditorLayout extends LitElement {
     ) as HTMLCanvasElement;
     if (previewLayer) console.log(previewLayer);
     if (canvas) {
-      console.log(this.height, this.width);
-      console.log('drin');
-      console.log(canvas);
       new ResizeObserver(this.updateResize).observe(canvas);
       this.editor = new Editor(
         canvas,
@@ -71,6 +68,9 @@ export class EditorLayout extends LitElement {
   handleSelectSelect = () => {
     this.editor?.selectTool(Tools_List.SELECT);
   };
+  handleSelectMove = () => {
+    this.editor?.selectTool(Tools_List.MOVE);
+  };
 
   deselectTool = () => {
     this.editor?.deselectTool();
@@ -80,37 +80,43 @@ export class EditorLayout extends LitElement {
     {
       title: 'Draw Tool',
       onClick: this.handleSelectDraw,
-      id: '0',
+      id: '1',
       isSelected: false,
     },
     {
       title: 'Line Tool',
       onClick: this.handleSelectLine,
-      id: '1',
+      id: '2',
       isSelected: false,
     },
     {
       title: 'Rect Tool',
       onClick: this.handleSelectRect,
-      id: '2',
+      id: '3',
       isSelected: false,
     },
     {
       title: 'Circle Tool',
       onClick: this.handleSelectCircle,
-      id: '3',
+      id: '4',
       isSelected: false,
     },
     {
       title: 'Select Tool',
       onClick: this.handleSelectSelect,
-      id: '4',
+      id: '5',
+      isSelected: false,
+    },
+    {
+      title: 'Move Tool',
+      onClick: this.handleSelectMove,
+      id: '6',
       isSelected: false,
     },
     {
       title: 'Deselect',
       onClick: this.deselectTool,
-      id: '2',
+      id: '0',
       isSelected: false,
     },
   ];

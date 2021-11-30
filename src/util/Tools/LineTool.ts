@@ -1,5 +1,6 @@
 import { EditorLayout } from '../../components/organisms/EditorLayout';
 import { Coordinates } from '../../types/types';
+import { Tools_List } from '../Editor';
 import { Line } from '../Shapes/Line';
 import { Tool } from './Tool';
 
@@ -15,6 +16,7 @@ export class LineTool extends Tool<Line> {
     if (renderingContext) {
       this.context = renderingContext;
     }
+    this.toolName = Tools_List.LINE;
   }
 
   draw = () => {

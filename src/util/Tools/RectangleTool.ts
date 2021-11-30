@@ -1,5 +1,6 @@
 import { EditorLayout } from '../../components/organisms/EditorLayout';
 import { Coordinates } from '../../types/types';
+import { Tools_List } from '../Editor';
 import { getEdgesFromPoints } from '../helper/coordinates';
 import { Rectangle } from '../Shapes/Rectangle';
 import { Tool } from './Tool';
@@ -16,6 +17,7 @@ export class RectangleTool extends Tool<Rectangle> {
     if (renderingContext) {
       this.context = renderingContext;
     }
+    this.toolName = Tools_List.RECT;
   }
 
   draw = () => {
