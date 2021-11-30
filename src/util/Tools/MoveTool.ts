@@ -53,21 +53,17 @@ export class MoveTool extends Tool<Shape> {
     Freehand: () => alert('to be implemented'),
   };
   onDown = (event: MouseEvent) => {
-    if(!this.selectedShape || !isPointInsideAnotherShape(this.currentCoordinates)(this.selectedShape)) return;
-    
+    if (
+      !this.selectedShape ||
+      !isPointInsideAnotherShape(this.currentCoordinates)(this.selectedShape)
+    )
+      return;
+
     this.currentShape = this.selectedShape;
     this.isDrawing = true;
-  
-    console.log(
-      !!this.selectedShape
-        ? isPointInsideAnotherShape(this.currentCoordinates)(this.selectedShape)
-        : 'undefined ????'
-    );
-    this.isDrawing = true;
-    }
+
     if (this.selectedShape && typeofShape(this.selectedShape) === 'Rectangle') {
       const center = (this.selectedShape as Rectangle).getCenter();
-      console.log(center);
       this.currentCoordinates = this.getCoords(event);
       this.initialCoordinateDifference = [
         this.currentCoordinates[0] - center[0],
