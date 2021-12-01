@@ -10,6 +10,5 @@ it(`Splits an array into two arrays, where the first array contains the values t
   ];
   const aggregateFunction = (value: number) => value >= 0;
   const result = partition(given, aggregateFunction);
-  console.log(result);
   expect(result).toEqual(expectation);
 });

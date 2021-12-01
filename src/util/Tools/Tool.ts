@@ -30,7 +30,6 @@ export abstract class Tool<T extends Shape, V extends Shape = T> {
     this.self = self;
     this.offset = offset;
     this.previewLayer = previewLayer;
-
     const renderingContext = this.drawLayer.getContext('2d');
     if (renderingContext) {
       this.context = renderingContext;
@@ -47,20 +46,47 @@ export abstract class Tool<T extends Shape, V extends Shape = T> {
     }
   }
 
+  static resetCanvas = (
+    canvas: HTMLCanvasElement,
+    canvasContext: CanvasRenderingContext2D
+  ) => {
+    if (canvas) {
+      canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+    }
+  };
+
   resetPreview = () => {
-    if (this.previewLayer) {
-      this.previewContext?.clearRect(
-        0,
-        0,
-        this.previewLayer?.width,
-        this.previewLayer.height
-      );
+    if (this.previewLayer && this.previewContext) {
+      Tool.resetCanvas(this.previewLayer, this.previewContext);
+    }
+  };
+
+  resetView = () => {
+    if (this.drawLayer && this.context) {
+      Tool.resetCanvas(this.drawLayer, this.context);
     }
   };
 
   resetCoordinates = () => {
     this.previousCoordinates = [0, 0];
     this.currentCoordinates = [0, 0];
+  };
+
+  highlightPreview = () => {
+    if (this.previewContext) {
+      this.previewContext.strokeStyle = 'red';
+      this.previewContext.setLineDash([10, 10]);
+      this.previewContext.lineWidth = 3;
+      this.previewContext.fillStyle = 'red';
+    }
+  };
+
+  unHighlightpreview = () => {
+    if (this.previewContext) {
+      this.previewContext.strokeStyle = '#000000';
+      this.previewContext.lineWidth = 2;
+      this.previewContext.fillStyle = '#000000';
+    }
   };
 
   updateShapeData = (newCoordinates: Coordinates): void => {

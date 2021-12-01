@@ -12,6 +12,7 @@ export class LineTool extends Tool<Line> {
     offset: Coordinates
   ) {
     super(target, self, offset, previewLayer);
+    this.resetPreview();
     const renderingContext = this.drawLayer.getContext('2d');
     if (renderingContext) {
       this.context = renderingContext;

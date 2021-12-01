@@ -21,8 +21,13 @@ export class Rectangle extends Shape {
   }
 
   setValues = (points: Coordinates[]) => {
+    console.log(
+      this.edges.map(edge => edge.points),
+      points
+    );
+    console.log('POINTS', points);
     const uniquePoints = [...new Set(points)];
-    this.boundary = uniquePoints as BoundaryCoordinates;
+    this.boundaries = uniquePoints as BoundaryCoordinates;
     const sumOfCoordinates = uniquePoints.reduce((acc, currPoint) => [
       acc[0] + currPoint[0],
       acc[1] + currPoint[1],
@@ -34,6 +39,7 @@ export class Rectangle extends Shape {
     ]);
     this.#width = (biggestX - this.#x) * 2;
     this.#height = (biggestY - this.#y) * 2;
+    console.log(this.boundaries);
   };
 
   setXY = (center: Coordinates) => {
@@ -56,9 +62,13 @@ export class Rectangle extends Shape {
           true
         )
     ) as RectangleComponents;
+    this.boundaries = this.boundaries?.map(
+      boundary =>
+        [boundary[0] + xDifference, boundary[1] + yDifference] as Coordinates
+    ) as BoundaryCoordinates;
   };
 
   toString = () => {
-    return JSON.stringify(this.boundary);
+    return JSON.stringify(this.boundaries);
   };
 }

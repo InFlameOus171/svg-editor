@@ -20,7 +20,6 @@ export class EditorLayout extends LitElement {
     const previewLayer = this.shadowRoot?.getElementById(
       'preview-layer'
     ) as HTMLCanvasElement;
-    if (previewLayer) console.log(previewLayer);
     if (canvas) {
       new ResizeObserver(this.updateResize).observe(canvas);
       this.editor = new Editor(
@@ -49,10 +48,6 @@ export class EditorLayout extends LitElement {
   @state()
   selectedElement: string | null = null;
 
-  handleSelectTool = () => {
-    console.log('selected');
-  };
-
   handleSelectDraw = () => {
     this.editor?.selectTool(Tools_List.DRAW);
   };
@@ -73,7 +68,7 @@ export class EditorLayout extends LitElement {
   };
 
   deselectTool = () => {
-    this.editor?.deselectTool();
+    this.editor?.onDeselectTool();
   };
 
   tools: IToolboxButtonProps[] = [
@@ -149,7 +144,7 @@ export class EditorLayout extends LitElement {
       <editor-header></editor-header>
 
       <textarea rows="5" id="footer" disabled>
-${JSON.stringify(this.selectedElement)}</textarea
+${JSON.stringify(this.selectedElement ?? '')}</textarea
       >
     `;
   }

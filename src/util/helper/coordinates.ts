@@ -119,16 +119,15 @@ const isBetweenTwoCoordinates =
 export const isPointInsideAnotherShape =
   (point: Coordinates) => (shape: Shape) =>
     isShapeInsideAnotherShape(shape)({
-      boundary: [point, point, point, point],
+      boundaries: [point, point, point, point],
     } as Shape);
 
 export const isShapeInsideAnotherShape =
   (potentiallyBiggerShape?: Shape) => (potentiallySmallerShape: Shape) => {
-    console.log(potentiallyBiggerShape, potentiallySmallerShape);
     if (!potentiallyBiggerShape) {
       return false;
     }
-    const { boundary: potentiallyBiggerCoordinates } = potentiallyBiggerShape;
+    const { boundaries: potentiallyBiggerCoordinates } = potentiallyBiggerShape;
     if (potentiallyBiggerCoordinates) {
       const [bigX, bigY] = partitionCoordinates(potentiallyBiggerCoordinates);
       const minCoordinates: Coordinates = [
@@ -139,7 +138,7 @@ export const isShapeInsideAnotherShape =
         Math.max(...bigX),
         Math.max(...bigY),
       ];
-      return potentiallySmallerShape.boundary?.every(
+      return potentiallySmallerShape.boundaries?.every(
         isBetweenTwoCoordinates(minCoordinates, maxCoordinates)
       );
     }

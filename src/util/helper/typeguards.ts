@@ -23,7 +23,7 @@ export const isFreehand = (shape: Object): shape is Freehand => {
   return (shape as Freehand).lines !== undefined;
 };
 
-export const typeofShape = (shape: Shape): Shapes => {
+export const typeOfShape = (shape: Shape): Shapes => {
   if (isRectangle(shape)) {
     return 'Rectangle';
   }

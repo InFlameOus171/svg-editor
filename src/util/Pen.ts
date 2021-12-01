@@ -1,8 +1,27 @@
+import { Shape } from '../types/shapes';
+import { typeOfShape } from './helper/typeguards';
 import { Ellipsis } from './Shapes/Ellipsis';
 import { Line } from './Shapes/Line';
 import { Rectangle } from './Shapes/Rectangle';
 
-export const Pen = {
+const Pen = {
+  draw: (context?: CanvasRenderingContext2D) => (shape: Shape) => {
+    const shapeType = typeOfShape(shape);
+    switch (shapeType) {
+      case 'Ellipsis':
+        Pen.drawOval(shape as Ellipsis, context);
+        break;
+      case 'Rectangle':
+        Pen.drawRectangle(shape as Rectangle, context);
+        break;
+      case 'Line':
+        Pen.drawLine(shape as Line, context);
+        break;
+      case 'Freehand':
+        break;
+    }
+  },
+
   drawLine: (line: Line, context?: CanvasRenderingContext2D) => {
     context?.beginPath();
     context?.moveTo(...line.points[0]);
@@ -12,6 +31,7 @@ export const Pen = {
   },
 
   drawRectangle: (rectangle: Rectangle, context?: CanvasRenderingContext2D) => {
+    console.log(rectangle.edges);
     rectangle.edges.forEach(edge => Pen.drawLine(edge, context));
   },
 
@@ -23,3 +43,5 @@ export const Pen = {
     context?.closePath();
   },
 };
+Object.freeze(Pen);
+export { Pen };

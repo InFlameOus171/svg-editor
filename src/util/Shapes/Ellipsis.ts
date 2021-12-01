@@ -31,7 +31,7 @@ export class Ellipsis extends Shape {
       this.center[0] + this.radiusX,
       this.center[1] - this.radiusY,
     ];
-    this.boundary = [
+    this.boundaries = [
       topLeftCorner,
       topRightCorner,
       bottomLeftCorner,

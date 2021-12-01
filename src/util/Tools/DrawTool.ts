@@ -14,6 +14,7 @@ export class DrawTool extends Tool<Freehand, Line> {
     offset: Coordinates
   ) {
     super(target, self, offset);
+    this.resetPreview();
     this.toolName = Tools_List.DRAW;
   }
 
@@ -26,7 +27,6 @@ export class DrawTool extends Tool<Freehand, Line> {
     this.drawLayer.addEventListener('mousedown', this.#onDown);
     this.drawLayer.addEventListener('mouseup', this.#onUp);
     this.drawLayer.addEventListener('mouseout', this.#onOut);
-    this.#setDrawTool();
   };
 
   destroy = () => {
@@ -35,16 +35,6 @@ export class DrawTool extends Tool<Freehand, Line> {
     this.drawLayer.removeEventListener('mouseup', this.#onUp);
     this.drawLayer.removeEventListener('mouseout', this.#onOut);
     return this.allShapes;
-  };
-
-  #setDrawTool = () => {
-    if (this.context) {
-      console.log(
-        this.context.strokeStyle,
-        this.context.lineWidth,
-        this.context.fillStyle
-      );
-    }
   };
 
   #onDown = (e: MouseEvent) => {

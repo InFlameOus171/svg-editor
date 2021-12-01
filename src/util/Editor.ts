@@ -25,8 +25,7 @@ export class Editor {
   #self: EditorLayout;
   #offset: Coordinates;
   #shapes: Shape[] = [];
-  #selectedShape?: Shape;
-
+  #selectedShape?: Shape | null = null;
   constructor(
     canvas: HTMLCanvasElement,
     previewLayer: HTMLCanvasElement,
@@ -40,10 +39,11 @@ export class Editor {
   }
 
   selectTool = (tool: Tools_List) => {
-    if (this.#selectedTool) this.deselectTool();
+    if (this.#selectedTool) this.#deselectTool();
     if (this.#canvas && this.#previewLayer) {
       switch (tool) {
         case Tools_List.DRAW: {
+          this.#self.selectedElement = null;
           this.#selectedTool = new DrawTool(
             this.#canvas,
             this.#self,
@@ -52,6 +52,7 @@ export class Editor {
           break;
         }
         case Tools_List.LINE: {
+          this.#self.selectedElement = null;
           this.#selectedTool = new LineTool(
             this.#canvas,
             this.#previewLayer,
@@ -61,6 +62,7 @@ export class Editor {
           break;
         }
         case Tools_List.RECT: {
+          this.#self.selectedElement = null;
           this.#selectedTool = new RectangleTool(
             this.#canvas,
             this.#previewLayer,
@@ -70,6 +72,7 @@ export class Editor {
           break;
         }
         case Tools_List.CIRCLE: {
+          this.#self.selectedElement = null;
           this.#selectedTool = new CircleTool(
             this.#canvas,
             this.#previewLayer,
@@ -89,13 +92,24 @@ export class Editor {
           break;
         }
         case Tools_List.MOVE: {
-          this.#selectedTool = new MoveTool(
-            this.#canvas,
-            this.#previewLayer,
-            this.#self,
-            this.#offset,
-            this.#selectedShape
-          );
+          if (this.#selectedShape) {
+            this.#selectedTool = new MoveTool(
+              this.#canvas,
+              this.#previewLayer,
+              this.#self,
+              this.#offset,
+              this.#shapes,
+              this.#selectedShape
+            );
+          } else {
+            this.#selectedTool = new SelectTool(
+              this.#canvas,
+              this.#previewLayer,
+              this.#self,
+              this.#offset,
+              this.#shapes
+            );
+          }
           break;
         }
       }
@@ -103,18 +117,42 @@ export class Editor {
     }
   };
 
-  deselectTool = () => {
-    if (this.#selectedTool) {
-      if (this.#selectedTool.toolName === Tools_List.SELECT) {
-        this.#selectedShape = this.#selectedTool?.destroy().shift();
-      }
-      const result = this.#selectedTool?.destroy();
-      this.#shapes.push(...result);
-      this.#selectedTool = null;
+  handleDeselectMoveTool = (result: Shape[]) => {};
+
+  onDeselectTool = () => {
+    this.#self.selectedElement = null;
+    const renderingContext = this.#previewLayer?.getContext('2d');
+    if (this.#previewLayer && renderingContext) {
+      Tool.resetCanvas(this.#previewLayer, renderingContext);
     }
+    this.#deselectTool();
   };
 
-  useSelectedTool = (event: Event) => this.#selectedTool?.executeAction?.();
+  #deselectTool = () => {
+    if (!this.#selectedTool) return;
+    switch (this.#selectedTool.toolName) {
+      case Tools_List.SELECT: {
+        const result = [...this.#selectedTool?.destroy()];
+        this.#selectedShape = result.shift();
+        break;
+      }
+      case Tools_List.MOVE: {
+        const result = [...this.#selectedTool?.destroy()];
+        this.#shapes = result;
+        this.#selectedShape = null;
+        break;
+      }
+      default: {
+        const result = [...this.#selectedTool?.destroy()];
+        if (result) {
+          this.#shapes.push(...result);
+        }
+        break;
+      }
+    }
+    console.log(this.#selectedShape);
+    this.#selectedTool = null;
+  };
 
   addElement(element: SVGRectElement) {
     throw new Error('Not implemented');

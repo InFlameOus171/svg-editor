@@ -13,6 +13,7 @@ export class CircleTool extends Tool<Ellipsis> {
     offset: Coordinates
   ) {
     super(target, self, offset, previewLayer);
+    this.resetPreview();
     this.toolName = Tools_List.CIRCLE;
     const renderingContext = this.drawLayer.getContext('2d');
     if (renderingContext) {

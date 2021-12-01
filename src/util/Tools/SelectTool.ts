@@ -9,7 +9,7 @@ import {
 import { Rectangle } from '../Shapes/Rectangle';
 import { Tool } from './Tool';
 import { RectangleTool } from './RectangleTool';
-import { typeofShape } from '../helper/typeguards';
+import { typeOfShape } from '../helper/typeguards';
 import { Tools_List } from '../Editor';
 
 export class SelectTool extends Tool<Shape> {
@@ -52,44 +52,34 @@ export class SelectTool extends Tool<Shape> {
     );
 
     if (!selectableShapes.length) {
+      this.onSelect(null);
       return;
     }
 
     const selectedShape = selectableShapes?.reduce((acc, shape) =>
       shape.index > acc?.index ? acc : shape
     );
-    selectedShape && this.onSelect(selectedShape);
+    this.onSelect(selectedShape);
   };
 
   onDown = (event: MouseEvent) => {
     this.unHighlightpreview();
+    this.currentShape = undefined;
     this.previousCoordinates = this.getCoords(event);
     this.isDrawing = true;
   };
 
-  highlightPreview = () => {
-    if (this.previewContext) {
-      this.previewContext.strokeStyle = 'red';
-      this.previewContext.lineWidth = 2;
-      this.previewContext.fillStyle = 'red';
+  onSelect = (selectedShape: Shape | null) => {
+    if (selectedShape) {
+      if (this.previewContext) {
+        this.highlightPreview();
+        const shapeType = typeOfShape(selectedShape);
+        this.drawTools[shapeType](selectedShape, this.previewContext);
+      }
+      this.self.selectedElement = selectedShape.toString();
+    } else {
+      this.self.selectedElement = null;
     }
-  };
-
-  unHighlightpreview = () => {
-    if (this.previewContext) {
-      this.previewContext.strokeStyle = '#000000';
-      this.previewContext.lineWidth = 2;
-      this.previewContext.fillStyle = '#000000';
-    }
-  };
-
-  onSelect = (selectedShape: Shape) => {
-    if (this.previewContext) {
-      this.highlightPreview();
-      const shapeType = typeofShape(selectedShape);
-      this.drawTools[shapeType](selectedShape, this.previewContext);
-    }
-    this.self.selectedElement = selectedShape.toString();
     this.self.requestUpdate();
   };
 
@@ -109,7 +99,7 @@ export class SelectTool extends Tool<Shape> {
     const highestShape = shapesInsideSelectedZone.find(
       shape => shape.index === highestIndex
     );
-    const shapeType = highestShape && typeofShape(highestShape);
+    const shapeType = highestShape && typeOfShape(highestShape);
     if (shapeType && this.previewContext) {
       this.onSelect(highestShape);
     }
@@ -121,6 +111,8 @@ export class SelectTool extends Tool<Shape> {
     if (this.currentShape) {
       this.onZoneSelection(this.currentShape as Rectangle);
     } else {
+      console.log('inside');
+
       this.onClick(event);
     }
     this.currentShape = undefined;
