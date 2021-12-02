@@ -14,7 +14,9 @@ export default {
       input: './src/index.html',
     }),
     // Resolve bare module specifiers to relative paths
-    resolve(),
+    // github - crypto wurde nicht richtig geladen
+    // https://github.com/open-wc/open-wc/issues/1534
+    resolve({browser: 'true'}),
     // Minify HTML template literals
     minifyHTML(),
     // Minify JS
@@ -34,4 +36,4 @@ export default {
     dir: 'build',
   },
   preserveEntrySignatures: 'strict',
-};
+}; 
