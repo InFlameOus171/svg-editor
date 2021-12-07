@@ -20,8 +20,8 @@ export const partition = <T>(
 };
 
 export const getUniqueXandYCoordinatesFromBoundaries = (
-  coordinates: BoundaryCoordinates
-): [[number, number], [number, number]] => {
+  coordinates: Coordinates[]
+): [number[], number[]] => {
   const uniqueCoordinates = [...new Map(coordinates)];
 
   const splitXandYCoordinates = uniqueCoordinates.reduce(
@@ -36,5 +36,5 @@ export const getUniqueXandYCoordinatesFromBoundaries = (
   return [
     [...new Set(splitXandYCoordinates[0])],
     [...new Set(splitXandYCoordinates[1])],
-  ] as [[number, number], [number, number]];
+  ];
 };

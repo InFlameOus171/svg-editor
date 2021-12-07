@@ -7,7 +7,7 @@ import { Tool } from './Tool';
 
 export class DrawTool extends Tool<Freehand, Line> {
   timesPerSecond: number = 30;
-  currentShapeComponents: Line[] = [];
+  currentShapeComponents: Coordinates[] = [];
   constructor(
     target: HTMLCanvasElement,
     self: EditorLayout,
@@ -44,10 +44,7 @@ export class DrawTool extends Tool<Freehand, Line> {
   };
 
   #onUp = () => {
-    const newLines = this.currentShapeComponents.map(
-      (component, index) => new Line(...component.points, index !== 0)
-    );
-    this.allShapes.push(new Freehand(newLines, true));
+    this.allShapes.push(new Freehand(this.currentShapeComponents, false));
     this.isDrawing = false;
   };
 
@@ -63,7 +60,7 @@ export class DrawTool extends Tool<Freehand, Line> {
       this.currentCoordinates,
       true
     );
-    this.currentShapeComponents.push(newShape);
+    this.currentShapeComponents.push(this.currentCoordinates);
     this.currentShape = newShape;
   };
 

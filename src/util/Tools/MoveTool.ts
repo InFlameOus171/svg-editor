@@ -17,6 +17,7 @@ export class MoveTool extends Tool<Shape> {
     selectedShape: Shape
   ) {
     super(target, self, offset, previewLayer);
+    console.log(selectedShape);
     this.allShapes = allShapes;
     const renderingContext = this.drawLayer.getContext('2d');
     if (renderingContext) {
@@ -27,7 +28,7 @@ export class MoveTool extends Tool<Shape> {
     this.#drawOnPreview = this.pen.draw(this.previewContext);
     this.#draw = this.pen.draw(this.context);
   }
-
+  #dCenter?: Coordinates;
   #drawOnPreview: (shape: Shape) => void;
   #draw: (shape: Shape) => void;
   currentShape?: Shape;
@@ -38,7 +39,6 @@ export class MoveTool extends Tool<Shape> {
       return shape.getId() === this.currentShape?.getId();
     });
 
-  #dCenter?: Coordinates;
   onDown = (event: MouseEvent) => {
     this.previousCoordinates = this.currentCoordinates;
     this.currentCoordinates = this.getCoords(event);
@@ -58,6 +58,7 @@ export class MoveTool extends Tool<Shape> {
     }
     // this.allShapes = this.allShapes.splice(indexOfShape, 1);
     this.isDrawing = true;
+    console.log(this.currentShape.toString());
   };
 
   onMove = (event: MouseEvent) => {
@@ -89,6 +90,7 @@ export class MoveTool extends Tool<Shape> {
         this.#draw(shape);
       });
     }
+    console.log(this.currentShape?.toString());
   };
 
   executeAction = () => {

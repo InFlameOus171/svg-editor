@@ -132,26 +132,29 @@ export class Editor {
     if (!this.#selectedTool) return;
     switch (this.#selectedTool.toolName) {
       case Tools_List.SELECT: {
-        const result = [...this.#selectedTool?.destroy()];
-        this.#selectedShape = result.shift();
+        const result = this.#selectedTool?.destroy();
+        if (!Array.isArray(result)) {
+          this.#selectedShape = result;
+        }
         break;
       }
       case Tools_List.MOVE: {
-        const result = [...this.#selectedTool?.destroy()];
-        this.#shapes = result;
+        const result = this.#selectedTool?.destroy();
+        if (Array.isArray(result)) {
+          this.#shapes = result;
+        }
         this.#selectedShape = null;
         break;
       }
       default: {
-        const result = [...this.#selectedTool?.destroy()];
-        if (result) {
+        const result = this.#selectedTool?.destroy();
+        if (Array.isArray(result)) {
           this.#shapes.push(...result);
+          this.#selectedShape = null;
         }
         break;
       }
     }
-    console.log(this.#shapes);
-    console.log(this.#selectedShape);
     this.#selectedTool = null;
   };
 

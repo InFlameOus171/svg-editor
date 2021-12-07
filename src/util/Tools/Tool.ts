@@ -104,7 +104,7 @@ export abstract class Tool<T extends Shape, V extends Shape = T> {
   executeAction = (): void => {
     throw new Error('not implemented');
   };
-  destroy = (): T[] => {
+  destroy = (): T | T[] | undefined => {
     throw new Error('not implemented');
   };
 }

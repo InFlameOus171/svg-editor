@@ -1,6 +1,7 @@
 import { Shape } from '../types/shapes';
 import { typeOfShape } from './helper/typeguards';
 import { Ellipse } from './Shapes/Ellipse';
+import { Freehand } from './Shapes/Freehand';
 import { Line } from './Shapes/Line';
 import { Rectangle } from './Shapes/Rectangle';
 
@@ -18,8 +19,22 @@ const Pen = {
         Pen.drawLine(shape as Line, context);
         break;
       case 'Freehand':
+        Pen.drawFreehand(shape as Freehand, context);
         break;
     }
+  },
+
+  drawFreehand: (freehand: Freehand, context?: CanvasRenderingContext2D) => {
+    const path = new Path2D();
+    const points = freehand.getPoints();
+    const start = points[0];
+    const rest = points.slice(1);
+    path.moveTo(...start);
+    rest.forEach(point => {
+      path.lineTo(...point);
+    });
+    context?.stroke(path);
+    context?.closePath();
   },
 
   drawLine: (line: Line, context?: CanvasRenderingContext2D) => {

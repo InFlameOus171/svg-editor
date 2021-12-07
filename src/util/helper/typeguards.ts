@@ -23,7 +23,7 @@ export const isLine = (shape: Object): shape is Line => {
 };
 
 export const isFreehand = (shape: Object): shape is Freehand => {
-  return (shape as Freehand).lines !== undefined;
+  return (shape as Freehand).getPoints !== undefined;
 };
 
 export const typeOfShape = (shape: Shape): Shapes => {

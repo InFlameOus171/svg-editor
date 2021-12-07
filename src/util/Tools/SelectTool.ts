@@ -31,6 +31,7 @@ export class SelectTool extends Tool<Shape> {
     this.previewContext && this.previewContext.setLineDash([10, 10]);
     this.toolName = Tools_List.SELECT;
   }
+  #selectedShape?: Shape;
   isMoving: boolean = false;
   executeAction = () => {
     this.drawLayer.addEventListener('mousemove', this.onMove);
@@ -42,7 +43,7 @@ export class SelectTool extends Tool<Shape> {
     this.drawLayer.removeEventListener('mousemove', this.onMove);
     this.drawLayer.removeEventListener('mousedown', this.onDown);
     this.drawLayer.removeEventListener('mouseup', this.onUp);
-    return this.allShapes;
+    return this.#selectedShape;
   };
 
   onClick = (event: MouseEvent) => {
@@ -53,8 +54,6 @@ export class SelectTool extends Tool<Shape> {
     const selectableShapes: Shape[] = this.allShapes.filter(
       pointPositionCompareFunction
     );
-
-    console.log(selectableShapes);
 
     if (!selectableShapes.length) {
       this.onSelect(null);
@@ -77,6 +76,8 @@ export class SelectTool extends Tool<Shape> {
 
   onSelect = (selectedShape: Shape | null) => {
     if (selectedShape) {
+      this.#selectedShape = selectedShape;
+
       if (this.previewContext) {
         this.highlightPreview();
         const shapeType = typeOfShape(selectedShape);
@@ -93,7 +94,7 @@ export class SelectTool extends Tool<Shape> {
     Rectangle: this.pen.drawRectangle,
     Ellipse: this.pen.drawEllipse,
     Line: this.pen.drawLine,
-    Freehand: () => alert('to be implemented'),
+    Freehand: this.pen.drawFreehand,
   };
 
   onZoneSelection = (selectedZone?: Rectangle) => {
