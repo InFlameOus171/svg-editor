@@ -2,7 +2,7 @@ import { EditorLayout } from '../components/organisms/EditorLayout';
 import { Shape } from '../types/shapes';
 import { Coordinates } from '../types/types';
 import { Tool } from './Tools/Tool';
-import { CircleTool } from './Tools/CircleTool';
+import { EllipseTool } from './Tools/EllipseTool';
 import { DrawTool } from './Tools/DrawTool';
 import { LineTool } from './Tools/LineTool';
 import { RectangleTool } from './Tools/RectangleTool';
@@ -13,7 +13,7 @@ export enum Tools_List {
   DRAW,
   LINE,
   RECT,
-  CIRCLE,
+  ELLIPSE,
   SELECT,
   MOVE,
 }
@@ -71,9 +71,9 @@ export class Editor {
           );
           break;
         }
-        case Tools_List.CIRCLE: {
+        case Tools_List.ELLIPSE: {
           this.#self.selectedElement = null;
-          this.#selectedTool = new CircleTool(
+          this.#selectedTool = new EllipseTool(
             this.#canvas,
             this.#previewLayer,
             this.#self,
@@ -150,6 +150,7 @@ export class Editor {
         break;
       }
     }
+    console.log(this.#shapes);
     console.log(this.#selectedShape);
     this.#selectedTool = null;
   };

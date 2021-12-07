@@ -1,18 +1,21 @@
 import { Shape, Shapes } from '../../types/shapes';
-import { Ellipsis } from '../Shapes/Ellipsis';
+import { Ellipse } from '../Shapes/Ellipse';
 import { Freehand } from '../Shapes/Freehand';
 import { Line } from '../Shapes/Line';
 import { Rectangle } from '../Shapes/Rectangle';
 
-export const isEllipsis = (shape: Object): shape is Ellipsis => {
+export const isEllipse = (shape: Object): shape is Ellipse => {
   return (
-    (shape as Ellipsis).radiusX !== undefined ||
-    (shape as Ellipsis).radiusY !== undefined
+    (shape as Ellipse).radiusX !== undefined ||
+    (shape as Ellipse).radiusY !== undefined
   );
 };
 
 export const isRectangle = (shape: Object): shape is Rectangle => {
-  return (shape as Rectangle).edges !== undefined;
+  return (
+    (shape as Rectangle).getWidth !== undefined &&
+    (shape as Rectangle).getHeight !== undefined
+  );
 };
 
 export const isLine = (shape: Object): shape is Line => {
@@ -27,8 +30,8 @@ export const typeOfShape = (shape: Shape): Shapes => {
   if (isRectangle(shape)) {
     return 'Rectangle';
   }
-  if (isEllipsis(shape)) {
-    return 'Ellipsis';
+  if (isEllipse(shape)) {
+    return 'Ellipse';
   }
   if (isLine(shape)) {
     return 'Line';

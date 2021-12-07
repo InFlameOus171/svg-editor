@@ -1,7 +1,8 @@
 import { EditorLayout } from '../../components/organisms/EditorLayout';
 import { Coordinates } from '../../types/types';
 import { Tools_List } from '../Editor';
-import { getEdgesFromPoints } from '../helper/coordinates';
+import { getRectangleValuesFromPoints } from '../helper/coordinates';
+import { createRect } from '../helper/shapes';
 import { Rectangle } from '../Shapes/Rectangle';
 import { Tool } from './Tool';
 
@@ -42,7 +43,8 @@ export class RectangleTool extends Tool<Rectangle> {
   };
 
   onDown = (event: MouseEvent) => {
-    this.previousCoordinates = this.getCoords(event);
+    this.currentCoordinates = this.getCoords(event);
+    this.previousCoordinates = this.currentCoordinates;
     this.isDrawing = true;
   };
 
@@ -58,12 +60,12 @@ export class RectangleTool extends Tool<Rectangle> {
   };
 
   createRectangle = (isPreview?: boolean) => {
-    const edges = getEdgesFromPoints(
+    const { startingCorner, width, height } = getRectangleValuesFromPoints(
       this.previousCoordinates,
-      this.currentCoordinates,
-      isPreview
+      this.currentCoordinates
     );
-    this.currentShape = new Rectangle(edges, true);
+    const shape = createRect(...startingCorner, width, height);
+    this.currentShape = new Rectangle(startingCorner, width, height, isPreview);
   };
 
   onMove = (event: MouseEvent) => {

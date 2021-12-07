@@ -1,71 +1,69 @@
-import {
-  BoundaryCoordinates,
-  Coordinates,
-  RectangleComponents,
-} from '../../types/types';
-import { partition } from '../helper/util';
-import { Line } from './Line';
+import { Coordinates } from '../../types/types';
 import { Shape } from './Shape';
 
 export class Rectangle extends Shape {
-  edges: RectangleComponents;
-  #x: number = 0;
-  #y: number = 0;
+  #startingCorner: Coordinates = [-1, -1];
   #width: number = 0;
   #height: number = 0;
 
-  constructor(edges: RectangleComponents, dontCountUp?: boolean) {
-    super(dontCountUp);
-    this.edges = edges;
-    this.setValues(edges.map(edge => edge.points).flat());
+  constructor(
+    startingCorner: Coordinates,
+    width: number,
+    height: number,
+    isPreview?: boolean
+  ) {
+    super(isPreview);
+    this.#startingCorner = startingCorner;
+    this.#width = width;
+    this.#height = height;
+    this.updateBoundaries();
   }
 
-  setValues = (points: Coordinates[]) => {
-    console.log(
-      this.edges.map(edge => edge.points),
-      points
-    );
-    console.log('POINTS', points);
-    const uniquePoints = [...new Set(points)];
-    this.boundaries = uniquePoints as BoundaryCoordinates;
-    const sumOfCoordinates = uniquePoints.reduce((acc, currPoint) => [
-      acc[0] + currPoint[0],
-      acc[1] + currPoint[1],
-    ]);
-    this.setXY([sumOfCoordinates[0] / 4, sumOfCoordinates[1] / 4]);
-    const [biggestX, biggestY] = uniquePoints.reduce((acc, curr) => [
-      acc[0] > curr[0] ? acc[0] : curr[0],
-      acc[1] > curr[1] ? acc[1] : curr[1],
-    ]);
-    this.#width = (biggestX - this.#x) * 2;
-    this.#height = (biggestY - this.#y) * 2;
-    console.log(this.boundaries);
+  updateBoundaries = () => {
+    const xMin = this.#startingCorner[0];
+    const yMax = this.#startingCorner[1];
+    const xMax = this.#startingCorner[0] + this.#width;
+    const yMin = this.#startingCorner[1] + this.#height;
+    this.boundaries = [
+      [xMin, yMin],
+      [xMin, yMax],
+      [xMax, yMin],
+      [xMax, yMax],
+    ];
   };
 
-  setXY = (center: Coordinates) => {
-    [this.#x, this.#y] = center;
-  };
-
-  getCenter = (): Coordinates => {
-    return [...[this.#x, this.#y]] as Coordinates;
+  resize = (coordinates: Coordinates) => {
+    this.#width = (coordinates[0] - this.#startingCorner[0]) * 2;
+    this.#height = (coordinates[1] - this.#startingCorner[1]) * 2;
   };
 
   moveTo = (coordinates: Coordinates) => {
-    const xDifference = coordinates[0] - this.#x;
-    const yDifference = coordinates[1] - this.#y;
-    [this.#x, this.#y] = coordinates;
-    this.edges = this.edges.map(
-      (edge): Line =>
-        new Line(
-          [edge.points[0][0] + xDifference, edge.points[0][1] + yDifference],
-          [edge.points[1][0] + xDifference, edge.points[1][1] + yDifference],
-          true
-        )
-    ) as RectangleComponents;
-    this.boundaries = this.boundaries?.map(
-      boundary =>
-        [boundary[0] + xDifference, boundary[1] + yDifference] as Coordinates
-    ) as BoundaryCoordinates;
+    this.#startingCorner = coordinates;
+    this.updateBoundaries();
+  };
+
+  getCenter: () => Coordinates = () => {
+    return this.#startingCorner;
+  };
+
+  getWidth: () => number = () => {
+    return this.#width;
+  };
+
+  getHeight: () => number = () => {
+    return this.#height;
+  };
+
+  /**
+   * @returns Array containing Path2d.rect(x,y,w,h) parameters: [x,y,w,h]
+   */
+  toPath2DRectParams: () => [number, number, number, number] = () => {
+    return [
+      this.#startingCorner[0],
+      this.#startingCorner[1],
+      this.#width,
+      this.#height,
+    ];
   };
 
   toString = () => {

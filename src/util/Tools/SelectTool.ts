@@ -3,6 +3,7 @@ import { Shape, Shapes } from '../../types/shapes';
 import { Coordinates } from '../../types/types';
 import {
   getEdgesFromPoints,
+  getRectangleValuesFromPoints,
   isPointInsideAnotherShape,
   isShapeInsideAnotherShape,
 } from '../helper/coordinates';
@@ -11,6 +12,7 @@ import { Tool } from './Tool';
 import { RectangleTool } from './RectangleTool';
 import { typeOfShape } from '../helper/typeguards';
 import { Tools_List } from '../Editor';
+import { createRect } from '../helper/shapes';
 
 export class SelectTool extends Tool<Shape> {
   constructor(
@@ -26,6 +28,7 @@ export class SelectTool extends Tool<Shape> {
       this.context = renderingContext;
     }
     this.allShapes = shapes;
+    this.previewContext && this.previewContext.setLineDash([10, 10]);
     this.toolName = Tools_List.SELECT;
   }
   isMoving: boolean = false;
@@ -51,6 +54,8 @@ export class SelectTool extends Tool<Shape> {
       pointPositionCompareFunction
     );
 
+    console.log(selectableShapes);
+
     if (!selectableShapes.length) {
       this.onSelect(null);
       return;
@@ -65,7 +70,8 @@ export class SelectTool extends Tool<Shape> {
   onDown = (event: MouseEvent) => {
     this.unHighlightpreview();
     this.currentShape = undefined;
-    this.previousCoordinates = this.getCoords(event);
+    this.currentCoordinates = this.getCoords(event);
+    this.previousCoordinates = this.currentCoordinates;
     this.isDrawing = true;
   };
 
@@ -85,7 +91,7 @@ export class SelectTool extends Tool<Shape> {
 
   drawTools: { [key in Shapes]: any } = {
     Rectangle: this.pen.drawRectangle,
-    Ellipsis: this.pen.drawOval,
+    Ellipse: this.pen.drawEllipse,
     Line: this.pen.drawLine,
     Freehand: () => alert('to be implemented'),
   };
@@ -122,13 +128,15 @@ export class SelectTool extends Tool<Shape> {
   onMove = (event: MouseEvent) => {
     if (this.isDrawing && this.previewLayer) {
       this.currentCoordinates = this.getCoords(event);
-      const edges = getEdgesFromPoints(
+      const { startingCorner, width, height } = getRectangleValuesFromPoints(
         this.previousCoordinates,
         this.currentCoordinates
       );
-      this.currentShape = new Rectangle(edges, false);
-      this.resetPreview();
-      this.pen.drawRectangle(this.currentShape, this.previewContext);
+      this.currentShape = new Rectangle(startingCorner, width, height, true);
+      if (this.currentShape) {
+        this.resetPreview();
+        this.pen.drawRectangle(this.currentShape, this.previewContext);
+      }
     }
   };
 }

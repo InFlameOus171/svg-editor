@@ -5,7 +5,7 @@ import {
   VectorCoordinates,
 } from '../../types/types';
 import { Partition } from '../../types/util.types';
-import { Ellipsis } from '../Shapes/Ellipsis';
+import { Ellipse } from '../Shapes/Ellipse';
 import { Line } from '../Shapes/Line';
 
 export const getEdgesFromPoints = (
@@ -24,6 +24,20 @@ export const getEdgesFromPoints = (
   return [edge1, edge2, edge3, edge4];
 };
 
+export const getRectangleValuesFromPoints = (
+  startPoint: Coordinates,
+  endPoint: Coordinates
+): { startingCorner: Coordinates; width: number; height: number } => {
+  const width = endPoint[0] - startPoint[0];
+  const height = endPoint[1] - startPoint[1];
+
+  return {
+    startingCorner: startPoint,
+    width,
+    height,
+  };
+};
+
 export const calculateDistanceBetweenPoints = (
   startPoint: Coordinates,
   endPoint: Coordinates
@@ -34,7 +48,7 @@ export const calculateDistanceBetweenPoints = (
   return Math.sqrt(result);
 };
 
-export const generateEllipsis = (
+export const generateEllipse = (
   startCoordinates: [number, number],
   endCoordinates: [number, number],
   dontCountUp?: boolean
@@ -51,7 +65,7 @@ export const generateEllipsis = (
     (startCoordinates[0] + endCoordinates[0]) / 2,
     endCoordinates[1],
   ]);
-  return new Ellipsis(center, radiusX, radiusY, dontCountUp);
+  return new Ellipse(center, radiusX, radiusY, dontCountUp);
 };
 
 export const generateCircle = (
@@ -64,7 +78,7 @@ export const generateCircle = (
     startCoordinates,
     endCoordinates
   );
-  return new Ellipsis(center, radius, radius, dontCountUp);
+  return new Ellipse(center, radius, radius, dontCountUp);
 };
 
 export const calculateVectorFromCoordinates = (
@@ -143,3 +157,25 @@ export const isShapeInsideAnotherShape =
       );
     }
   };
+
+const isPointInside = (shape: Shape, point: Coordinates) => {
+  const boundaries = shape.boundaries;
+  let pointIsIside = false;
+  if (!boundaries) return false;
+  for (let i = 0; i < boundaries.length; i++) {
+    const j = (i + 1) % boundaries.length;
+    if (
+      (boundaries[i][1] < point[1] && boundaries[j][1] >= point[1]) ||
+      (boundaries[j][1] < point[1] && boundaries[i][1] >= point[1])
+    ) {
+      if (
+        (point[1] - boundaries[i][1]) * (boundaries[j][0] - boundaries[i][0]) <
+        (point[0] - boundaries[i][0]) * (boundaries[j][1] - boundaries[i][1])
+      ) {
+        pointIsIside = !pointIsIside;
+      }
+    }
+  }
+
+  return pointIsIside;
+};
