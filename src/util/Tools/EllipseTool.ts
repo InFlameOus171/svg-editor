@@ -1,22 +1,21 @@
 import { EditorLayout } from '../../components/organisms/EditorLayout';
+import { Tools_List } from '../../types/shapes';
 import { Coordinates } from '../../types/types';
-import { Tools_List } from '../Editor';
 import {
   generateCircle,
   generateEllipse as generateEllipse,
 } from '../helper/coordinates';
 import { Ellipse } from '../Shapes/Ellipse';
-import { Line } from '../Shapes/Line';
 import { Tool } from './Tool';
 
 export class EllipseTool extends Tool<Ellipse> {
   constructor(
-    target: HTMLCanvasElement,
+    drawLayer: HTMLCanvasElement,
     previewLayer: HTMLCanvasElement,
     self: EditorLayout,
     offset: Coordinates
   ) {
-    super(target, self, offset, previewLayer);
+    super(drawLayer, self, offset, previewLayer);
     this.resetPreview();
     this.toolName = Tools_List.ELLIPSE;
     const renderingContext = this.drawLayer.getContext('2d');
@@ -25,34 +24,27 @@ export class EllipseTool extends Tool<Ellipse> {
     }
   }
 
-  draw = () => {
+  #draw = () => {
     this.currentShape && this.pen.drawEllipse(this.currentShape, this.context);
     this.resetPreview();
   };
 
-  executeAction = () => {
-    this.drawLayer.addEventListener('mousemove', this.onMove);
-    this.drawLayer.addEventListener('mousedown', this.onDown);
-    this.drawLayer.addEventListener('mouseup', this.onUp);
-    window.addEventListener('keydown', this.onKeyDown);
-    window.addEventListener('keyup', this.onKeyUp);
+  #onKeyDown = (event: KeyboardEvent) => {
+    if (event.ctrlKey) {
+      this.isCircle = true;
+    }
   };
 
-  destroy = () => {
-    this.drawLayer.removeEventListener('mousemove', this.onMove);
-    this.drawLayer.removeEventListener('mousedown', this.onDown);
-    this.drawLayer.removeEventListener('mouseup', this.onUp);
-    window.removeEventListener('keydown', this.onKeyDown);
-    window.removeEventListener('keyup', this.onKeyUp);
-    return this.allShapes;
+  #onKeyUp = () => {
+    this.isCircle = false;
   };
 
-  onDown = (event: MouseEvent) => {
+  #onDown = (event: MouseEvent) => {
     this.previousCoordinates = this.getCoords(event);
     this.isDrawing = true;
   };
 
-  onUp = (event: MouseEvent) => {
+  #onUp = (event: MouseEvent) => {
     this.isDrawing = false;
     this.currentCoordinates = this.getCoords(event);
     if (this.isCircle) {
@@ -67,22 +59,11 @@ export class EllipseTool extends Tool<Ellipse> {
       );
     }
     this.allShapes.push(this.currentShape);
-
-    this.draw();
+    this.#draw();
   };
   isCircle: boolean = false;
 
-  onKeyDown = (event: KeyboardEvent) => {
-    if (event.ctrlKey) {
-      this.isCircle = true;
-    }
-  };
-
-  onKeyUp = (event: KeyboardEvent) => {
-    this.isCircle = false;
-  };
-
-  onMove = (event: MouseEvent) => {
+  #onMove = (event: MouseEvent) => {
     this.currentCoordinates = this.getCoords(event);
     this.resetPreview();
 
@@ -105,5 +86,22 @@ export class EllipseTool extends Tool<Ellipse> {
         this.pen.drawEllipse(previewShape, this.previewContext);
       }
     }
+  };
+
+  executeAction = () => {
+    this.drawLayer.addEventListener('mousemove', this.#onMove);
+    this.drawLayer.addEventListener('mousedown', this.#onDown);
+    this.drawLayer.addEventListener('mouseup', this.#onUp);
+    window.addEventListener('keydown', this.#onKeyDown);
+    window.addEventListener('keyup', this.#onKeyUp);
+  };
+
+  destroy = () => {
+    this.drawLayer.removeEventListener('mousemove', this.#onMove);
+    this.drawLayer.removeEventListener('mousedown', this.#onDown);
+    this.drawLayer.removeEventListener('mouseup', this.#onUp);
+    window.removeEventListener('keydown', this.#onKeyDown);
+    window.removeEventListener('keyup', this.#onKeyUp);
+    return this.allShapes;
   };
 }

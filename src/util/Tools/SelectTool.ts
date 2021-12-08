@@ -1,52 +1,39 @@
 import { EditorLayout } from '../../components/organisms/EditorLayout';
-import { ShapeType, Shapes } from '../../types/shapes';
+import { Shapes, ShapeType, Tools_List } from '../../types/shapes';
 import { Coordinates } from '../../types/types';
 import {
-  getEdgesFromPoints,
   getCanvasRectangleValuesFromPoints,
   isPointInsideAnotherShape,
   isShapeInsideAnotherShape,
 } from '../helper/coordinates';
+import { typeOfShape } from '../helper/typeguards';
 import { Rectangle } from '../Shapes/Rectangle';
 import { Tool } from './Tool';
-import { RectangleTool } from './RectangleTool';
-import { typeOfShape } from '../helper/typeguards';
-import { Tools_List } from '../Editor';
-import { createRect } from '../helper/shapes';
 
 export class SelectTool extends Tool<ShapeType> {
   constructor(
-    target: HTMLCanvasElement,
+    drawLayer: HTMLCanvasElement,
     previewLayer: HTMLCanvasElement,
     self: EditorLayout,
     offset: Coordinates,
     shapes: ShapeType[]
   ) {
-    super(target, self, offset, previewLayer);
+    super(drawLayer, self, offset, previewLayer);
+
+    this.toolName = Tools_List.SELECT;
+    this.allShapes = shapes;
+
+    this.previewContext && this.previewContext.setLineDash([10, 10]);
+
     const renderingContext = this.drawLayer.getContext('2d');
     if (renderingContext) {
       this.context = renderingContext;
     }
-    this.allShapes = shapes;
-    this.previewContext && this.previewContext.setLineDash([10, 10]);
-    this.toolName = Tools_List.SELECT;
   }
+
   #selectedShape?: ShapeType;
-  isMoving: boolean = false;
-  executeAction = () => {
-    this.drawLayer.addEventListener('mousemove', this.onMove);
-    this.drawLayer.addEventListener('mousedown', this.onDown);
-    this.drawLayer.addEventListener('mouseup', this.onUp);
-  };
 
-  destroy = () => {
-    this.drawLayer.removeEventListener('mousemove', this.onMove);
-    this.drawLayer.removeEventListener('mousedown', this.onDown);
-    this.drawLayer.removeEventListener('mouseup', this.onUp);
-    return this.#selectedShape;
-  };
-
-  onClick = (event: MouseEvent) => {
+  #onClick = (event: MouseEvent) => {
     this.currentCoordinates = this.getCoords(event);
     const pointPositionCompareFunction = isPointInsideAnotherShape(
       this.currentCoordinates
@@ -56,17 +43,17 @@ export class SelectTool extends Tool<ShapeType> {
     );
 
     if (!selectableShapes.length) {
-      this.onSelect(null);
+      this.#onSelect(null);
       return;
     }
 
     const selectedShape = selectableShapes?.reduce((acc, shape) =>
       shape.index > acc?.index ? acc : shape
     );
-    this.onSelect(selectedShape);
+    this.#onSelect(selectedShape);
   };
 
-  onDown = (event: MouseEvent) => {
+  #onDown = (event: MouseEvent) => {
     this.unHighlightpreview();
     this.currentShape = undefined;
     this.currentCoordinates = this.getCoords(event);
@@ -74,7 +61,7 @@ export class SelectTool extends Tool<ShapeType> {
     this.isDrawing = true;
   };
 
-  onSelect = (selectedShape: ShapeType | null) => {
+  #onSelect = (selectedShape: ShapeType | null) => {
     if (selectedShape) {
       this.#selectedShape = selectedShape;
 
@@ -83,10 +70,6 @@ export class SelectTool extends Tool<ShapeType> {
         const shapeType = typeOfShape(selectedShape);
         this.drawTools[shapeType](selectedShape, this.previewContext);
       }
-      console.log(
-        (selectedShape as Rectangle).getHeight(),
-        (selectedShape as Rectangle).getWidth()
-      );
       this.self.selectedElement = selectedShape.toString();
     } else {
       this.self.selectedElement = null;
@@ -101,7 +84,7 @@ export class SelectTool extends Tool<ShapeType> {
     Freehand: this.pen.drawFreehand,
   };
 
-  onZoneSelection = (selectedZone?: Rectangle) => {
+  #onZoneSelection = (selectedZone?: Rectangle) => {
     const compareFunction = isShapeInsideAnotherShape(selectedZone);
     const shapesInsideSelectedZone = this.allShapes.filter(compareFunction);
     const highestIndex = Math.max(
@@ -112,25 +95,22 @@ export class SelectTool extends Tool<ShapeType> {
     );
     const shapeType = highestShape && typeOfShape(highestShape);
     if (shapeType && this.previewContext) {
-      this.onSelect(highestShape);
+      this.#onSelect(highestShape);
     }
   };
 
-  onUp = (event: MouseEvent) => {
+  #onUp = (event: MouseEvent) => {
     this.resetPreview();
     this.isDrawing = false;
     if (this.currentShape) {
-      this.onZoneSelection(this.currentShape as Rectangle);
+      this.#onZoneSelection(this.currentShape as Rectangle);
     } else {
-      console.log('inside');
-
-      this.onClick(event);
+      this.#onClick(event);
     }
     this.currentShape = undefined;
-    this.isMoving = false;
   };
 
-  onMove = (event: MouseEvent) => {
+  #onMove = (event: MouseEvent) => {
     if (this.isDrawing && this.previewLayer) {
       this.currentCoordinates = this.getCoords(event);
       const { startingCorner, width, height } =
@@ -144,5 +124,18 @@ export class SelectTool extends Tool<ShapeType> {
         this.pen.drawRectangle(this.currentShape, this.previewContext);
       }
     }
+  };
+
+  executeAction = () => {
+    this.drawLayer.addEventListener('mousemove', this.#onMove);
+    this.drawLayer.addEventListener('mousedown', this.#onDown);
+    this.drawLayer.addEventListener('mouseup', this.#onUp);
+  };
+
+  destroy = () => {
+    this.drawLayer.removeEventListener('mousemove', this.#onMove);
+    this.drawLayer.removeEventListener('mousedown', this.#onDown);
+    this.drawLayer.removeEventListener('mouseup', this.#onUp);
+    return this.#selectedShape;
   };
 }

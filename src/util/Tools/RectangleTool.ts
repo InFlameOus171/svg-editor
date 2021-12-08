@@ -1,6 +1,6 @@
 import { EditorLayout } from '../../components/organisms/EditorLayout';
+import { Tools_List } from '../../types/shapes';
 import { Coordinates } from '../../types/types';
-import { Tools_List } from '../Editor';
 import {
   getCanvasRectangleValuesFromPoints,
   getFormattedRectangleValuesFromPoints,
@@ -11,12 +11,12 @@ import { Tool } from './Tool';
 
 export class RectangleTool extends Tool<Rectangle> {
   constructor(
-    target: HTMLCanvasElement,
+    drawLayer: HTMLCanvasElement,
     previewLayer: HTMLCanvasElement,
     self: EditorLayout,
     offset: Coordinates
   ) {
-    super(target, self, offset, previewLayer);
+    super(drawLayer, self, offset, previewLayer);
     this.resetPreview();
     const renderingContext = this.drawLayer.getContext('2d');
     if (renderingContext) {
@@ -25,7 +25,7 @@ export class RectangleTool extends Tool<Rectangle> {
     this.toolName = Tools_List.RECT;
   }
 
-  draw = () => {
+  #draw = () => {
     if (this.currentShape) {
       this.pen.drawRectangle(this.currentShape, this.context);
     }
@@ -58,7 +58,7 @@ export class RectangleTool extends Tool<Rectangle> {
       this.allShapes.push(this.currentShape);
     }
     this.resetPreview();
-    this.draw();
+    this.#draw();
     this.resetCoordinates();
   };
 

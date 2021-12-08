@@ -17,15 +17,11 @@ export class Line extends Shape {
   ) {
     super(dontCountUp);
     this.points = [startPoint, endPoint];
-    if (!dontCountUp) {
-      console.log(startPoint, endPoint, this.points);
-    }
     this.#center = [
       (startPoint[0] + endPoint[0]) / 2,
       (startPoint[1] + endPoint[1]) / 2,
     ];
     this.#updateBoundaries();
-    !dontCountUp && console.log(this.boundaries);
   }
 
   #updateBoundaries = () => {

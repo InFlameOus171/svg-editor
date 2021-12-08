@@ -1,7 +1,6 @@
 import { EditorLayout } from '../../components/organisms/EditorLayout';
-import { ShapeType, Shapes } from '../../types/shapes';
+import { ShapeType, Shapes, Tools_List } from '../../types/shapes';
 import { Coordinates } from '../../types/types';
-import { Tools_List } from '../Editor';
 import { isPointInsideAnotherShape } from '../helper/coordinates';
 import { typeOfShape } from '../helper/typeguards';
 import { Rectangle } from '../Shapes/Rectangle';
@@ -9,15 +8,14 @@ import { Tool } from './Tool';
 
 export class MoveTool extends Tool<ShapeType> {
   constructor(
-    target: HTMLCanvasElement,
+    drawLayer: HTMLCanvasElement,
     previewLayer: HTMLCanvasElement,
     self: EditorLayout,
     offset: Coordinates,
     allShapes: ShapeType[] = [],
     selectedShape: ShapeType
   ) {
-    super(target, self, offset, previewLayer);
-    console.log(selectedShape);
+    super(drawLayer, self, offset, previewLayer);
     this.allShapes = allShapes;
     const renderingContext = this.drawLayer.getContext('2d');
     if (renderingContext) {
@@ -31,15 +29,13 @@ export class MoveTool extends Tool<ShapeType> {
   #dCenter?: Coordinates;
   #drawOnPreview: (shape: ShapeType) => void;
   #draw: (shape: ShapeType) => void;
-  currentShape?: ShapeType;
-  initialCoordinateDifference?: Coordinates;
 
   #getIndexOfSelectedShape = () =>
     this.allShapes.findIndex(shape => {
       return shape.getId() === this.currentShape?.getId();
     });
 
-  onDown = (event: MouseEvent) => {
+  #onDown = (event: MouseEvent) => {
     this.previousCoordinates = this.currentCoordinates;
     this.currentCoordinates = this.getCoords(event);
     const currentShapeCenter = this.currentShape?.getCenter() ?? [0, 0];
@@ -58,10 +54,9 @@ export class MoveTool extends Tool<ShapeType> {
     }
     // this.allShapes = this.allShapes.splice(indexOfShape, 1);
     this.isDrawing = true;
-    console.log(this.currentShape.toString());
   };
 
-  onMove = (event: MouseEvent) => {
+  #onMove = (event: MouseEvent) => {
     if (!this.isDrawing) return;
     this.previousCoordinates = this.currentCoordinates;
     this.currentCoordinates = this.getCoords(event);
@@ -77,7 +72,7 @@ export class MoveTool extends Tool<ShapeType> {
     }
   };
 
-  onUp = (event: MouseEvent) => {
+  #onUp = () => {
     this.isDrawing = false;
     if (this.currentShape) {
       this.allShapes.splice(
@@ -90,19 +85,18 @@ export class MoveTool extends Tool<ShapeType> {
         this.#draw(shape);
       });
     }
-    console.log(this.currentShape?.toString());
   };
 
   executeAction = () => {
-    this.drawLayer.addEventListener('mousedown', this.onDown);
-    this.drawLayer.addEventListener('mousemove', this.onMove);
-    this.drawLayer.addEventListener('mouseup', this.onUp);
+    this.drawLayer.addEventListener('mousedown', this.#onDown);
+    this.drawLayer.addEventListener('mousemove', this.#onMove);
+    this.drawLayer.addEventListener('mouseup', this.#onUp);
   };
 
   destroy = () => {
-    this.drawLayer.removeEventListener('mousedown', this.onDown);
-    this.drawLayer.removeEventListener('mousemove', this.onMove);
-    this.drawLayer.removeEventListener('mouseup', this.onUp);
+    this.drawLayer.removeEventListener('mousedown', this.#onDown);
+    this.drawLayer.removeEventListener('mousemove', this.#onMove);
+    this.drawLayer.removeEventListener('mouseup', this.#onUp);
     return this.allShapes;
   };
 }

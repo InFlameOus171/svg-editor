@@ -14,7 +14,6 @@ export class Freehand extends Shape {
     super(dontCountUp);
     this.#points = points;
     this.#updateBoundaryAndCenter();
-    !dontCountUp && console.log(this.#points);
   }
 
   #updateBoundaryAndCenter = () => {

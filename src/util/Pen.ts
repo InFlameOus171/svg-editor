@@ -70,6 +70,15 @@ const Pen = {
     context?.stroke(path);
     context?.closePath;
   },
+
+  clearCanvas: (
+    canvas: HTMLCanvasElement,
+    canvasContext: CanvasRenderingContext2D
+  ) => {
+    if (canvas) {
+      canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+    }
+  },
 };
 Object.freeze(Pen);
 export { Pen };

@@ -1,7 +1,6 @@
 import { EditorLayout } from '../../components/organisms/EditorLayout';
-import { ShapeType } from '../../types/shapes';
+import { ShapeType, Tools_List } from '../../types/shapes';
 import { Coordinates } from '../../types/types';
-import { Tools_List } from '../Editor';
 import { Pen } from '../Pen';
 
 export abstract class Tool<T extends ShapeType, V extends ShapeType = T> {
@@ -21,12 +20,12 @@ export abstract class Tool<T extends ShapeType, V extends ShapeType = T> {
   currentCoordinates: [number, number] = [0, 0];
 
   constructor(
-    target: HTMLCanvasElement,
+    drawLayer: HTMLCanvasElement,
     self: EditorLayout,
     offset: Coordinates,
     previewLayer?: HTMLCanvasElement
   ) {
-    this.drawLayer = target;
+    this.drawLayer = drawLayer;
     this.self = self;
     this.offset = offset;
     this.previewLayer = previewLayer;
@@ -46,24 +45,15 @@ export abstract class Tool<T extends ShapeType, V extends ShapeType = T> {
     }
   }
 
-  static resetCanvas = (
-    canvas: HTMLCanvasElement,
-    canvasContext: CanvasRenderingContext2D
-  ) => {
-    if (canvas) {
-      canvasContext.clearRect(0, 0, canvas.width, canvas.height);
-    }
-  };
-
   resetPreview = () => {
     if (this.previewLayer && this.previewContext) {
-      Tool.resetCanvas(this.previewLayer, this.previewContext);
+      this.pen.clearCanvas(this.previewLayer, this.previewContext);
     }
   };
 
   resetView = () => {
     if (this.drawLayer && this.context) {
-      Tool.resetCanvas(this.drawLayer, this.context);
+      this.pen.clearCanvas(this.drawLayer, this.context);
     }
   };
 
@@ -97,7 +87,7 @@ export abstract class Tool<T extends ShapeType, V extends ShapeType = T> {
     return [e.clientX - this.offset[0], e.clientY - this.offset[1]];
   };
 
-  draw = (): void => {
+  #draw = (): void => {
     throw new Error('not implemented');
   };
 

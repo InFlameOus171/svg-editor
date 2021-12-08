@@ -13,17 +13,17 @@ export const isEllipse = (shape: Object): shape is Ellipse => {
 
 export const isRectangle = (shape: Object): shape is Rectangle => {
   return (
-    (shape as Rectangle).getWidth !== undefined &&
-    (shape as Rectangle).getHeight !== undefined
+    (shape as Rectangle)['getWidth'] !== undefined &&
+    (shape as Rectangle)['getHeight'] !== undefined
   );
 };
 
 export const isLine = (shape: Object): shape is Line => {
-  return (shape as Line).points !== undefined;
+  return (shape as Line)['points'] !== undefined;
 };
 
 export const isFreehand = (shape: Object): shape is Freehand => {
-  return (shape as Freehand).getPoints !== undefined;
+  return (shape as Freehand)['getPoints'] !== undefined;
 };
 
 export const typeOfShape = (shape: ShapeType): Shapes => {
