@@ -43,6 +43,7 @@ export class Editor {
   }
 
   save = () => {
+    this.onDeselectTool();
     const svgNS = 'http://www.w3.org/2000/svg';
     const svg = document.createElementNS(svgNS, 'svg');
     const g = document.createElementNS(svgNS, 'g');
