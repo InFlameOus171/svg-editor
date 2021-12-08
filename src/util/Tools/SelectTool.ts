@@ -1,9 +1,9 @@
 import { EditorLayout } from '../../components/organisms/EditorLayout';
-import { Shape, Shapes } from '../../types/shapes';
+import { ShapeType, Shapes } from '../../types/shapes';
 import { Coordinates } from '../../types/types';
 import {
   getEdgesFromPoints,
-  getRectangleValuesFromPoints,
+  getCanvasRectangleValuesFromPoints,
   isPointInsideAnotherShape,
   isShapeInsideAnotherShape,
 } from '../helper/coordinates';
@@ -14,13 +14,13 @@ import { typeOfShape } from '../helper/typeguards';
 import { Tools_List } from '../Editor';
 import { createRect } from '../helper/shapes';
 
-export class SelectTool extends Tool<Shape> {
+export class SelectTool extends Tool<ShapeType> {
   constructor(
     target: HTMLCanvasElement,
     previewLayer: HTMLCanvasElement,
     self: EditorLayout,
     offset: Coordinates,
-    shapes: Shape[]
+    shapes: ShapeType[]
   ) {
     super(target, self, offset, previewLayer);
     const renderingContext = this.drawLayer.getContext('2d');
@@ -31,7 +31,7 @@ export class SelectTool extends Tool<Shape> {
     this.previewContext && this.previewContext.setLineDash([10, 10]);
     this.toolName = Tools_List.SELECT;
   }
-  #selectedShape?: Shape;
+  #selectedShape?: ShapeType;
   isMoving: boolean = false;
   executeAction = () => {
     this.drawLayer.addEventListener('mousemove', this.onMove);
@@ -51,7 +51,7 @@ export class SelectTool extends Tool<Shape> {
     const pointPositionCompareFunction = isPointInsideAnotherShape(
       this.currentCoordinates
     );
-    const selectableShapes: Shape[] = this.allShapes.filter(
+    const selectableShapes: ShapeType[] = this.allShapes.filter(
       pointPositionCompareFunction
     );
 
@@ -74,7 +74,7 @@ export class SelectTool extends Tool<Shape> {
     this.isDrawing = true;
   };
 
-  onSelect = (selectedShape: Shape | null) => {
+  onSelect = (selectedShape: ShapeType | null) => {
     if (selectedShape) {
       this.#selectedShape = selectedShape;
 
@@ -83,6 +83,10 @@ export class SelectTool extends Tool<Shape> {
         const shapeType = typeOfShape(selectedShape);
         this.drawTools[shapeType](selectedShape, this.previewContext);
       }
+      console.log(
+        (selectedShape as Rectangle).getHeight(),
+        (selectedShape as Rectangle).getWidth()
+      );
       this.self.selectedElement = selectedShape.toString();
     } else {
       this.self.selectedElement = null;
@@ -129,10 +133,11 @@ export class SelectTool extends Tool<Shape> {
   onMove = (event: MouseEvent) => {
     if (this.isDrawing && this.previewLayer) {
       this.currentCoordinates = this.getCoords(event);
-      const { startingCorner, width, height } = getRectangleValuesFromPoints(
-        this.previousCoordinates,
-        this.currentCoordinates
-      );
+      const { startingCorner, width, height } =
+        getCanvasRectangleValuesFromPoints(
+          this.previousCoordinates,
+          this.currentCoordinates
+        );
       this.currentShape = new Rectangle(startingCorner, width, height, true);
       if (this.currentShape) {
         this.resetPreview();

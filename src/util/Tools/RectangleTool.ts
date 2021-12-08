@@ -1,7 +1,10 @@
 import { EditorLayout } from '../../components/organisms/EditorLayout';
 import { Coordinates } from '../../types/types';
 import { Tools_List } from '../Editor';
-import { getRectangleValuesFromPoints } from '../helper/coordinates';
+import {
+  getCanvasRectangleValuesFromPoints,
+  getFormattedRectangleValuesFromPoints,
+} from '../helper/coordinates';
 import { createRect } from '../helper/shapes';
 import { Rectangle } from '../Shapes/Rectangle';
 import { Tool } from './Tool';
@@ -59,19 +62,29 @@ export class RectangleTool extends Tool<Rectangle> {
     this.resetCoordinates();
   };
 
-  createRectangle = (isPreview?: boolean) => {
-    const { startingCorner, width, height } = getRectangleValuesFromPoints(
-      this.previousCoordinates,
-      this.currentCoordinates
-    );
-    const shape = createRect(...startingCorner, width, height);
-    this.currentShape = new Rectangle(startingCorner, width, height, isPreview);
+  // TODO - Doppelte funktionen zusammenführen/kürzen
+  createRectangle = () => {
+    const { startingCorner, width, height } =
+      getFormattedRectangleValuesFromPoints(
+        this.previousCoordinates,
+        this.currentCoordinates
+      );
+    this.currentShape = new Rectangle(startingCorner, width, height);
+  };
+
+  createRectanglePreview = () => {
+    const { startingCorner, width, height } =
+      getCanvasRectangleValuesFromPoints(
+        this.previousCoordinates,
+        this.currentCoordinates
+      );
+    this.currentShape = new Rectangle(startingCorner, width, height, true);
   };
 
   onMove = (event: MouseEvent) => {
     if (this.isDrawing) {
       this.currentCoordinates = this.getCoords(event);
-      this.createRectangle(true);
+      this.createRectanglePreview();
       if (this.currentShape) {
         this.resetPreview();
         this.pen.drawRectangle(this.currentShape, this.previewContext);

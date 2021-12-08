@@ -1,4 +1,4 @@
-import { Shape } from '../types/shapes';
+import { ShapeType } from '../types/shapes';
 import { typeOfShape } from './helper/typeguards';
 import { Ellipse } from './Shapes/Ellipse';
 import { Freehand } from './Shapes/Freehand';
@@ -6,7 +6,7 @@ import { Line } from './Shapes/Line';
 import { Rectangle } from './Shapes/Rectangle';
 
 const Pen = {
-  draw: (context?: CanvasRenderingContext2D) => (shape: Shape) => {
+  draw: (context?: CanvasRenderingContext2D) => (shape: ShapeType) => {
     const shapeType = typeOfShape(shape);
     switch (shapeType) {
       case 'Ellipse':
@@ -47,14 +47,26 @@ const Pen = {
 
   drawRectangle: (rectangle: Rectangle, context?: CanvasRenderingContext2D) => {
     const path = new Path2D();
-    path.rect(...rectangle.toPath2DRectParams());
+    const values = Object.values(rectangle.toPathParams()) as [
+      number,
+      number,
+      number,
+      number
+    ];
+    path.rect(...values);
     context?.stroke(path);
     context?.closePath();
   },
 
-  drawEllipse: (shape: Ellipse, context?: CanvasRenderingContext2D) => {
+  drawEllipse: (ellipse: Ellipse, context?: CanvasRenderingContext2D) => {
     const path = new Path2D();
-    path.ellipse(...shape.toPath2DParams(), 0, 0, 2 * Math.PI);
+    const values = Object.values(ellipse.toPathParams()) as [
+      number,
+      number,
+      number,
+      number
+    ];
+    path.ellipse(...values, 0, 0, 2 * Math.PI);
     context?.stroke(path);
     context?.closePath;
   },

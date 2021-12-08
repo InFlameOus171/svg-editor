@@ -8,7 +8,7 @@ import {
   layoutHeaderStyle,
   layoutStyle,
 } from './EditorLayout.styles';
-import { Shape } from '../../../types/shapes.js';
+import { ShapeType } from '../../../types/shapes.js';
 
 @customElement('editor-layout')
 export class EditorLayout extends LitElement {
@@ -141,7 +141,7 @@ export class EditorLayout extends LitElement {
         <!-- <div id="connection-info">connection-info</div> -->
       </div>
 
-      <editor-header></editor-header>
+      <editor-header .onSave=${this.editor?.save}></editor-header>
 
       <textarea rows="5" id="footer" disabled>
 ${JSON.stringify(this.selectedElement ?? '')}</textarea

@@ -68,11 +68,6 @@ export class EllipseTool extends Tool<Ellipse> {
     }
     this.allShapes.push(this.currentShape);
 
-    this.currentShape?.boundaries?.forEach(boundary => {
-      this.currentShape?.boundaries?.forEach(boundary2 => {
-        this.pen.drawLine(new Line(boundary, boundary2, true), this.context);
-      });
-    });
     this.draw();
   };
   isCircle: boolean = false;

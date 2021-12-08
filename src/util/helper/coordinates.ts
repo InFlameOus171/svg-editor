@@ -1,4 +1,4 @@
-import { Shape } from '../../types/shapes';
+import { ShapeType } from '../../types/shapes';
 import {
   Coordinates,
   RectangleComponents,
@@ -24,12 +24,38 @@ export const getEdgesFromPoints = (
   return [edge1, edge2, edge3, edge4];
 };
 
-export const getRectangleValuesFromPoints = (
+export const getCanvasRectangleValuesFromPoints = (
   startPoint: Coordinates,
   endPoint: Coordinates
 ): { startingCorner: Coordinates; width: number; height: number } => {
   const width = endPoint[0] - startPoint[0];
   const height = endPoint[1] - startPoint[1];
+
+  return {
+    startingCorner: startPoint,
+    width,
+    height,
+  };
+};
+
+export const getFormattedRectangleValuesFromPoints = (
+  startPoint: Coordinates,
+  endPoint: Coordinates
+): { startingCorner: Coordinates; width: number; height: number } => {
+  const width = Math.abs(endPoint[0] - startPoint[0]);
+  const height = Math.abs(endPoint[1] - startPoint[1]);
+  if (startPoint[0] < endPoint[0] || startPoint[1] < endPoint[1]) {
+    const newStartingCorner: Coordinates = [
+      Math.min(startPoint[0], endPoint[0]),
+      Math.min(startPoint[1], endPoint[1]),
+    ];
+    console.log(startPoint, endPoint);
+    return {
+      startingCorner: newStartingCorner,
+      width,
+      height,
+    };
+  }
 
   return {
     startingCorner: startPoint,
@@ -131,13 +157,14 @@ const isBetweenTwoCoordinates =
   };
 
 export const isPointInsideAnotherShape =
-  (point: Coordinates) => (shape: Shape) =>
+  (point: Coordinates) => (shape: ShapeType) =>
     isShapeInsideAnotherShape(shape)({
       boundaries: [point, point, point, point],
-    } as Shape);
+    } as ShapeType);
 
 export const isShapeInsideAnotherShape =
-  (potentiallyBiggerShape?: Shape) => (potentiallySmallerShape: Shape) => {
+  (potentiallyBiggerShape?: ShapeType) =>
+  (potentiallySmallerShape: ShapeType) => {
     if (!potentiallyBiggerShape) {
       return false;
     }
@@ -158,7 +185,7 @@ export const isShapeInsideAnotherShape =
     }
   };
 
-const isPointInside = (shape: Shape, point: Coordinates) => {
+const isPointInside = (shape: ShapeType, point: Coordinates) => {
   const boundaries = shape.boundaries;
   let pointIsIside = false;
   if (!boundaries) return false;

@@ -1,4 +1,4 @@
-import { Coordinates } from '../../types/types';
+import { Coordinates, RectSVGParams } from '../../types/types';
 import { Shape } from './Shape';
 
 export class Rectangle extends Shape {
@@ -54,17 +54,22 @@ export class Rectangle extends Shape {
     return this.#height;
   };
 
-  /**
-   * @returns Array containing Path2d.rect(x,y,w,h) parameters: [x,y,w,h]
-   */
-  toPath2DRectParams: () => [number, number, number, number] = () => {
-    return [
-      this.#startingCorner[0],
-      this.#startingCorner[1],
-      this.#width,
-      this.#height,
-    ];
-  };
+  toPathParams = () => ({
+    x: this.#startingCorner[0],
+    y: this.#startingCorner[1],
+    width: this.#width,
+    height: this.#height,
+  });
+
+  toSvgParams = (): RectSVGParams => ({
+    x: this.#startingCorner[0].toString(),
+    y: this.#startingCorner[1].toString(),
+    width: this.#width.toString(),
+    height: this.#height.toString(),
+    fill: this.getFill(),
+    stroke: this.getStroke(),
+    strokeWidth: this.getStrokeWidth(),
+  });
 
   toString = () => {
     return JSON.stringify(this.boundaries);

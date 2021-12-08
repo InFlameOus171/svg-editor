@@ -9,6 +9,9 @@ export class EditorHeader extends LitElement {
   @property()
   onSelectSvgFile?: (data: Document) => void;
 
+  @property()
+  onSave?: (event: MouseEvent) => void;
+
   #handleSelectFile = (event: Event) => {
     const fileInputElement = event.target as HTMLInputElement;
     const file = fileInputElement?.files?.[0];
@@ -39,6 +42,7 @@ export class EditorHeader extends LitElement {
           accept="image/svg+xml"
         />
       </label>
+      <button id="save" @click=${this.onSave}>Save</button>
     `;
   }
 }

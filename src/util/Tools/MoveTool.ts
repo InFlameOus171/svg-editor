@@ -1,5 +1,5 @@
 import { EditorLayout } from '../../components/organisms/EditorLayout';
-import { Shape, Shapes } from '../../types/shapes';
+import { ShapeType, Shapes } from '../../types/shapes';
 import { Coordinates } from '../../types/types';
 import { Tools_List } from '../Editor';
 import { isPointInsideAnotherShape } from '../helper/coordinates';
@@ -7,14 +7,14 @@ import { typeOfShape } from '../helper/typeguards';
 import { Rectangle } from '../Shapes/Rectangle';
 import { Tool } from './Tool';
 
-export class MoveTool extends Tool<Shape> {
+export class MoveTool extends Tool<ShapeType> {
   constructor(
     target: HTMLCanvasElement,
     previewLayer: HTMLCanvasElement,
     self: EditorLayout,
     offset: Coordinates,
-    allShapes: Shape[] = [],
-    selectedShape: Shape
+    allShapes: ShapeType[] = [],
+    selectedShape: ShapeType
   ) {
     super(target, self, offset, previewLayer);
     console.log(selectedShape);
@@ -29,9 +29,9 @@ export class MoveTool extends Tool<Shape> {
     this.#draw = this.pen.draw(this.context);
   }
   #dCenter?: Coordinates;
-  #drawOnPreview: (shape: Shape) => void;
-  #draw: (shape: Shape) => void;
-  currentShape?: Shape;
+  #drawOnPreview: (shape: ShapeType) => void;
+  #draw: (shape: ShapeType) => void;
+  currentShape?: ShapeType;
   initialCoordinateDifference?: Coordinates;
 
   #getIndexOfSelectedShape = () =>

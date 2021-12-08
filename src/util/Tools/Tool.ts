@@ -1,10 +1,10 @@
 import { EditorLayout } from '../../components/organisms/EditorLayout';
-import { Shape } from '../../types/shapes';
+import { ShapeType } from '../../types/shapes';
 import { Coordinates } from '../../types/types';
 import { Tools_List } from '../Editor';
 import { Pen } from '../Pen';
 
-export abstract class Tool<T extends Shape, V extends Shape = T> {
+export abstract class Tool<T extends ShapeType, V extends ShapeType = T> {
   drawLayer: HTMLCanvasElement;
   previewLayer?: HTMLCanvasElement;
   self: EditorLayout;

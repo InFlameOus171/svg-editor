@@ -1,4 +1,4 @@
-import { Coordinates } from '../../types/types';
+import { Coordinates, EllipseSVGParams } from '../../types/types';
 import { Shape } from './Shape';
 
 export class Ellipse extends Shape {
@@ -52,9 +52,22 @@ export class Ellipse extends Shape {
     return this.#center;
   };
 
-  toPath2DParams = (): [number, number, number, number] => {
-    return [this.#center[0], this.#center[1], this.radiusX, this.radiusY];
-  };
+  toPathParams = () => ({
+    cx: this.#center[0],
+    cy: this.#center[1],
+    rx: this.radiusX,
+    ry: this.radiusY,
+  });
+
+  toSVGEllipseParams = (): EllipseSVGParams => ({
+    cx: this.#center[0].toString(),
+    cy: this.#center[1].toString(),
+    rx: this.radiusX.toString(),
+    ry: this.radiusY.toString(),
+    fill: this.getFill(),
+    stroke: this.getStroke(),
+    strokeWidth: this.getStrokeWidth(),
+  });
 
   toString = () => {
     return JSON.stringify({

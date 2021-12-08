@@ -1,4 +1,8 @@
-import { Coordinates, VectorCoordinates } from '../../types/types';
+import {
+  Coordinates,
+  LineSVGParams,
+  VectorCoordinates,
+} from '../../types/types';
 import { Pen } from '../Pen';
 import { Shape } from './Shape';
 
@@ -51,6 +55,16 @@ export class Line extends Shape {
   getCenter: () => Coordinates = () => {
     return this.#center;
   };
+
+  toSVGLineParams = (): LineSVGParams => ({
+    x1: this.points[0][0].toString(),
+    y1: this.points[0][1].toString(),
+    x2: this.points[1][0].toString(),
+    y2: this.points[1][1].toString(),
+    fill: this.getFill(),
+    stroke: this.getStroke(),
+    strokeWidth: this.getStrokeWidth(),
+  });
 
   toString = () => {
     return JSON.stringify({

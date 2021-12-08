@@ -1,4 +1,8 @@
-import { BoundaryCoordinates, Coordinates } from '../../types/types';
+import {
+  BoundaryCoordinates,
+  Coordinates,
+  FreehandSVGParams,
+} from '../../types/types';
 import { getUniqueXandYCoordinatesFromBoundaries } from '../helper/util';
 import { Line } from './Line';
 import { Shape } from './Shape';
@@ -46,6 +50,13 @@ export class Freehand extends Shape {
   getPoints = () => {
     return this.#points;
   };
+
+  toSVGFreehandParams = (): FreehandSVGParams => ({
+    points: this.toString(),
+    fill: this.getFill(),
+    stroke: this.getStroke(),
+    strokeWidth: this.getStrokeWidth().toString(),
+  });
 
   toString = () => {
     return this.#points

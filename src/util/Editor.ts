@@ -1,5 +1,5 @@
 import { EditorLayout } from '../components/organisms/EditorLayout';
-import { Shape } from '../types/shapes';
+import { ShapeType } from '../types/shapes';
 import { Coordinates } from '../types/types';
 import { Tool } from './Tools/Tool';
 import { EllipseTool } from './Tools/EllipseTool';
@@ -8,6 +8,10 @@ import { LineTool } from './Tools/LineTool';
 import { RectangleTool } from './Tools/RectangleTool';
 import { SelectTool } from './Tools/SelectTool';
 import { MoveTool } from './Tools/MoveTool';
+import { typeOfShape } from './helper/typeguards';
+import { Rectangle } from './Shapes/Rectangle';
+import { Ellipse } from './Shapes/Ellipse';
+import { appendAsSVGShapeGeneratorFunction } from './helper/shapes';
 
 export enum Tools_List {
   DRAW,
@@ -19,13 +23,13 @@ export enum Tools_List {
 }
 
 export class Editor {
-  #selectedTool: Tool<Shape> | null = null;
+  #selectedTool: Tool<ShapeType> | null = null;
   #canvas: HTMLCanvasElement | null = null;
   #previewLayer: HTMLCanvasElement | null = null;
   #self: EditorLayout;
   #offset: Coordinates;
-  #shapes: Shape[] = [];
-  #selectedShape?: Shape | null = null;
+  #shapes: ShapeType[] = [];
+  #selectedShape?: ShapeType | null = null;
   constructor(
     canvas: HTMLCanvasElement,
     previewLayer: HTMLCanvasElement,
@@ -37,6 +41,47 @@ export class Editor {
     this.#self = self;
     this.#offset = offset;
   }
+
+  save = () => {
+    const svgNS = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(svgNS, 'svg');
+    const g = document.createElementNS(svgNS, 'g');
+
+    svg.setAttribute('height', this.#canvas?.height.toString() ?? '500');
+    svg.setAttribute('width', this.#canvas?.width.toString() ?? '500');
+    svg.appendChild(g);
+
+    const appendAsSVGShape = appendAsSVGShapeGeneratorFunction(g, svgNS);
+    this.#shapes.forEach(appendAsSVGShape);
+    console.log(svg);
+    const xmlSerializer = new XMLSerializer();
+    let source = xmlSerializer.serializeToString(svg);
+
+    //add name spaces.
+    //https://stackoverflow.com/questions/23218174/how-do-i-save-export-an-svg-file-after-creating-an-svg-with-d3-js-ie-safari-an
+    if (!source.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)) {
+      source = source.replace(
+        /^<svg/,
+        '<svg xmlns="http://www.w3.org/2000/svg"'
+      );
+    }
+    if (!source.match(/^<svg[^>]+"http\:\/\/www\.w3\.org\/1999\/xlink"/)) {
+      source = source.replace(
+        /^<svg/,
+        '<svg xmlns:xlink="http://www.w3.org/1999/xlink"'
+      );
+    }
+    source = '<?xml version="1.0" standalone="no"?>\r\n' + source;
+
+    var url = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(source);
+
+    const downloadLink = document.createElement('a');
+    downloadLink.download = 'svg-element.svg';
+    downloadLink.href = url;
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+  };
 
   selectTool = (tool: Tools_List) => {
     if (this.#selectedTool) this.#deselectTool();
@@ -117,7 +162,7 @@ export class Editor {
     }
   };
 
-  handleDeselectMoveTool = (result: Shape[]) => {};
+  handleDeselectMoveTool = (result: ShapeType[]) => {};
 
   onDeselectTool = () => {
     this.#self.selectedElement = null;
