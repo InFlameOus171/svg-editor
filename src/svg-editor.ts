@@ -1,7 +1,5 @@
-import { SvgEditor } from './parts/templates/SvgEditor.js';
-import { EditorLayout } from './parts/organisms/EditorLayout/EditorLayout.js';
-import { ToolboxButton } from './parts/atoms/ToolboxButton/ToolboxButton.js';
-
-window.customElements.define('svg-editor', SvgEditor);
-window.customElements.define('editor-layout', EditorLayout);
-window.customElements.define('toolbox-button', ToolboxButton);
+import './components/templates/SvgEditor';
+import './components/organisms/EditorLayout';
+import './components/atoms/ToolboxButton';
+import './components/molecules/ToolBox';
+import './components/molecules/EditorHeader';
