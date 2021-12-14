@@ -1,5 +1,11 @@
 import { Line } from '../util/Shapes/Line';
 
+declare global {
+  interface Element {
+    getFloatAttribute: (value: string) => number;
+  }
+}
+
 export type NullableString = null | string;
 export type NullableNumber = null | number;
 export type Coordinates = [number, number];
@@ -24,6 +30,11 @@ export type EllipseSVGParams = SVGParamsBase & {
   rx: string;
   ry: string;
 };
+export type CircleSVGParams = SVGParamsBase & {
+  cx: string;
+  cy: string;
+  r: string;
+};
 export type RectSVGParams = SVGParamsBase & {
   x: string;
   y: string;
@@ -40,4 +51,9 @@ export type LineSVGParams = SVGParamsBase & {
 
 export type FreehandSVGParams = SVGParamsBase & {
   points: string;
+};
+
+export type SVGDrawPath = {
+  command: string;
+  points: Coordinates[];
 };

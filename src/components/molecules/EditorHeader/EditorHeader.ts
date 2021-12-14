@@ -12,20 +12,28 @@ export class EditorHeader extends LitElement {
   @property()
   onSave?: (event: MouseEvent) => void;
 
-  #handleSelectFile = (event: Event) => {
+  handleSelectFile = (event: Event) => {
+    console.log('lel ???');
     const fileInputElement = event.target as HTMLInputElement;
     const file = fileInputElement?.files?.[0];
+    console.log('file');
     if (!file) {
+      console.log('no file');
       return;
     }
+    console.log('yes file');
+
     const reader = new FileReader();
     reader.addEventListener('load', readerEvent => {
       // TODO - Validate file
       const content = readerEvent.target?.result;
-      if (typeof content === 'string')
+      if (typeof content === 'string') {
+        console.log('called function');
+
         this.onSelectSvgFile?.(
           new DOMParser().parseFromString(content, 'image/svg+xml')
         );
+      }
     });
     reader.readAsText(file);
   };
@@ -38,7 +46,7 @@ export class EditorHeader extends LitElement {
           id="open-file"
           type="file"
           hidden
-          .onchange=${this.#handleSelectFile}
+          @change=${this.handleSelectFile}
           accept="image/svg+xml"
         />
       </label>

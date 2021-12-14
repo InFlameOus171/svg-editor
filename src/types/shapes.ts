@@ -13,4 +13,5 @@ export enum Tools_List {
   ELLIPSE,
   SELECT,
   MOVE,
+  TEST,
 }

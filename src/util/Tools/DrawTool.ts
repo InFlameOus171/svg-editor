@@ -58,6 +58,7 @@ export class DrawTool extends Tool<Freehand, Line> {
 
   #onMove = (e: MouseEvent) => {
     if (!this.isDrawing || this.shallWait) {
+      console.log(this.isDrawing, this.shallWait, 'is waiting');
       return;
     }
     const newCoordinates = this.getCoords(e);

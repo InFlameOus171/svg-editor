@@ -52,6 +52,12 @@ export const getToolboxButtonsProps = (
     isSelected: false,
   },
   {
+    title: 'TEST',
+    onClick: () => selectToolFunction(Tools_List.TEST),
+    id: '7',
+    isSelected: false,
+  },
+  {
     title: 'Unselect',
     onClick: () => selectToolFunction(null),
     id: '0',

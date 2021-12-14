@@ -3,8 +3,10 @@ import { ShapeType, Tools_List } from '../types/shapes';
 import { Coordinates } from '../types/types';
 import { appendAsSVGShapeGeneratorFunction } from './helper/shapes';
 import { Pen } from './Pen';
+import { Freehand } from './Shapes/Freehand';
 import { DrawTool } from './Tools/DrawTool';
 import { EllipseTool } from './Tools/EllipseTool';
+import { ImportTool } from './Tools/ImportTool';
 import { LineTool } from './Tools/LineTool';
 import { MoveTool } from './Tools/MoveTool';
 import { RectangleTool } from './Tools/RectangleTool';
@@ -19,6 +21,7 @@ export class Editor {
   #offset: Coordinates;
   #shapes: ShapeType[] = [];
   #selectedShape?: ShapeType | null = null;
+  #pen: any;
   constructor(
     canvas: HTMLCanvasElement,
     previewLayer: HTMLCanvasElement,
@@ -29,6 +32,10 @@ export class Editor {
     this.#previewLayer = previewLayer;
     this.#self = self;
     this.#offset = offset;
+    const context = canvas.getContext('2d');
+    if (context) {
+      this.#pen = Pen.generatePen(context);
+    }
   }
 
   #openDownloadDialog = (url: string) => {
@@ -78,13 +85,13 @@ export class Editor {
     const xmlSerializer = new XMLSerializer();
     const svgNS = 'http://www.w3.org/2000/svg';
     const svg = document.createElementNS(svgNS, 'svg');
-    const g = document.createElementNS(svgNS, 'g');
+    // const g = document.createElementNS(svgNS, 'g');
 
     svg.setAttribute('height', this.#canvas?.height.toString() ?? '500');
     svg.setAttribute('width', this.#canvas?.width.toString() ?? '500');
-    svg.appendChild(g);
+    // svg.appendChild(g);
 
-    const appendAsSVGShape = appendAsSVGShapeGeneratorFunction(g, svgNS);
+    const appendAsSVGShape = appendAsSVGShapeGeneratorFunction(svg, svgNS);
     this.#shapes.forEach(appendAsSVGShape);
 
     let source = xmlSerializer.serializeToString(svg);
@@ -107,6 +114,16 @@ export class Editor {
     const url =
       'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(source);
     this.#openDownloadDialog(url);
+  };
+
+  importSVG = (data: Document) => {
+    console.log('called', data);
+    if (this.#canvas) {
+      const importTool = new ImportTool(this.#canvas, this.#self, this.#offset);
+      console.log(data);
+      importTool.drawSvg(data);
+      this.#shapes.push(...importTool.destroy());
+    }
   };
 
   onSelectTool = (tool: Tools_List) => {
@@ -183,6 +200,18 @@ export class Editor {
           }
           break;
         }
+        case Tools_List.TEST: {
+          const polylinePoints =
+            '327,87 260,136 208,207 224,255 292,288 354,303 358,305 352,327 348,334 310,340 248,351 234,352'
+              .split(' ')
+              .map((coordinate): [number, number] => {
+                const [x, y] = coordinate.split(',');
+                return [parseFloat(x), parseFloat(y)];
+              });
+          const newShape = new Freehand(polylinePoints);
+          this.#pen.draw(newShape);
+          break;
+        }
       }
       this.#selectedTool?.executeAction();
     }
@@ -190,7 +219,7 @@ export class Editor {
 
   onUnselectTool = () => {
     const renderingContext = this.#previewLayer?.getContext('2d');
-
+    console.log(this.#shapes);
     this.#self.selectedElement = null;
     if (this.#previewLayer && renderingContext) {
       Pen.clearCanvas(this.#previewLayer, renderingContext);

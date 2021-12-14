@@ -45,10 +45,13 @@ export class EditorLayout extends LitElement {
   selectedElement: string | null = null;
 
   handleSelectTool = (tool: Tools_List | null) => {
-    if (!tool) {
+    console.log('selectedTool');
+    if (tool === null) {
       this.editor?.onUnselectTool();
+      console.log('unselected');
     } else {
       this.editor?.onSelectTool(tool);
+      console.log('selected');
     }
   };
 
@@ -76,7 +79,10 @@ export class EditorLayout extends LitElement {
         </div>
         <tool-box .tools=${this.tools}></tool-box>
       </div>
-      <editor-header .onSave=${this.editor?.onSave}></editor-header>
+      <editor-header
+        .onSave=${this.editor?.onSave}
+        .onSelectSvgFile=${this.editor?.importSVG}
+      ></editor-header>
       <textarea rows="5" id="footer" disabled>
 ${JSON.stringify(this.selectedElement ?? '')}</textarea
       >

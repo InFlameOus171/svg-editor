@@ -1,5 +1,6 @@
 import { ShapeType } from '../../types/shapes';
 import {
+  CircleSVGParams,
   EllipseSVGParams,
   FreehandSVGParams,
   LineSVGParams,
@@ -57,6 +58,17 @@ export const setEllipseSVGParams = (
   setSVGStyleParams(svgShape, fill, stroke, strokeWidth);
 };
 
+export const setCircleSVGParams = (
+  svgShape: Element,
+  circleParams: EllipseSVGParams
+) => {
+  const { cx, cy, rx, fill, stroke, strokeWidth } = circleParams;
+  svgShape.setAttribute('cx', cx);
+  svgShape.setAttribute('cy', cy);
+  svgShape.setAttribute('r', rx);
+  setSVGStyleParams(svgShape, fill, stroke, strokeWidth);
+};
+
 export const setLineSVGParams = (
   svgShape: Element,
   lineParams: LineSVGParams
@@ -91,9 +103,16 @@ export const appendAsSVGShapeGeneratorFunction =
       }
       case 'Ellipse': {
         const ellipseObject = shape as Ellipse;
-        const ellipse = document.createElementNS(svgNameSpace, 'ellipse');
-        setEllipseSVGParams(ellipse, ellipseObject.toSVGEllipseParams());
-        parent?.appendChild(ellipse);
+        const isCircle = ellipseObject.radiusX === ellipseObject.radiusY;
+        if (isCircle) {
+          const circle = document.createElementNS(svgNameSpace, 'circle');
+          setCircleSVGParams(circle, ellipseObject.toSVGEllipseParams());
+          parent?.appendChild(circle);
+        } else {
+          const ellipse = document.createElementNS(svgNameSpace, 'ellipse');
+          setEllipseSVGParams(ellipse, ellipseObject.toSVGEllipseParams());
+          parent?.appendChild(ellipse);
+        }
         break;
       }
       case 'Line': {

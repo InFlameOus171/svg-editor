@@ -6,22 +6,26 @@ import { Line } from './Shapes/Line';
 import { Rectangle } from './Shapes/Rectangle';
 
 const Pen = {
-  draw: (context?: CanvasRenderingContext2D) => (shape: ShapeType) => {
-    const shapeType = typeOfShape(shape);
-    switch (shapeType) {
-      case 'Ellipse':
-        Pen.drawEllipse(shape as Ellipse, context);
-        break;
-      case 'Rectangle':
-        Pen.drawRectangle(shape as Rectangle, context);
-        break;
-      case 'Line':
-        Pen.drawLine(shape as Line, context);
-        break;
-      case 'Freehand':
-        Pen.drawFreehand(shape as Freehand, context);
-        break;
-    }
+  generatePen: (context?: CanvasRenderingContext2D) => {
+    return {
+      draw: (shape: ShapeType) => {
+        const shapeType = typeOfShape(shape);
+        switch (shapeType) {
+          case 'Ellipse':
+            Pen.drawEllipse(shape as Ellipse, context);
+            break;
+          case 'Rectangle':
+            Pen.drawRectangle(shape as Rectangle, context);
+            break;
+          case 'Line':
+            Pen.drawLine(shape as Line, context);
+            break;
+          case 'Freehand':
+            Pen.drawFreehand(shape as Freehand, context);
+            break;
+        }
+      },
+    };
   },
 
   drawFreehand: (freehand: Freehand, context?: CanvasRenderingContext2D) => {

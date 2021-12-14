@@ -23,8 +23,8 @@ export class MoveTool extends Tool<ShapeType> {
     }
     this.currentShape = selectedShape;
     this.toolName = Tools_List.MOVE;
-    this.#drawOnPreview = this.pen.draw(this.previewContext);
-    this.#draw = this.pen.draw(this.context);
+    this.#drawOnPreview = this.pen.generatePen(this.previewContext).draw;
+    this.#draw = this.pen.generatePen(this.context).draw;
   }
   #dCenter?: Coordinates;
   #drawOnPreview: (shape: ShapeType) => void;
