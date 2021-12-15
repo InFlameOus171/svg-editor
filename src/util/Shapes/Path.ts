@@ -33,6 +33,13 @@ export class Path extends Shape {
     return this.#center;
   };
 
+  toSVGPathParams = () => ({
+    d: this.toString(),
+    fill: this.getFill(),
+    stroke: this.getStroke(),
+    strokeWidth: this.getStrokeWidth(),
+  });
+
   moveTo = (coordinates: Coordinates) => {
     const xDifference = coordinates[0] - this.#center[0];
     const yDifference = coordinates[1] - this.#center[1];

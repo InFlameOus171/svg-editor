@@ -49,6 +49,10 @@ export type LineSVGParams = SVGParamsBase & {
   y2: string;
 };
 
+export type PathSVGParams = SVGParamsBase & {
+  d: string;
+};
+
 export type FreehandSVGParams = SVGParamsBase & {
   points: string;
 };

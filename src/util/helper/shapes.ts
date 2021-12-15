@@ -6,11 +6,13 @@ import {
   EllipseSVGParams,
   FreehandSVGParams,
   LineSVGParams,
+  PathSVGParams,
   RectSVGParams,
 } from '../../types/types';
 import { Ellipse } from '../Shapes/Ellipse';
 import { Freehand } from '../Shapes/Freehand';
 import { Line } from '../Shapes/Line';
+import { Path } from '../Shapes/Path';
 import { Rectangle } from '../Shapes/Rectangle';
 import { typeOfShape } from './typeguards';
 
@@ -92,6 +94,15 @@ export const setFreehandSVGParams = (
   setSVGStyleParams(svgShape, fill, stroke, strokeWidth);
 };
 
+export const setPathSVGParams = (
+  svgShape: Element,
+  pathParams: PathSVGParams
+) => {
+  const { d, fill, stroke, strokeWidth } = pathParams;
+  svgShape.setAttribute('d', d);
+  setSVGStyleParams(svgShape, fill, stroke, strokeWidth);
+};
+
 export const appendAsSVGShapeGeneratorFunction =
   (parent?: Element, svgNameSpace: string | null = null) =>
   (shape: ShapeType) => {
@@ -129,6 +140,13 @@ export const appendAsSVGShapeGeneratorFunction =
         const freehand = document.createElementNS(svgNameSpace, 'polyline');
         setFreehandSVGParams(freehand, freehandObject.toSVGFreehandParams());
         parent?.appendChild(freehand);
+        break;
+      }
+      case 'Path': {
+        const pathObject = shape as Path;
+        const path = document.createElementNS(svgNameSpace, 'path');
+        setPathSVGParams(path, pathObject.toSVGPathParams());
+        parent?.append(path);
         break;
       }
     }
