@@ -180,7 +180,36 @@ export const getConvertedSVGShapes = (
   };
 };
 
+export const relativeCommandValues = [
+  'a',
+  'c',
+  'h',
+  'm',
+  's',
+  'q',
+  't',
+  'l',
+  'v',
+  'z',
+];
+
+export const absoluteCommandValues = [
+  'A',
+  'C',
+  'H',
+  'L',
+  'M',
+  'Q',
+  'S',
+  'T',
+  'V',
+  'Z',
+];
+
+export const pathCommandValues = [
+  ...relativeCommandValues,
+  ...absoluteCommandValues,
+];
+
 // Reads path string and groups each match in three groups: 1st: path command, 2nd: x coordinate and y coordinates "x,y"
-export const pathCommandsRegExp = new RegExp(
-  /(?<=([a-zA-Z]\s))((-?\d*\.?\d*,-?\d*\.?\d*\s)*)/g
-);
+export const pathCommandsRegExp = new RegExp(/(-?\d+\.?\d*)|[a-zA-Z]/g);

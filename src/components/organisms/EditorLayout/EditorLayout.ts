@@ -45,13 +45,10 @@ export class EditorLayout extends LitElement {
   selectedElement: string | null = null;
 
   handleSelectTool = (tool: Tools_List | null) => {
-    console.log('selectedTool');
     if (tool === null) {
       this.editor?.onUnselectTool();
-      console.log('unselected');
     } else {
       this.editor?.onSelectTool(tool);
-      console.log('selected');
     }
   };
 
@@ -66,16 +63,8 @@ export class EditorLayout extends LitElement {
     return html`
       <div id="content">
         <div id="draw-container">
-          <canvas
-            id="drawzone"
-            height=${window.innerHeight / 1.5}
-            width=${window.innerHeight / 1.5}
-          ></canvas>
-          <canvas
-            id="preview-layer"
-            height=${window.innerHeight / 1.5}
-            width=${window.innerHeight / 1.5}
-          ></canvas>
+          <canvas id="drawzone" height="1000px" width="1000px"></canvas>
+          <canvas id="preview-layer" height="1000px" width="1000px"></canvas>
         </div>
         <tool-box .tools=${this.tools}></tool-box>
       </div>

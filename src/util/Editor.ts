@@ -2,8 +2,10 @@ import { EditorLayout } from '../components/organisms/EditorLayout';
 import { ShapeType, Tools_List } from '../types/shapes';
 import { Coordinates } from '../types/types';
 import { appendAsSVGShapeGeneratorFunction } from './helper/shapes';
+import { isPath, typeOfShape } from './helper/typeguards';
 import { Pen } from './Pen';
 import { Freehand } from './Shapes/Freehand';
+import { Path } from './Shapes/Path';
 import { DrawTool } from './Tools/DrawTool';
 import { EllipseTool } from './Tools/EllipseTool';
 import { ImportTool } from './Tools/ImportTool';
@@ -117,10 +119,8 @@ export class Editor {
   };
 
   importSVG = (data: Document) => {
-    console.log('called', data);
     if (this.#canvas) {
       const importTool = new ImportTool(this.#canvas, this.#self, this.#offset);
-      console.log(data);
       importTool.drawSvg(data);
       this.#shapes.push(...importTool.destroy());
     }
@@ -201,15 +201,11 @@ export class Editor {
           break;
         }
         case Tools_List.TEST: {
-          const polylinePoints =
-            '327,87 260,136 208,207 224,255 292,288 354,303 358,305 352,327 348,334 310,340 248,351 234,352'
-              .split(' ')
-              .map((coordinate): [number, number] => {
-                const [x, y] = coordinate.split(',');
-                return [parseFloat(x), parseFloat(y)];
-              });
-          const newShape = new Freehand(polylinePoints);
-          this.#pen.draw(newShape);
+          const path = new Path2D(
+            'm366,86c-6,-3 -18.97324,-5.49968 -33,-6c-9.99365,-0.35646 -15.67285,1.28027 -20,6c-7.30972,7.97295 -11.16595,21.98733 -12,34c-1.24869,17.98447 -1.43643,38.27258 4,63c7.13782,32.46616 16.43185,58.74576 20,83c3.36023,22.84094 3.88696,40.26443 1,54c-3.05777,14.54819 -8.57492,28.164 -13,39c-4.56812,11.18625 -8.59692,16.99982 -15,19c-13.49887,4.21674 -32.33762,3.58691 -50,-1c-14.38876,-3.73676 -24,-9 -27,-9l-1,-1'
+          );
+          const ctx = this.#canvas.getContext('2d');
+          ctx?.stroke(path);
           break;
         }
       }
@@ -219,7 +215,7 @@ export class Editor {
 
   onUnselectTool = () => {
     const renderingContext = this.#previewLayer?.getContext('2d');
-    console.log(this.#shapes);
+    this.#shapes.forEach(shape => {});
     this.#self.selectedElement = null;
     if (this.#previewLayer && renderingContext) {
       Pen.clearCanvas(this.#previewLayer, renderingContext);

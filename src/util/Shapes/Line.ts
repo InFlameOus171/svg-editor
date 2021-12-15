@@ -3,6 +3,7 @@ import {
   LineSVGParams,
   VectorCoordinates,
 } from '../../types/types';
+import { getLineBoundaries } from '../helper/coordinates';
 import { Pen } from '../Pen';
 import { Shape } from './Shape';
 
@@ -15,27 +16,13 @@ export class Line extends Shape {
     endPoint: Coordinates,
     dontCountUp?: boolean
   ) {
-    super(dontCountUp);
+    super(getLineBoundaries(startPoint, endPoint), dontCountUp);
     this.points = [startPoint, endPoint];
     this.#center = [
       (startPoint[0] + endPoint[0]) / 2,
       (startPoint[1] + endPoint[1]) / 2,
     ];
-    this.#updateBoundaries();
   }
-
-  #updateBoundaries = () => {
-    const x1 = this.points[0][0];
-    const x2 = this.points[1][0];
-    const y1 = this.points[0][1];
-    const y2 = this.points[1][1];
-    this.boundaries = [
-      [x1, y1],
-      [x1, y2],
-      [x2, y1],
-      [x2, y2],
-    ];
-  };
 
   moveTo = (coordinates: Coordinates): void => {
     const xDifference = coordinates[0] - this.#center[0];

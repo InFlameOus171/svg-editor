@@ -82,6 +82,7 @@ export class SelectTool extends Tool<ShapeType> {
     Ellipse: this.pen.drawEllipse,
     Line: this.pen.drawLine,
     Freehand: this.pen.drawFreehand,
+    Path: this.pen.drawPath,
   };
 
   #onZoneSelection = (selectedZone?: Rectangle) => {
@@ -98,6 +99,8 @@ export class SelectTool extends Tool<ShapeType> {
       this.#onSelect(highestShape);
     }
   };
+
+  // 448 71 229.510498046875 399
 
   #onUp = (event: MouseEvent) => {
     this.resetPreview();

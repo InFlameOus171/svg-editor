@@ -1,35 +1,25 @@
-import {
-  BoundaryCoordinates,
-  Coordinates,
-  FreehandSVGParams,
-} from '../../types/types';
-import { getUniqueXandYCoordinatesFromBoundaries } from '../helper/util';
-import { Line } from './Line';
+import { Coordinates, FreehandSVGParams } from '../../types/types';
+import { getFreehandBoundaries } from '../helper/coordinates';
 import { Shape } from './Shape';
 
 export class Freehand extends Shape {
   #points: Coordinates[];
   #center: Coordinates = [-1, -1];
   constructor(points: Coordinates[], dontCountUp?: boolean) {
-    super(dontCountUp);
+    super(getFreehandBoundaries(points), dontCountUp);
     this.#points = points;
-    this.#updateBoundaryAndCenter();
+    this.#updateCenter();
   }
 
-  #updateBoundaryAndCenter = () => {
-    const [uniqueXCoordinates, uniqueYCoordinates] =
-      getUniqueXandYCoordinatesFromBoundaries(this.#points);
-    const maxX = Math.max(...uniqueXCoordinates);
-    const maxY = Math.max(...uniqueYCoordinates);
-    const minX = Math.min(...uniqueXCoordinates);
-    const minY = Math.min(...uniqueYCoordinates);
-    this.boundaries = [
-      [minX, minY],
-      [minX, maxY],
-      [maxX, minY],
-      [maxX, maxY],
-    ];
-    this.#center = [(maxX + minX) / 2, (maxY + minY) / 2];
+  #updateCenter = () => {
+    const sumOfCoordinates = this.boundaries.reduce(
+      (acc, boundaryCoordinate) => [
+        acc[0] + boundaryCoordinate[0],
+        acc[1] + boundaryCoordinate[1],
+      ],
+      [0, 0]
+    );
+    this.#center = [sumOfCoordinates[0] / 4, sumOfCoordinates[1] / 4];
   };
 
   getCenter = () => {
@@ -43,7 +33,8 @@ export class Freehand extends Shape {
       point[0] + xDifference,
       point[1] + yDifference,
     ]);
-    this.#updateBoundaryAndCenter();
+    this.#updateCenter();
+    this.moveBoundaries([xDifference, yDifference]);
   };
 
   getPoints = () => {

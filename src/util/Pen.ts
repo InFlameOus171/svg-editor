@@ -3,6 +3,7 @@ import { typeOfShape } from './helper/typeguards';
 import { Ellipse } from './Shapes/Ellipse';
 import { Freehand } from './Shapes/Freehand';
 import { Line } from './Shapes/Line';
+import { Path } from './Shapes/Path';
 import { Rectangle } from './Shapes/Rectangle';
 
 const Pen = {
@@ -23,9 +24,20 @@ const Pen = {
           case 'Freehand':
             Pen.drawFreehand(shape as Freehand, context);
             break;
+          case 'Path':
+            Pen.drawPath(shape as Path, context);
         }
       },
     };
+  },
+
+  drawPath: (path: Path, context?: CanvasRenderingContext2D) => {
+    const pathConstructor = new Path2D();
+    pathConstructor.moveTo(...path.offset);
+    console.log(path.toString());
+    pathConstructor.addPath(new Path2D(path.toString()));
+    context?.stroke(pathConstructor);
+    context?.closePath();
   },
 
   drawFreehand: (freehand: Freehand, context?: CanvasRenderingContext2D) => {

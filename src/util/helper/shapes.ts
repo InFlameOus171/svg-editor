@@ -1,6 +1,8 @@
 import { ShapeType } from '../../types/shapes';
 import {
+  BoundaryCoordinates,
   CircleSVGParams,
+  Coordinates,
   EllipseSVGParams,
   FreehandSVGParams,
   LineSVGParams,

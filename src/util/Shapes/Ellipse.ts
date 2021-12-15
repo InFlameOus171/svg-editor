@@ -1,4 +1,9 @@
-import { Coordinates, EllipseSVGParams } from '../../types/types';
+import {
+  BoundaryCoordinates,
+  Coordinates,
+  EllipseSVGParams,
+} from '../../types/types';
+import { getCircleBoundaries } from '../helper/coordinates';
 import { Shape } from './Shape';
 
 export class Ellipse extends Shape {
@@ -11,41 +16,17 @@ export class Ellipse extends Shape {
     radiusY: number,
     dontCountUp?: boolean
   ) {
-    super(dontCountUp);
+    super(getCircleBoundaries(center, radiusX, radiusY), dontCountUp);
     this.#center = center;
     this.radiusX = radiusX;
     this.radiusY = radiusY;
-    this.#updateBoundaries();
   }
 
-  #updateBoundaries = () => {
-    const topLeftCorner: Coordinates = [
-      this.#center[0] - this.radiusX,
-      this.#center[1] + this.radiusY,
-    ];
-    const topRightCorner: Coordinates = [
-      this.#center[0] + this.radiusX,
-      this.#center[1] + this.radiusY,
-    ];
-    const bottomLeftCorner: Coordinates = [
-      this.#center[0] - this.radiusX,
-      this.#center[1] - this.radiusY,
-    ];
-    const bottomRightCorner: Coordinates = [
-      this.#center[0] + this.radiusX,
-      this.#center[1] - this.radiusY,
-    ];
-    this.boundaries = [
-      topLeftCorner,
-      topRightCorner,
-      bottomLeftCorner,
-      bottomRightCorner,
-    ];
-  };
-
-  moveTo = (coodinates: Coordinates) => {
-    this.#center = coodinates;
-    this.#updateBoundaries();
+  moveTo = (coordinates: Coordinates) => {
+    const xDifference = coordinates[0] - this.#center[0];
+    const yDifference = coordinates[1] - this.#center[1];
+    this.#center = coordinates;
+    this.moveBoundaries([xDifference, yDifference]);
   };
 
   getCenter = () => {

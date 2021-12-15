@@ -1,4 +1,5 @@
 import { Coordinates, RectSVGParams } from '../../types/types';
+import { getRectBoundaries } from '../helper/coordinates';
 import { Shape } from './Shape';
 
 export class Rectangle extends Shape {
@@ -12,25 +13,11 @@ export class Rectangle extends Shape {
     height: number,
     isPreview?: boolean
   ) {
-    super(isPreview);
+    super(getRectBoundaries(startingCorner, width, height), isPreview);
     this.#startingCorner = startingCorner;
     this.#width = width;
     this.#height = height;
-    this.updateBoundaries();
   }
-
-  updateBoundaries = () => {
-    const xMin = this.#startingCorner[0];
-    const yMax = this.#startingCorner[1];
-    const xMax = this.#startingCorner[0] + this.#width;
-    const yMin = this.#startingCorner[1] + this.#height;
-    this.boundaries = [
-      [xMin, yMin],
-      [xMin, yMax],
-      [xMax, yMin],
-      [xMax, yMax],
-    ];
-  };
 
   resize = (coordinates: Coordinates) => {
     this.#width = (coordinates[0] - this.#startingCorner[0]) * 2;
@@ -38,8 +25,10 @@ export class Rectangle extends Shape {
   };
 
   moveTo = (coordinates: Coordinates) => {
+    const xDifference = coordinates[0] - this.#startingCorner[0];
+    const yDifference = coordinates[1] - this.#startingCorner[1];
     this.#startingCorner = coordinates;
-    this.updateBoundaries();
+    this.moveBoundaries([xDifference, yDifference]);
   };
 
   getCenter: () => Coordinates = () => {
