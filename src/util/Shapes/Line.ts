@@ -1,6 +1,7 @@
 import {
   Coordinates,
   LineSVGParams,
+  SVGParamsBase,
   VectorCoordinates,
 } from '../../types/types';
 import { getLineBoundaries } from '../helper/coordinates';
@@ -14,9 +15,14 @@ export class Line extends Shape {
   constructor(
     startPoint: Coordinates,
     endPoint: Coordinates,
+    styleAttributes?: Partial<SVGParamsBase>,
     dontCountUp?: boolean
   ) {
-    super(getLineBoundaries(startPoint, endPoint), dontCountUp);
+    super(
+      getLineBoundaries(startPoint, endPoint),
+      styleAttributes,
+      dontCountUp
+    );
     this.points = [startPoint, endPoint];
     this.#center = [
       (startPoint[0] + endPoint[0]) / 2,

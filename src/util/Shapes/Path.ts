@@ -1,30 +1,36 @@
-import { Coordinates, SVGDrawPath } from '../../types/types';
-import {
-  getPathBoundaries,
-  relativePathToAbsolutePath,
-} from '../helper/coordinates';
+import { Coordinates, SVGDrawPath, SVGParamsBase } from '../../types/types';
+import { getPathBoundaries, sumOfCoordinates } from '../helper/coordinates';
+import { getPathCommands } from '../helper/shapes';
+import { singleDirectionCommands } from '../helper/util';
 import { Shape } from './Shape';
 
 export class Path extends Shape {
   drawPath: SVGDrawPath[];
   offset: Coordinates;
   #center: Coordinates = [-1, -1];
+
   constructor(
     drawPath: SVGDrawPath[],
+    styleAttributes?: Partial<SVGParamsBase>,
     dontCountUp?: boolean,
     offset: Coordinates = [0, 0]
   ) {
-    super(undefined, dontCountUp);
+    super(undefined, styleAttributes, dontCountUp);
+    console.log(drawPath);
 
     this.drawPath = drawPath.map(path => {
+      if (singleDirectionCommands.includes(path.command)) {
+        return { command: path.command, points: path.points };
+      }
       return {
         command: path.command,
-        points: path.points.map(point => [
+        points: (path.points as Array<Coordinates>)?.map(point => [
           point[0] + offset[0],
           point[1] + offset[1],
         ]),
       };
     });
+
     this.boundaries = getPathBoundaries(this.drawPath);
     this.offset = offset;
   }
@@ -41,49 +47,76 @@ export class Path extends Shape {
   });
 
   moveTo = (coordinates: Coordinates) => {
-    const xDifference = coordinates[0] - this.#center[0];
-    const yDifference = coordinates[1] - this.#center[1];
-    this.drawPath = this.drawPath.map(path => {
-      return {
-        command: path.command,
-        points: path.points.map(point => [
-          point[0] + xDifference,
-          point[1] + yDifference,
-        ]),
-      };
-    });
-    this.#center = coordinates;
-    this.drawPath = [
-      {
-        command: this.drawPath[0].command,
-        points: this.drawPath[0].points.map(point => [
-          point[0] + xDifference,
-          point[1] + yDifference,
-        ]),
-      },
-      ...this.drawPath.slice(1),
+    const pathCommands = getPathCommands(this.toString());
+    const [dx, dy] = [
+      coordinates[0] - this.#center[0],
+      coordinates[1] - this.#center[1],
     ];
-    this.moveBoundaries([xDifference, yDifference]);
+    const newPathCommands = pathCommands.map(pathCommand => {
+      if (['M', 'm'].includes(pathCommand.command)) {
+        return {
+          command: pathCommand.command,
+          points: (pathCommand.points as Array<Coordinates>).map(
+            (point: Coordinates): Coordinates =>
+              sumOfCoordinates(point)([dx, dy])
+          ),
+        };
+      }
+      return pathCommand;
+    });
+    const newPath = new Path(
+      newPathCommands,
+      {
+        fill: this.getFill(),
+        stroke: this.getStroke(),
+        strokeWidth: this.getStrokeWidth(),
+      },
+      false
+    );
+    this.#center = newPath.getCenter();
+    this.boundaries = newPath.boundaries;
+    this.drawPath = newPath.drawPath;
+    // moveCommands.forEach(moveCommand => {
+    //   if (moveCommand) {
+    //     const changedCommands = [
+    //       {
+    //         command: moveCommand.command,
+    //         points: (moveCommand.points as Array<Coordinates>).map(
+    //           (point: Coordinates): Coordinates =>
+    //             sumOfCoordinates(point)([dx, dy])
+    //         ),
+    //       },
+    //       ...pathCommands,
+    //     ];
+
+    //   }
+    // });
   };
 
   toString = (): string => {
-    return this.drawPath.reduce((acc: string, pathValue: SVGDrawPath) => {
-      return acc
-        .concat(
-          ' ',
-          pathValue.command,
-          ' ',
-          pathValue.points.reduce(
-            (acc: string, point: Coordinates) =>
-              acc.concat(
-                [point[0].toString(), point[1].toString()].join(),
-                ' '
-              ),
-            ''
-          ),
-          ' '
-        )
-        .trim();
-    }, '');
+    const result = this.drawPath.reduce(
+      (acc: string, pathValue: SVGDrawPath) => {
+        return acc
+          .concat(
+            ' ',
+            pathValue.command,
+            ' ',
+            Array.isArray(pathValue.points)
+              ? pathValue.points.reduce(
+                  (acc: string, point: Coordinates) =>
+                    acc.concat(
+                      [point[0].toString(), point[1].toString()].join(),
+                      ' '
+                    ),
+                  ''
+                )
+              : pathValue.points ?? '',
+            ' '
+          )
+          .trim();
+      },
+      ''
+    );
+    return result;
   };
 }

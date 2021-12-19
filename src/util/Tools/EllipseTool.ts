@@ -72,7 +72,8 @@ export class EllipseTool extends Tool<Ellipse> {
         const previewShape = generateCircle(
           this.previousCoordinates,
           this.currentCoordinates,
-          true
+          undefined,
+          false
         );
         this.currentShape = previewShape;
         this.pen.drawEllipse(previewShape, this.previewContext);
@@ -80,7 +81,8 @@ export class EllipseTool extends Tool<Ellipse> {
         const previewShape = generateEllipse(
           this.previousCoordinates,
           this.currentCoordinates,
-          true
+          undefined,
+          false
         );
         this.currentShape = previewShape;
         this.pen.drawEllipse(previewShape, this.previewContext);

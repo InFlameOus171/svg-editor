@@ -35,7 +35,8 @@ export class DrawTool extends Tool<Freehand, Line> {
     const newShape = new Line(
       this.previousCoordinates,
       this.currentCoordinates,
-      true
+      undefined,
+      false
     );
     this.currentShapeComponents.push(this.currentCoordinates);
     this.currentShape = newShape;
@@ -48,7 +49,9 @@ export class DrawTool extends Tool<Freehand, Line> {
   };
 
   #onUp = () => {
-    this.allShapes.push(new Freehand(this.currentShapeComponents, false));
+    this.allShapes.push(
+      new Freehand(this.currentShapeComponents, undefined, false)
+    );
     this.currentShapeComponents = [];
     this.isDrawing = false;
   };

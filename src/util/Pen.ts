@@ -33,11 +33,29 @@ const Pen = {
 
   drawPath: (path: Path, context?: CanvasRenderingContext2D) => {
     const pathConstructor = new Path2D();
-    pathConstructor.moveTo(...path.offset);
-    console.log(path.toString());
+    pathConstructor.moveTo(path.offset[0], path.offset[1]);
     pathConstructor.addPath(new Path2D(path.toString()));
-    context?.stroke(pathConstructor);
-    context?.closePath();
+    if (context) {
+      const { fill, stroke, strokeWidth } = path.getStyleAttributes();
+      if (stroke && stroke !== 'null') {
+        context.strokeStyle = stroke;
+      }
+      if (fill) {
+        context.fillStyle = fill;
+        context.fill(pathConstructor);
+      }
+      if (strokeWidth) {
+        context.lineWidth = parseFloat(strokeWidth);
+      }
+      if (stroke || strokeWidth) {
+        context.stroke(pathConstructor);
+      }
+      if (!stroke && !fill && !strokeWidth) {
+        context.stroke(pathConstructor);
+        context.fill(pathConstructor);
+      }
+      context.closePath();
+    }
   },
 
   drawFreehand: (freehand: Freehand, context?: CanvasRenderingContext2D) => {

@@ -8,6 +8,7 @@ import {
   LineSVGParams,
   PathSVGParams,
   RectSVGParams,
+  SVGDrawPath,
 } from '../../types/types';
 import { Ellipse } from '../Shapes/Ellipse';
 import { Freehand } from '../Shapes/Freehand';
@@ -15,6 +16,11 @@ import { Line } from '../Shapes/Line';
 import { Path } from '../Shapes/Path';
 import { Rectangle } from '../Shapes/Rectangle';
 import { typeOfShape } from './typeguards';
+import {
+  pathCommandsRegExp,
+  pathCommandValues,
+  singleDirectionCommands,
+} from './util';
 
 export const createRect = (
   x: number,
@@ -29,13 +35,13 @@ export const createRect = (
 
 export const setSVGStyleParams = (
   svgShape: Element,
-  fill: string,
-  stroke: string,
-  strokeWidth: string
+  fill?: string,
+  stroke?: string,
+  strokeWidth?: string
 ) => {
-  svgShape.setAttribute('stroke', stroke);
-  svgShape.setAttribute('stroke-width', strokeWidth);
-  svgShape.setAttribute('fill', fill);
+  stroke && svgShape.setAttribute('stroke', stroke);
+  strokeWidth && svgShape.setAttribute('stroke-width', strokeWidth);
+  fill && svgShape.setAttribute('fill', fill);
 };
 
 export const setRectSVGParams = (
@@ -110,7 +116,7 @@ export const appendAsSVGShapeGeneratorFunction =
       case 'Rectangle': {
         const rectangleObject = shape as Rectangle;
         const rect = document.createElementNS(svgNameSpace, 'rect');
-        setRectSVGParams(rect, rectangleObject.toSvgParams());
+        setRectSVGParams(rect, rectangleObject.toSvgRectParams());
         parent?.appendChild(rect);
         break;
       }
@@ -151,3 +157,54 @@ export const appendAsSVGShapeGeneratorFunction =
       }
     }
   };
+
+export const getPathCommands = (d: string) => {
+  const matches = Array.from(d.matchAll(pathCommandsRegExp)).map(
+    match => match[0]
+  );
+  const indices = matches.reduce((acc: number[], match, index) => {
+    if (pathCommandValues.includes(match)) {
+      return [...acc, index];
+    } else {
+      if (index === matches.length - 1) {
+        return [...acc, index];
+      }
+      return acc;
+    }
+  }, []);
+  const segments = indices.reduce(
+    (acc: string[][], commandIndex, currentIndex) => {
+      if (currentIndex === indices.length - 1) {
+        return [...acc, matches.slice(commandIndex)];
+      }
+      return [...acc, matches.slice(commandIndex, indices[currentIndex + 1])];
+    },
+    []
+  );
+  return segments.map(convertMatchesToSVGDrawPath);
+};
+
+export const convertMatchesToSVGDrawPath = (
+  match: RegExpMatchArray
+): SVGDrawPath => {
+  console.log(match);
+  const command = match[0].trim();
+  const matchedCoordinates = match.slice(1);
+  if (singleDirectionCommands.includes(command)) {
+    return { command, points: matchedCoordinates.shift() };
+  }
+  const points = matchedCoordinates.reduce(
+    (acc: Coordinates[], point, index) => {
+      if (index % 2 === 0) {
+        return acc;
+      }
+      const coordinates: Coordinates = [
+        parseFloat(matchedCoordinates[index - 1]),
+        parseFloat(point),
+      ];
+      return [...acc, coordinates];
+    },
+    []
+  );
+  return { command, points };
+};

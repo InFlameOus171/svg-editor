@@ -1,15 +1,20 @@
 import { nanoid } from 'nanoid';
-import { BoundaryCoordinates, Coordinates } from '../../types/types';
+import {
+  BoundaryCoordinates,
+  Coordinates,
+  SVGParamsBase,
+} from '../../types/types';
 
 export abstract class Shape {
   static #counter: number = 0;
-  #id?: string;
-  boundaries: BoundaryCoordinates;
-  #stroke: string = '#000000';
-  #fill: string = 'rgba(0,0,0,0)';
-  #strokeWidth: number = 2;
 
+  #fill?: string;
+  #id?: string;
+  #stroke?: string;
+  #strokeWidth?: string;
+  boundaries: BoundaryCoordinates;
   index: number = 0;
+
   constructor(
     boundaries: BoundaryCoordinates = [
       [-1, -1],
@@ -17,14 +22,26 @@ export abstract class Shape {
       [-1, -1],
       [-1, -1],
     ],
-    dontCountUp: boolean = false
+
+    styleAttributes: Partial<SVGParamsBase> = {
+      stroke: '#000000',
+      fill: 'rgba(0,0,0,0)',
+      strokeWidth: '2',
+    },
+
+    countShapecountUp: boolean = true
   ) {
-    if (!dontCountUp) {
+    if (countShapecountUp) {
       Shape.#counter++;
       this.#id = nanoid();
     }
-    this.index = Shape.#counter;
+
+    this.#fill = styleAttributes.fill;
+    this.#stroke = styleAttributes.stroke;
+    this.#strokeWidth = styleAttributes.strokeWidth;
+
     this.boundaries = boundaries;
+    this.index = Shape.#counter;
   }
 
   moveBoundaries = (difference: Coordinates) => {
@@ -40,11 +57,19 @@ export abstract class Shape {
   };
 
   getStrokeWidth = () => {
-    return this.#strokeWidth.toString();
+    return this.#strokeWidth;
   };
 
   getFill = () => {
     return this.#fill;
+  };
+
+  getStyleAttributes = () => {
+    return {
+      fill: this.#fill,
+      stroke: this.#stroke,
+      strokeWidth: this.#strokeWidth,
+    };
   };
 
   getId = () => {

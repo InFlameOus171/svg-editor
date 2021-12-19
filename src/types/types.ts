@@ -19,9 +19,9 @@ export type BoundaryCoordinates = [
 ];
 
 export type SVGParamsBase = {
-  fill: string;
-  stroke: string;
-  strokeWidth: string;
+  fill?: string;
+  stroke?: string;
+  strokeWidth?: string;
 };
 
 export type EllipseSVGParams = SVGParamsBase & {
@@ -59,5 +59,5 @@ export type FreehandSVGParams = SVGParamsBase & {
 
 export type SVGDrawPath = {
   command: string;
-  points: Coordinates[];
+  points?: Coordinates[] | string;
 };

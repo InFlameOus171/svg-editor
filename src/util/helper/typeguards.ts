@@ -6,28 +6,22 @@ import { Path } from '../Shapes/Path';
 import { Rectangle } from '../Shapes/Rectangle';
 
 export const isEllipse = (shape: ShapeType): shape is Ellipse => {
-  return (
-    (shape as Ellipse).radiusX !== undefined ||
-    (shape as Ellipse).radiusY !== undefined
-  );
+  return (shape as Ellipse)['toSVGEllipseParams'] !== undefined;
 };
 
 export const isRectangle = (shape: ShapeType): shape is Rectangle => {
-  return (
-    (shape as Rectangle)['getWidth'] !== undefined &&
-    (shape as Rectangle)['getHeight'] !== undefined
-  );
+  return (shape as Rectangle)['toSvgRectParams'] !== undefined;
 };
 
 export const isLine = (shape: ShapeType): shape is Line => {
-  return (shape as Line)['points'] !== undefined;
+  return (shape as Line)['toSVGLineParams'] !== undefined;
 };
 
 export const isFreehand = (shape: ShapeType): shape is Freehand => {
-  return (shape as Freehand)['getPoints'] !== undefined;
+  return (shape as Freehand)['toSVGFreehandParams'] !== undefined;
 };
 export const isPath = (shape: ShapeType): shape is Path => {
-  return (shape as Path)['toString'] !== undefined;
+  return (shape as Path)['toSVGPathParams'] !== undefined;
 };
 
 export const typeOfShape = (shape: ShapeType): Shapes => {

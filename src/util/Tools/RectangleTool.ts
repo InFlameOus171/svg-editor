@@ -78,7 +78,13 @@ export class RectangleTool extends Tool<Rectangle> {
         this.previousCoordinates,
         this.currentCoordinates
       );
-    this.currentShape = new Rectangle(startingCorner, width, height, true);
+    this.currentShape = new Rectangle(
+      startingCorner,
+      width,
+      height,
+      undefined,
+      false
+    );
   };
 
   onMove = (event: MouseEvent) => {

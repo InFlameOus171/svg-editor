@@ -1,4 +1,4 @@
-import { Coordinates, RectSVGParams } from '../../types/types';
+import { Coordinates, RectSVGParams, SVGParamsBase } from '../../types/types';
 import { getRectBoundaries } from '../helper/coordinates';
 import { Shape } from './Shape';
 
@@ -11,9 +11,14 @@ export class Rectangle extends Shape {
     startingCorner: Coordinates,
     width: number,
     height: number,
+    styleAttributes?: Partial<SVGParamsBase>,
     isPreview?: boolean
   ) {
-    super(getRectBoundaries(startingCorner, width, height), isPreview);
+    super(
+      getRectBoundaries(startingCorner, width, height),
+      styleAttributes,
+      isPreview
+    );
     this.#startingCorner = startingCorner;
     this.#width = width;
     this.#height = height;
@@ -50,7 +55,7 @@ export class Rectangle extends Shape {
     height: this.#height,
   });
 
-  toSvgParams = (): RectSVGParams => ({
+  toSvgRectParams = (): RectSVGParams => ({
     x: this.#startingCorner[0].toString(),
     y: this.#startingCorner[1].toString(),
     width: this.#width.toString(),

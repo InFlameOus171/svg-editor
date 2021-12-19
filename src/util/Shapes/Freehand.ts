@@ -1,12 +1,21 @@
-import { Coordinates, FreehandSVGParams } from '../../types/types';
+import {
+  Coordinates,
+  FreehandSVGParams,
+  SVGParamsBase,
+} from '../../types/types';
 import { getFreehandBoundaries } from '../helper/coordinates';
 import { Shape } from './Shape';
 
 export class Freehand extends Shape {
   #points: Coordinates[];
   #center: Coordinates = [-1, -1];
-  constructor(points: Coordinates[], dontCountUp?: boolean) {
-    super(getFreehandBoundaries(points), dontCountUp);
+
+  constructor(
+    points: Coordinates[],
+    styleAttributes?: Partial<SVGParamsBase>,
+    countShapecountUp?: boolean
+  ) {
+    super(getFreehandBoundaries(points), styleAttributes, countShapecountUp);
     this.#points = points;
     this.#updateCenter();
   }
@@ -45,7 +54,7 @@ export class Freehand extends Shape {
     points: this.toString(),
     fill: this.getFill(),
     stroke: this.getStroke(),
-    strokeWidth: this.getStrokeWidth().toString(),
+    strokeWidth: this.getStrokeWidth(),
   });
 
   toString = () => {

@@ -121,7 +121,13 @@ export class SelectTool extends Tool<ShapeType> {
           this.previousCoordinates,
           this.currentCoordinates
         );
-      this.currentShape = new Rectangle(startingCorner, width, height, true);
+      this.currentShape = new Rectangle(
+        startingCorner,
+        width,
+        height,
+        undefined,
+        false
+      );
       if (this.currentShape) {
         this.resetPreview();
         this.pen.drawRectangle(this.currentShape, this.previewContext);

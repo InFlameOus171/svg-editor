@@ -4,6 +4,7 @@ import {
   Coordinates,
   RectangleComponents,
   SVGDrawPath,
+  SVGParamsBase,
   VectorCoordinates,
 } from '../../types/types';
 import { Partition } from '../../types/util.types';
@@ -11,22 +12,23 @@ import { Ellipse } from '../Shapes/Ellipse';
 import { Line } from '../Shapes/Line';
 import {
   getUniqueXandYCoordinatesFromBoundaries,
-  relativeCommandValues,
+  relativeCommands,
 } from './util';
 
 export const getEdgesFromPoints = (
   startPoint: Coordinates,
   endPoint: Coordinates,
-  dontCountUp?: boolean
+  styleAttributes?: Partial<SVGParamsBase>,
+  countShapecountUp?: boolean
 ): RectangleComponents => {
   const corner1: Coordinates = startPoint;
   const corner2: Coordinates = [endPoint[0], startPoint[1]];
   const corner3: Coordinates = endPoint;
   const corner4: Coordinates = [startPoint[0], endPoint[1]];
-  const edge1 = new Line(corner1, corner2, dontCountUp);
-  const edge2 = new Line(corner2, corner3, true);
-  const edge3 = new Line(corner3, corner4, true);
-  const edge4 = new Line(corner4, corner1, true);
+  const edge1 = new Line(corner1, corner2, styleAttributes, countShapecountUp);
+  const edge2 = new Line(corner2, corner3, styleAttributes, true);
+  const edge3 = new Line(corner3, corner4, styleAttributes, true);
+  const edge4 = new Line(corner4, corner1, styleAttributes, true);
   return [edge1, edge2, edge3, edge4];
 };
 
@@ -74,7 +76,8 @@ export const calculateDistanceBetweenPoints = (
 export const generateEllipse = (
   startCoordinates: [number, number],
   endCoordinates: [number, number],
-  dontCountUp?: boolean
+  styleAttributes?: Partial<SVGParamsBase>,
+  countShapecountUp?: boolean
 ) => {
   const center: Coordinates = [
     (startCoordinates[0] + endCoordinates[0]) / 2,
@@ -88,20 +91,33 @@ export const generateEllipse = (
     (startCoordinates[0] + endCoordinates[0]) / 2,
     endCoordinates[1],
   ]);
-  return new Ellipse(center, radiusX, radiusY, dontCountUp);
+  return new Ellipse(
+    center,
+    radiusX,
+    radiusY,
+    styleAttributes,
+    countShapecountUp
+  );
 };
 
 export const generateCircle = (
   startCoordinates: [number, number],
   endCoordinates: [number, number],
-  dontCountUp?: boolean
+  styleAttributes?: Partial<SVGParamsBase>,
+  countShapecountUp?: boolean
 ) => {
   const center: Coordinates = startCoordinates;
   const radius = calculateDistanceBetweenPoints(
     startCoordinates,
     endCoordinates
   );
-  return new Ellipse(center, radius, radius, dontCountUp);
+  return new Ellipse(
+    center,
+    radius,
+    radius,
+    styleAttributes,
+    countShapecountUp
+  );
 };
 
 export const calculateVectorFromCoordinates = (
@@ -282,7 +298,16 @@ export const relativePathToAbsolutePath = (
   let lastAbsolutePoint: Coordinates = [0, 0];
   const drawPathWithAbsolutePoints = drawPath.reduce(
     (acc: SVGDrawPath[], innerDrawPath): SVGDrawPath[] => {
-      if (relativeCommandValues.includes(innerDrawPath.command)) {
+      if (!Array.isArray(innerDrawPath.points)) {
+        return [
+          ...acc,
+          {
+            command: innerDrawPath.command.toUpperCase(),
+            points: innerDrawPath.points,
+          },
+        ];
+      }
+      if (relativeCommands.includes(innerDrawPath.command)) {
         const newDrawPathPoints = innerDrawPath.points.reduce(
           (allNewPoints: Coordinates[], point: Coordinates, index: number) => {
             if (innerDrawPath.command === 'c' && index % 3 === 2) {
@@ -329,9 +354,18 @@ export const relativePathToAbsolutePath = (
 };
 
 export const getPointsOfDrawPath = (drawPath: SVGDrawPath[]) => {
-  return drawPath.reduce((acc: Coordinates[], drawPath: SVGDrawPath) => {
-    return [...acc, ...drawPath.points];
-  }, []);
+  return drawPath.reduce(
+    (acc: Array<Coordinates | string>, drawPath: SVGDrawPath) => {
+      if (!!drawPath.points) {
+        return acc;
+      }
+      if (Array.isArray(drawPath.points)) {
+        return [...acc, ...drawPath.points];
+      }
+      return [...acc, drawPath.points];
+    },
+    []
+  );
 };
 
 export const getPathBoundaries = (
@@ -352,14 +386,6 @@ export const getPathBoundaries = (
   const yMin = Math.min(...yCoords);
   const xMax = Math.max(...xCoords);
   const yMax = Math.max(...yCoords);
-
-  console.log('xCoords', xCoords, 'yCoords', yCoords);
-  console.log('boundaries', [
-    [xMin, yMin],
-    [xMax, yMin],
-    [xMin, yMax],
-    [xMax, yMax],
-  ]);
 
   return [
     [xMin, yMin],

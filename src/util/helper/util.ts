@@ -109,14 +109,22 @@ Element.prototype.getFloatAttribute = function (attribute: string) {
   return parseFloat(this.getAttribute(attribute));
 };
 
+const getStyleAttributes = (element: Element) => {
+  const fill = element.getAttribute('fill') ?? '';
+  const stroke = element.getAttribute('stroke') ?? '';
+  const strokeWidth = element.getAttribute('stroke-width') ?? '';
+  return { fill, stroke, strokeWidth };
+};
+
 const convertToShapeType = ({ element, elementOffset }: FlattenedElement) => {
   const [dx, dy] = elementOffset;
+  const styleAttributes = getStyleAttributes(element);
   switch (element.tagName) {
     case acceptedTags[0]: {
       const cx = element.getFloatAttribute('cx') + dx;
       const cy = element.getFloatAttribute('cy') + dy;
       const r = element.getFloatAttribute('r');
-      return new Ellipse([cx, cy], r, r);
+      return new Ellipse([cx, cy], r, r, styleAttributes);
     }
     case acceptedTags[1]: {
       {
@@ -124,7 +132,7 @@ const convertToShapeType = ({ element, elementOffset }: FlattenedElement) => {
         const cy = element.getFloatAttribute('cy') + dy;
         const rx = element.getFloatAttribute('rx');
         const ry = element.getFloatAttribute('ry');
-        return new Ellipse([cx, cy], rx, ry);
+        return new Ellipse([cx, cy], rx, ry, styleAttributes);
       }
     }
     case acceptedTags[2]: {
@@ -133,7 +141,7 @@ const convertToShapeType = ({ element, elementOffset }: FlattenedElement) => {
         const y = element.getFloatAttribute('y') + dy;
         const width = element.getFloatAttribute('width');
         const height = element.getFloatAttribute('height');
-        return new Rectangle([x, y], width, height);
+        return new Rectangle([x, y], width, height, styleAttributes);
       }
     }
     case acceptedTags[3]: {
@@ -144,7 +152,7 @@ const convertToShapeType = ({ element, elementOffset }: FlattenedElement) => {
             const [x, y] = coordinate.split(',');
             return [parseFloat(x), parseFloat(y)];
           });
-        return new Freehand(points);
+        return new Freehand(points, styleAttributes);
       }
     }
     case acceptedTags[4]: {
@@ -153,12 +161,14 @@ const convertToShapeType = ({ element, elementOffset }: FlattenedElement) => {
         const x2 = element.getFloatAttribute('x2');
         const y1 = element.getFloatAttribute('y1');
         const y2 = element.getFloatAttribute('y2');
-        return new Line([x1, y1], [x2, y2]);
+        return new Line([x1, y1], [x2, y2], styleAttributes);
       }
     }
   }
 };
+
 type ReturnType = [FlattenedElement[], FlattenedElement[]];
+
 export const getConvertedSVGShapes = (
   element: Element
 ): { shapes: ShapeType[]; paths: FlattenedElement[] } => {
@@ -180,35 +190,23 @@ export const getConvertedSVGShapes = (
   };
 };
 
-export const relativeCommandValues = [
-  'a',
-  'c',
-  'h',
-  'm',
-  's',
-  'q',
-  't',
-  'l',
-  'v',
-  'z',
-];
+export const relativeCommands = ['a', 'c', 'm', 's', 'q', 't', 'l', 'z'];
 
-export const absoluteCommandValues = [
-  'A',
-  'C',
-  'H',
-  'L',
-  'M',
-  'Q',
-  'S',
-  'T',
-  'V',
-  'Z',
+export const absoluteCommands = ['A', 'C', 'L', 'M', 'Q', 'S', 'T', 'Z'];
+
+export const relativeSingleDirectionCommands = ['h', 'v'];
+
+export const absoluteSingleDirectionCommands = ['H', 'V'];
+
+export const singleDirectionCommands = [
+  ...relativeSingleDirectionCommands,
+  ...absoluteSingleDirectionCommands,
 ];
 
 export const pathCommandValues = [
-  ...relativeCommandValues,
-  ...absoluteCommandValues,
+  ...relativeCommands,
+  ...absoluteCommands,
+  ...singleDirectionCommands,
 ];
 
 // Reads path string and groups each match in three groups: 1st: path command, 2nd: x coordinate and y coordinates "x,y"

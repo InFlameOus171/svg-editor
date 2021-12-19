@@ -2,6 +2,7 @@ import {
   BoundaryCoordinates,
   Coordinates,
   EllipseSVGParams,
+  SVGParamsBase,
 } from '../../types/types';
 import { getCircleBoundaries } from '../helper/coordinates';
 import { Shape } from './Shape';
@@ -14,9 +15,14 @@ export class Ellipse extends Shape {
     center: Coordinates,
     radiusX: number,
     radiusY: number,
+    styleAttributes?: Partial<SVGParamsBase>,
     dontCountUp?: boolean
   ) {
-    super(getCircleBoundaries(center, radiusX, radiusY), dontCountUp);
+    super(
+      getCircleBoundaries(center, radiusX, radiusY),
+      styleAttributes,
+      dontCountUp
+    );
     this.#center = center;
     this.radiusX = radiusX;
     this.radiusY = radiusY;
