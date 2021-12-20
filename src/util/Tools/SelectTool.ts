@@ -5,6 +5,7 @@ import {
   getCanvasRectangleValuesFromPoints,
   isPointInsideAnotherShape,
   isShapeInsideAnotherShape,
+  rectangleParamsFromBoundaries,
 } from '../helper/coordinates';
 import { typeOfShape } from '../helper/typeguards';
 import { Rectangle } from '../Shapes/Rectangle';
@@ -68,7 +69,16 @@ export class SelectTool extends Tool<ShapeType> {
       if (this.previewContext) {
         this.highlightPreview();
         const shapeType = typeOfShape(selectedShape);
-        this.drawTools['Rectangle'](new Rectangle());
+        const { startingCorner, width, height } = rectangleParamsFromBoundaries(
+          selectedShape.boundaries
+        );
+        this.drawTools['Rectangle'](
+          new Rectangle(startingCorner, width, height, {
+            stroke: 'red',
+            strokeWidth: '2',
+          }),
+          this.previewContext
+        );
         this.drawTools[shapeType](selectedShape, this.previewContext);
       }
       this.self.selectedElement = selectedShape.toString();

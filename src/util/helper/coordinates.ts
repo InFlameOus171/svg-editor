@@ -369,55 +369,81 @@ export const getPointsOfDrawPath = (drawPath: SVGDrawPath[]) => {
         return acc;
       }
       if (Array.isArray(currentDrawPath.points)) {
-        if(singleDirectionCommands.includes(currentDrawPath.command)){
-          switch(currentDrawPath.command) {
-            case "H":
-            case "h": {
-              return  [...acc, [0,parseFloat(currentDrawPath.points[0] as unknown as string)]] as Coordinates[];
+        if (singleDirectionCommands.includes(currentDrawPath.command)) {
+          switch (currentDrawPath.command) {
+            case 'H':
+            case 'h': {
+              return [
+                ...acc,
+                [0, parseFloat(currentDrawPath.points[0] as unknown as string)],
+              ] as Coordinates[];
             }
-            case "V":
-            case "v": {
-              return [...acc, [parseFloat(currentDrawPath.points[0] as unknown as string),0]] as Coordinates[];
+            case 'V':
+            case 'v': {
+              return [
+                ...acc,
+                [parseFloat(currentDrawPath.points[0] as unknown as string), 0],
+              ] as Coordinates[];
             }
           }
         }
       }
-      return [...acc, currentDrawPath.points as Coordinates];
+      return [...acc, ...(currentDrawPath.points as Coordinates[])];
     },
     []
   );
 };
 
-export const splitCoordinate = (acc: [number[], number[]], point:string | Coordinates) => {
+export const splitCoordinate = (
+  acc: [number[], number[]],
+  point: string | Coordinates
+) => {
   return [
     [...acc[0], point[0]],
     [...acc[1], point[1]],
   ] as [number[], number[]];
-}
+};
 
-export const splitAllCoordinates = (coordinates: string|Coordinates[])
+export const splitAllCoordinates = (
+  coordinates: Array<string | Coordinates>
+) => {
+  return coordinates.reduce(splitCoordinate, [[], []]);
+};
 
-export const getPathBoundaries = (
-  drawPath: SVGDrawPath[]
+export const getMinMaxValuesOfSplitCoordinates = (
+  xCoordinates: number[],
+  yCoordinates: number[]
+) => {
+  const xMin = Math.min(...xCoordinates);
+  const yMin = Math.min(...yCoordinates);
+  const xMax = Math.max(...xCoordinates);
+  const yMax = Math.max(...yCoordinates);
+  return { xMin, yMin, xMax, yMax };
+};
+
+export const getMinMaxValuesOfCoordinates = (coordinates: Coordinates[]) => {
+  const [xCoords, yCoords] = splitAllCoordinates(coordinates);
+  return getMinMaxValuesOfSplitCoordinates(xCoords, yCoords);
+};
+
+export const getBoundaryFromCoordinates = (
+  coordinates: Coordinates[]
 ): BoundaryCoordinates => {
-  const absoluteDrawPath = relativePathToAbsolutePath(drawPath);
-  console.log('absoluteDrawPath', absoluteDrawPath);
-  const absolutePointsOfDrawPath = getPointsOfDrawPath(absoluteDrawPath);
-  console.log('absolutePointsOfDrawPath', absolutePointsOfDrawPath);
-  const [xCoords, yCoords] = absolutePointsOfDrawPath.reduce(splitCoordinate, [[], []]);
-  console.log(xCoords);
-  console.log(yCoords);
-  const xMin = Math.min(...xCoords);
-  const yMin = Math.min(...yCoords);
-  const xMax = Math.max(...xCoords);
-  const yMax = Math.max(...yCoords);
-
+  const { xMin, xMax, yMin, yMax } = getMinMaxValuesOfCoordinates(coordinates);
   return [
     [xMin, yMin],
     [xMax, yMin],
     [xMin, yMax],
     [xMax, yMax],
   ];
+};
+
+export const getPathBoundaries = (
+  drawPath: SVGDrawPath[]
+): BoundaryCoordinates => {
+  const absoluteDrawPath = relativePathToAbsolutePath(drawPath);
+  const absolutePointsOfDrawPath = getPointsOfDrawPath(absoluteDrawPath);
+  return getBoundaryFromCoordinates(absolutePointsOfDrawPath);
 };
 
 export const sumOfCoordinates =
@@ -433,21 +459,14 @@ export const rectangleParamsFromBoundaries = (
   boundaries: BoundaryCoordinates
 ) => {
   const [xCoordinates, yCoordinates] = Array.from(
-    new Set(
-      boundaries.reduce(
-        (acc: [number[], number[]], curr: Coordinates) => {
-          return [
-            [...acc[0], curr[0]],
-            [...acc[1], curr[1]],
-          ];
-        },
-        [[], []]
-      )
-    )
-  ).sort((a, b) => a - b);
-  const startingPoint = [
-    valuesOfBoundaryCoordinates[0],
-    valuesOfBoundaryCoordinates[1],
-  ];
-  const width = valuesOfBoundaryCoordinates[0];
+    new Set(splitAllCoordinates(boundaries))
+  );
+  const { xMin, yMin, xMax, yMax } = getMinMaxValuesOfSplitCoordinates(
+    xCoordinates,
+    yCoordinates
+  );
+  const startingCorner: Coordinates = [xMin, yMin];
+  const width: number = xMax - xMin;
+  const height: number = yMax - yMin;
+  return { startingCorner, width, height };
 };
