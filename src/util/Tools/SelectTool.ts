@@ -68,6 +68,7 @@ export class SelectTool extends Tool<ShapeType> {
       if (this.previewContext) {
         this.highlightPreview();
         const shapeType = typeOfShape(selectedShape);
+        this.drawTools['Rectangle'](new Rectangle());
         this.drawTools[shapeType](selectedShape, this.previewContext);
       }
       this.self.selectedElement = selectedShape.toString();

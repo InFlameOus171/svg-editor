@@ -1,7 +1,10 @@
 import { Coordinates, SVGDrawPath, SVGParamsBase } from '../../types/types';
 import { getPathBoundaries, sumOfCoordinates } from '../helper/coordinates';
 import { getPathCommands } from '../helper/shapes';
-import { singleDirectionCommands } from '../helper/util';
+import {
+  absoluteCoordinatesCommands,
+  singleDirectionCommands,
+} from '../helper/util';
 import { Shape } from './Shape';
 
 export class Path extends Shape {
@@ -16,8 +19,6 @@ export class Path extends Shape {
     offset: Coordinates = [0, 0]
   ) {
     super(undefined, styleAttributes, dontCountUp);
-    console.log(drawPath);
-
     this.drawPath = drawPath.map(path => {
       if (singleDirectionCommands.includes(path.command)) {
         return { command: path.command, points: path.points };
@@ -30,8 +31,14 @@ export class Path extends Shape {
         ]),
       };
     });
-
+    console.log(offset);
     this.boundaries = getPathBoundaries(this.drawPath);
+    const sumOfBoundaries = this.boundaries.reduce(
+      (acc, curr) => sumOfCoordinates(acc)(curr),
+      [0, 0]
+    );
+    this.#center = [sumOfBoundaries[0] / 4, sumOfBoundaries[1] / 4];
+    console.log(this.boundaries, this.#center);
     this.offset = offset;
   }
 
@@ -53,7 +60,9 @@ export class Path extends Shape {
       coordinates[1] - this.#center[1],
     ];
     const newPathCommands = pathCommands.map(pathCommand => {
-      if (['M', 'm'].includes(pathCommand.command)) {
+      if (
+        ['M', 'm', ...absoluteCoordinatesCommands].includes(pathCommand.command)
+      ) {
         return {
           command: pathCommand.command,
           points: (pathCommand.points as Array<Coordinates>).map(
@@ -73,6 +82,7 @@ export class Path extends Shape {
       },
       false
     );
+    console.log(newPath.#center, newPath.toSVGPathParams);
     this.#center = newPath.getCenter();
     this.boundaries = newPath.boundaries;
     this.drawPath = newPath.drawPath;

@@ -190,13 +190,40 @@ export const getConvertedSVGShapes = (
   };
 };
 
-export const relativeCommands = ['a', 'c', 'm', 's', 'q', 't', 'l', 'z'];
+export const relativeCoordinatesCommands = [
+  'a',
+  'c',
+  'm',
+  's',
+  'q',
+  't',
+  'l',
+  'z',
+];
 
-export const absoluteCommands = ['A', 'C', 'L', 'M', 'Q', 'S', 'T', 'Z'];
+export const absoluteCoordinatesCommands = [
+  'A',
+  'C',
+  'L',
+  'M',
+  'Q',
+  'S',
+  'T',
+  'Z',
+];
 
 export const relativeSingleDirectionCommands = ['h', 'v'];
 
 export const absoluteSingleDirectionCommands = ['H', 'V'];
+
+export const relativeCommands = [
+  ...relativeCoordinatesCommands,
+  relativeSingleDirectionCommands,
+];
+export const absoluteCommands = [
+  ...absoluteCoordinatesCommands,
+  absoluteSingleDirectionCommands,
+];
 
 export const singleDirectionCommands = [
   ...relativeSingleDirectionCommands,
@@ -204,8 +231,8 @@ export const singleDirectionCommands = [
 ];
 
 export const pathCommandValues = [
-  ...relativeCommands,
-  ...absoluteCommands,
+  ...relativeCoordinatesCommands,
+  ...absoluteCoordinatesCommands,
   ...singleDirectionCommands,
 ];
 

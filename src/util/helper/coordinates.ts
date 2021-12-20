@@ -13,6 +13,7 @@ import { Line } from '../Shapes/Line';
 import {
   getUniqueXandYCoordinatesFromBoundaries,
   relativeCommands,
+  singleDirectionCommands,
 } from './util';
 
 export const getEdgesFromPoints = (
@@ -26,9 +27,9 @@ export const getEdgesFromPoints = (
   const corner3: Coordinates = endPoint;
   const corner4: Coordinates = [startPoint[0], endPoint[1]];
   const edge1 = new Line(corner1, corner2, styleAttributes, countShapecountUp);
-  const edge2 = new Line(corner2, corner3, styleAttributes, true);
-  const edge3 = new Line(corner3, corner4, styleAttributes, true);
-  const edge4 = new Line(corner4, corner1, styleAttributes, true);
+  const edge2 = new Line(corner2, corner3, styleAttributes, false);
+  const edge3 = new Line(corner3, corner4, styleAttributes, false);
+  const edge4 = new Line(corner4, corner1, styleAttributes, false);
   return [edge1, edge2, edge3, edge4];
 };
 
@@ -298,6 +299,7 @@ export const relativePathToAbsolutePath = (
   let lastAbsolutePoint: Coordinates = [0, 0];
   const drawPathWithAbsolutePoints = drawPath.reduce(
     (acc: SVGDrawPath[], innerDrawPath): SVGDrawPath[] => {
+      console.log('acc', acc, 'curr', innerDrawPath);
       if (!Array.isArray(innerDrawPath.points)) {
         return [
           ...acc,
@@ -310,8 +312,15 @@ export const relativePathToAbsolutePath = (
       if (relativeCommands.includes(innerDrawPath.command)) {
         const newDrawPathPoints = innerDrawPath.points.reduce(
           (allNewPoints: Coordinates[], point: Coordinates, index: number) => {
-            if (innerDrawPath.command === 'c' && index % 3 === 2) {
-              return [...allNewPoints];
+            if (innerDrawPath.command === 'c') {
+              if (index % 3 === 2) {
+                lastAbsolutePoint = [
+                  lastAbsolutePoint[0] + 1.05 * point[0],
+                  lastAbsolutePoint[1] + 1.05 * point[1],
+                ];
+                return [...allNewPoints, lastAbsolutePoint];
+              }
+              return allNewPoints;
             }
             if (index === 0) {
               lastAbsolutePoint = [
@@ -355,33 +364,49 @@ export const relativePathToAbsolutePath = (
 
 export const getPointsOfDrawPath = (drawPath: SVGDrawPath[]) => {
   return drawPath.reduce(
-    (acc: Array<Coordinates | string>, drawPath: SVGDrawPath) => {
-      if (!!drawPath.points) {
+    (acc: Array<Coordinates>, currentDrawPath: SVGDrawPath) => {
+      if (!currentDrawPath.points) {
         return acc;
       }
-      if (Array.isArray(drawPath.points)) {
-        return [...acc, ...drawPath.points];
+      if (Array.isArray(currentDrawPath.points)) {
+        if(singleDirectionCommands.includes(currentDrawPath.command)){
+          switch(currentDrawPath.command) {
+            case "H":
+            case "h": {
+              return  [...acc, [0,parseFloat(currentDrawPath.points[0] as unknown as string)]] as Coordinates[];
+            }
+            case "V":
+            case "v": {
+              return [...acc, [parseFloat(currentDrawPath.points[0] as unknown as string),0]] as Coordinates[];
+            }
+          }
+        }
       }
-      return [...acc, drawPath.points];
+      return [...acc, currentDrawPath.points as Coordinates];
     },
     []
   );
 };
 
+export const splitCoordinate = (acc: [number[], number[]], point:string | Coordinates) => {
+  return [
+    [...acc[0], point[0]],
+    [...acc[1], point[1]],
+  ] as [number[], number[]];
+}
+
+export const splitAllCoordinates = (coordinates: string|Coordinates[])
+
 export const getPathBoundaries = (
   drawPath: SVGDrawPath[]
 ): BoundaryCoordinates => {
   const absoluteDrawPath = relativePathToAbsolutePath(drawPath);
+  console.log('absoluteDrawPath', absoluteDrawPath);
   const absolutePointsOfDrawPath = getPointsOfDrawPath(absoluteDrawPath);
-  const [xCoords, yCoords] = absolutePointsOfDrawPath.reduce(
-    (acc: [number[], number[]], point) => {
-      return [
-        [...acc[0], point[0]],
-        [...acc[1], point[1]],
-      ] as [number[], number[]];
-    },
-    [[], []]
-  );
+  console.log('absolutePointsOfDrawPath', absolutePointsOfDrawPath);
+  const [xCoords, yCoords] = absolutePointsOfDrawPath.reduce(splitCoordinate, [[], []]);
+  console.log(xCoords);
+  console.log(yCoords);
   const xMin = Math.min(...xCoords);
   const yMin = Math.min(...yCoords);
   const xMax = Math.max(...xCoords);
@@ -403,3 +428,26 @@ export const sumOfCoordinates =
       coordinates1[1] + coordinates2[1],
     ];
   };
+
+export const rectangleParamsFromBoundaries = (
+  boundaries: BoundaryCoordinates
+) => {
+  const [xCoordinates, yCoordinates] = Array.from(
+    new Set(
+      boundaries.reduce(
+        (acc: [number[], number[]], curr: Coordinates) => {
+          return [
+            [...acc[0], curr[0]],
+            [...acc[1], curr[1]],
+          ];
+        },
+        [[], []]
+      )
+    )
+  ).sort((a, b) => a - b);
+  const startingPoint = [
+    valuesOfBoundaryCoordinates[0],
+    valuesOfBoundaryCoordinates[1],
+  ];
+  const width = valuesOfBoundaryCoordinates[0];
+};

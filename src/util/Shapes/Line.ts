@@ -16,12 +16,12 @@ export class Line extends Shape {
     startPoint: Coordinates,
     endPoint: Coordinates,
     styleAttributes?: Partial<SVGParamsBase>,
-    dontCountUp?: boolean
+    countShapeCountUp?: boolean
   ) {
     super(
       getLineBoundaries(startPoint, endPoint),
       styleAttributes,
-      dontCountUp
+      countShapeCountUp
     );
     this.points = [startPoint, endPoint];
     this.#center = [
