@@ -299,7 +299,6 @@ export const relativePathToAbsolutePath = (
   let lastAbsolutePoint: Coordinates = [0, 0];
   const drawPathWithAbsolutePoints = drawPath.reduce(
     (acc: SVGDrawPath[], innerDrawPath): SVGDrawPath[] => {
-      console.log('acc', acc, 'curr', innerDrawPath);
       if (!Array.isArray(innerDrawPath.points)) {
         return [
           ...acc,

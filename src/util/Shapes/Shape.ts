@@ -12,6 +12,13 @@ export abstract class Shape {
   #id?: string;
   #stroke?: string;
   #strokeWidth?: string;
+  #matrix?: string;
+  #skewX?: string;
+  #skewY?: string;
+  #translate?: string;
+  #rotate?: string;
+  #scale?: string;
+
   boundaries: BoundaryCoordinates;
   index: number = 0;
 
@@ -26,7 +33,7 @@ export abstract class Shape {
     styleAttributes: Partial<SVGParamsBase> = {
       stroke: '#000000',
       fill: 'rgba(0,0,0,0)',
-      strokeWidth: '2',
+      strokeWidth: '1',
     },
 
     countShapecountUp: boolean = true
@@ -39,7 +46,12 @@ export abstract class Shape {
     this.#fill = styleAttributes.fill;
     this.#stroke = styleAttributes.stroke;
     this.#strokeWidth = styleAttributes.strokeWidth;
-
+    this.#matrix = styleAttributes.matrix;
+    this.#skewX = styleAttributes.skewX;
+    this.#skewY = styleAttributes.skewY;
+    this.#translate = styleAttributes.translate;
+    this.#rotate = styleAttributes.rotate;
+    this.#scale = styleAttributes.scale;
     this.boundaries = boundaries;
     this.index = Shape.#counter;
   }
@@ -69,6 +81,12 @@ export abstract class Shape {
       fill: this.#fill,
       stroke: this.#stroke,
       strokeWidth: this.#strokeWidth,
+      matrix: this.#matrix,
+      skewX: this.#skewX,
+      skewY: this.#skewY,
+      translate: this.#translate,
+      rotate: this.#rotate,
+      scale: this.#scale,
     };
   };
 

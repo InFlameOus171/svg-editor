@@ -22,6 +22,12 @@ export type SVGParamsBase = {
   fill?: string;
   stroke?: string;
   strokeWidth?: string;
+  matrix?: string;
+  skewX?: string;
+  skewY?: string;
+  translate?: string;
+  rotate?: string;
+  scale?: string;
 };
 
 export type EllipseSVGParams = SVGParamsBase & {

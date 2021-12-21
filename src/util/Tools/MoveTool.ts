@@ -73,6 +73,7 @@ export class MoveTool extends Tool<ShapeType> {
       const { startingCorner, width, height } = rectangleParamsFromBoundaries(
         this.currentShape.boundaries
       );
+      this.#drawOnPreview(this.currentShape);
       this.#drawOnPreview(
         new Rectangle(startingCorner, width, height, {
           stroke: 'red',
@@ -80,7 +81,6 @@ export class MoveTool extends Tool<ShapeType> {
         })
       );
       this.highlightPreview();
-      this.#drawOnPreview(this.currentShape);
     }
   };
 

@@ -15,12 +15,9 @@ import { Freehand } from '../Shapes/Freehand';
 import { Line } from '../Shapes/Line';
 import { Path } from '../Shapes/Path';
 import { Rectangle } from '../Shapes/Rectangle';
+import { pathCommandsRegExp } from './regularExpressions';
 import { typeOfShape } from './typeguards';
-import {
-  pathCommandsRegExp,
-  pathCommandValues,
-  singleDirectionCommands,
-} from './util';
+import { pathCommandValues, singleDirectionCommands } from './util';
 
 export const createRect = (
   x: number,
@@ -187,7 +184,6 @@ export const getPathCommands = (d: string) => {
 export const convertMatchesToSVGDrawPath = (
   match: RegExpMatchArray
 ): SVGDrawPath => {
-  console.log(match);
   const command = match[0].trim();
   const matchedCoordinates = match.slice(1);
   if (singleDirectionCommands.includes(command)) {

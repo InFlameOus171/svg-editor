@@ -31,14 +31,12 @@ export class Path extends Shape {
         ]),
       };
     });
-    console.log(offset);
     this.boundaries = getPathBoundaries(this.drawPath);
     const sumOfBoundaries = this.boundaries.reduce(
       (acc, curr) => sumOfCoordinates(acc)(curr),
       [0, 0]
     );
     this.#center = [sumOfBoundaries[0] / 4, sumOfBoundaries[1] / 4];
-    console.log(this.boundaries, this.#center);
     this.offset = offset;
   }
 
@@ -82,7 +80,6 @@ export class Path extends Shape {
       },
       false
     );
-    console.log(newPath.#center, newPath.toSVGPathParams);
     this.#center = newPath.getCenter();
     this.boundaries = newPath.boundaries;
     this.drawPath = newPath.drawPath;

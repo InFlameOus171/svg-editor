@@ -4,7 +4,17 @@ import { FlattenedElement, Partition } from '../../types/util.types';
 import { Ellipse } from '../Shapes/Ellipse';
 import { Freehand } from '../Shapes/Freehand';
 import { Line } from '../Shapes/Line';
+import { Path } from '../Shapes/Path';
 import { Rectangle } from '../Shapes/Rectangle';
+import {
+  matrixRegExp,
+  rotateRegExp,
+  scaleRegExp,
+  skewXRegExp,
+  skewYRegExp,
+  translateRegExp,
+} from './regularExpressions';
+import { getPathCommands } from './shapes';
 
 export const partition = <T>(
   array: Array<T>,
@@ -63,8 +73,6 @@ export const elementArrayToObject = (elements: Element[]) =>
     return { ...acc, [elem.tagName]: [...(acc[elem.tagName] ?? []), elem] };
   }, {});
 
-const translateRegExp = new RegExp(/(?<=translate)\((\w*) (\w*)\)/);
-
 export const flattenElementsAndCalculateOffset = (
   element: Element,
   elementOffset: [number, number] = [0, 0]
@@ -93,13 +101,7 @@ export const flattenElementsAndCalculateOffset = (
   }
 };
 
-const acceptedTags = [
-  'circle',
-  'ellipse',
-  'rect',
-  'polyline',
-  'line' /* 'path' */,
-];
+const acceptedTags = ['circle', 'ellipse', 'rect', 'polyline', 'line', 'path'];
 
 const isShapeElement = (flattenedElement: FlattenedElement) => {
   return acceptedTags.includes(flattenedElement.element.tagName);
@@ -113,7 +115,25 @@ const getStyleAttributes = (element: Element) => {
   const fill = element.getAttribute('fill') ?? '';
   const stroke = element.getAttribute('stroke') ?? '';
   const strokeWidth = element.getAttribute('stroke-width') ?? '';
-  return { fill, stroke, strokeWidth };
+  const transform = element.getAttribute('transform') ?? '';
+  const matrix = matrixRegExp.exec(transform)?.shift();
+  console.log(matrixRegExp, transform);
+  const rotate = rotateRegExp.exec(transform)?.shift();
+  const scale = scaleRegExp.exec(transform)?.shift();
+  const skewX = skewXRegExp.exec(transform)?.shift();
+  const skewY = skewYRegExp.exec(transform)?.shift();
+  const translate = translateRegExp.exec(transform)?.shift();
+  return {
+    fill,
+    stroke,
+    strokeWidth,
+    matrix,
+    rotate,
+    scale,
+    skewX,
+    skewY,
+    translate,
+  };
 };
 
 const convertToShapeType = ({ element, elementOffset }: FlattenedElement) => {
@@ -164,30 +184,20 @@ const convertToShapeType = ({ element, elementOffset }: FlattenedElement) => {
         return new Line([x1, y1], [x2, y2], styleAttributes);
       }
     }
+    case acceptedTags[5]: {
+      const pathDString = element.getAttribute('d') ?? '';
+      const pathCommands = getPathCommands(pathDString);
+      return new Path(pathCommands, styleAttributes, true, elementOffset);
+    }
   }
 };
 
-type ReturnType = [FlattenedElement[], FlattenedElement[]];
-
-export const getConvertedSVGShapes = (
-  element: Element
-): { shapes: ShapeType[]; paths: FlattenedElement[] } => {
+export const convertElementToShapeType = (element: Element): ShapeType[] => {
   const useableElements = flattenElementsAndCalculateOffset(element);
-  const [shapeElements, pathElements] = useableElements.reduce(
-    (acc: ReturnType, elem): ReturnType => {
-      if (isShapeElement(elem)) {
-        return [[...acc[0], elem], [...acc[1]]];
-      }
-      return [[...acc[0]], [...acc[1], elem]];
-    },
-    [[], []]
-  );
-  return {
-    shapes: shapeElements
-      .map(convertToShapeType)
-      .filter(value => value !== undefined) as ShapeType[],
-    paths: pathElements,
-  };
+  const shapeElements = useableElements.filter(isShapeElement);
+  return shapeElements
+    .map(convertToShapeType)
+    .filter(value => value !== undefined) as ShapeType[];
 };
 
 export const relativeCoordinatesCommands = [
@@ -235,6 +245,3 @@ export const pathCommandValues = [
   ...absoluteCoordinatesCommands,
   ...singleDirectionCommands,
 ];
-
-// Reads path string and groups each match in three groups: 1st: path command, 2nd: x coordinate and y coordinates "x,y"
-export const pathCommandsRegExp = new RegExp(/(-?\d+\.?\d*)|[a-zA-Z]/g);
