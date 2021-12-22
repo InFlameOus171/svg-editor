@@ -19,7 +19,8 @@ export class ImportTool extends Tool<ShapeType> {
 
   drawSvg = (svg: Document) => {
     if (svg.firstChild) {
-      const appendedSvg = document.body.appendChild(svg.firstChild);
+      // TODO document not appendable ?
+      const appendedSvg = document.body.appendChild(svg);
       const shapes = convertSVGDocumentToShapes(appendedSvg);
       document.body.removeChild(appendedSvg);
       this.allShapes.push(...shapes);
