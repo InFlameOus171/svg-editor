@@ -9,26 +9,21 @@ import { Shape } from './Shape';
 
 export class Path extends Shape {
   drawPath: SVGDrawPath[];
-  offset: Coordinates;
   #center: Coordinates = [-1, -1];
 
   constructor(
     drawPath: SVGDrawPath[],
-    styleAttributes?: Partial<SVGParamsBase>,
-    dontCountUp?: boolean,
-    offset: Coordinates = [0, 0]
+    svgParams?: Partial<SVGParamsBase>,
+    dontCountUp?: boolean
   ) {
-    super(undefined, styleAttributes, dontCountUp);
+    super(undefined, svgParams, dontCountUp);
     this.drawPath = drawPath.map(path => {
       if (singleDirectionCommands.includes(path.command)) {
         return { command: path.command, points: path.points };
       }
       return {
         command: path.command,
-        points: (path.points as Array<Coordinates>)?.map(point => [
-          point[0] + offset[0],
-          point[1] + offset[1],
-        ]),
+        points: path.points,
       };
     });
     this.boundaries = getPathBoundaries(this.drawPath);
@@ -37,7 +32,6 @@ export class Path extends Shape {
       [0, 0]
     );
     this.#center = [sumOfBoundaries[0] / 4, sumOfBoundaries[1] / 4];
-    this.offset = offset;
   }
 
   getCenter: () => Coordinates = () => {

@@ -1,4 +1,3 @@
-import './types/global.types';
 import './components/templates/SvgEditor';
 import './components/organisms/EditorLayout';
 import './components/atoms/ToolboxButton';

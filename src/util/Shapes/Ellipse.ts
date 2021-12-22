@@ -15,12 +15,12 @@ export class Ellipse extends Shape {
     center: Coordinates,
     radiusX: number,
     radiusY: number,
-    styleAttributes?: Partial<SVGParamsBase>,
+    svgParams?: Partial<SVGParamsBase>,
     dontCountUp?: boolean
   ) {
     super(
       getCircleBoundaries(center, radiusX, radiusY),
-      styleAttributes,
+      svgParams,
       dontCountUp
     );
     this.#center = center;

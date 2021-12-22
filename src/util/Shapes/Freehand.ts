@@ -12,10 +12,10 @@ export class Freehand extends Shape {
 
   constructor(
     points: Coordinates[],
-    styleAttributes?: Partial<SVGParamsBase>,
+    svgParams?: Partial<SVGParamsBase>,
     countShapecountUp?: boolean
   ) {
-    super(getFreehandBoundaries(points), styleAttributes, countShapecountUp);
+    super(getFreehandBoundaries(points), svgParams, countShapecountUp);
     this.#points = points;
     this.#updateCenter();
   }

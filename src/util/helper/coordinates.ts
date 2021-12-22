@@ -19,17 +19,17 @@ import {
 export const getEdgesFromPoints = (
   startPoint: Coordinates,
   endPoint: Coordinates,
-  styleAttributes?: Partial<SVGParamsBase>,
+  svgParams?: Partial<SVGParamsBase>,
   countShapecountUp?: boolean
 ): RectangleComponents => {
   const corner1: Coordinates = startPoint;
   const corner2: Coordinates = [endPoint[0], startPoint[1]];
   const corner3: Coordinates = endPoint;
   const corner4: Coordinates = [startPoint[0], endPoint[1]];
-  const edge1 = new Line(corner1, corner2, styleAttributes, countShapecountUp);
-  const edge2 = new Line(corner2, corner3, styleAttributes, false);
-  const edge3 = new Line(corner3, corner4, styleAttributes, false);
-  const edge4 = new Line(corner4, corner1, styleAttributes, false);
+  const edge1 = new Line(corner1, corner2, svgParams, countShapecountUp);
+  const edge2 = new Line(corner2, corner3, svgParams, false);
+  const edge3 = new Line(corner3, corner4, svgParams, false);
+  const edge4 = new Line(corner4, corner1, svgParams, false);
   return [edge1, edge2, edge3, edge4];
 };
 
@@ -77,7 +77,7 @@ export const calculateDistanceBetweenPoints = (
 export const generateEllipse = (
   startCoordinates: [number, number],
   endCoordinates: [number, number],
-  styleAttributes?: Partial<SVGParamsBase>,
+  svgParams?: Partial<SVGParamsBase>,
   countShapecountUp?: boolean
 ) => {
   const center: Coordinates = [
@@ -92,19 +92,13 @@ export const generateEllipse = (
     (startCoordinates[0] + endCoordinates[0]) / 2,
     endCoordinates[1],
   ]);
-  return new Ellipse(
-    center,
-    radiusX,
-    radiusY,
-    styleAttributes,
-    countShapecountUp
-  );
+  return new Ellipse(center, radiusX, radiusY, svgParams, countShapecountUp);
 };
 
 export const generateCircle = (
   startCoordinates: [number, number],
   endCoordinates: [number, number],
-  styleAttributes?: Partial<SVGParamsBase>,
+  svgParams?: Partial<SVGParamsBase>,
   countShapecountUp?: boolean
 ) => {
   const center: Coordinates = startCoordinates;
@@ -112,13 +106,7 @@ export const generateCircle = (
     startCoordinates,
     endCoordinates
   );
-  return new Ellipse(
-    center,
-    radius,
-    radius,
-    styleAttributes,
-    countShapecountUp
-  );
+  return new Ellipse(center, radius, radius, svgParams, countShapecountUp);
 };
 
 export const calculateVectorFromCoordinates = (

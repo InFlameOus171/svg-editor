@@ -22,12 +22,7 @@ export type SVGParamsBase = {
   fill?: string;
   stroke?: string;
   strokeWidth?: string;
-  matrix?: string;
-  skewX?: string;
-  skewY?: string;
-  translate?: string;
-  rotate?: string;
-  scale?: string;
+  transformMatrix?: DOMMatrix;
 };
 
 export type EllipseSVGParams = SVGParamsBase & {
@@ -67,3 +62,5 @@ export type SVGDrawPath = {
   command: string;
   points?: Coordinates[] | string;
 };
+
+export type Matrix = [number, number, number, number, number, number];

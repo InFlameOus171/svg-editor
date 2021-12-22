@@ -11,23 +11,23 @@ import { Rectangle } from './Shapes/Rectangle';
 const Pen = {
   generatePen: (context?: CanvasRenderingContext2D) => {
     return {
-      draw: (shape: ShapeType, styleAttributes?: Partial<SVGParamsBase>) => {
+      draw: (shape: ShapeType, svgParams?: Partial<SVGParamsBase>) => {
         const shapeType = typeOfShape(shape);
         switch (shapeType) {
           case 'Ellipse':
-            Pen.drawEllipse(shape as Ellipse, context, styleAttributes);
+            Pen.drawEllipse(shape as Ellipse, context, svgParams);
             break;
           case 'Rectangle':
-            Pen.drawRectangle(shape as Rectangle, context, styleAttributes);
+            Pen.drawRectangle(shape as Rectangle, context, svgParams);
             break;
           case 'Line':
-            Pen.drawLine(shape as Line, context, styleAttributes);
+            Pen.drawLine(shape as Line, context, svgParams);
             break;
           case 'Freehand':
-            Pen.drawFreehand(shape as Freehand, context, styleAttributes);
+            Pen.drawFreehand(shape as Freehand, context, svgParams);
             break;
           case 'Path':
-            Pen.drawPath(shape as Path, context, styleAttributes);
+            Pen.drawPath(shape as Path, context, svgParams);
         }
       },
     };
@@ -36,19 +36,9 @@ const Pen = {
   setStyles: (
     pathConstructor: Path2D,
     context: CanvasRenderingContext2D,
-    styleAttributes: Partial<SVGParamsBase>
+    svgParams: Partial<SVGParamsBase>
   ) => {
-    const {
-      fill,
-      stroke,
-      strokeWidth,
-      matrix,
-      scale,
-      translate,
-      skewX,
-      skewY,
-      rotate,
-    } = styleAttributes;
+    const { fill, stroke, strokeWidth, transformMatrix } = svgParams;
     if (fill) {
       context.fillStyle = fill;
     }
@@ -58,24 +48,12 @@ const Pen = {
     if (strokeWidth) {
       context.lineWidth = parseFloat(strokeWidth);
     }
-    if (matrix) {
-      const matrixValues = matrix.match(decimalNumberRegExpGlobal);
-      if (matrixValues) {
-        const domMatrix = new DOMMatrix(matrixValues.map(parseFloat));
-        pathConstructor.addPath(new Path2D(), domMatrix);
-      }
+    if (transformMatrix) {
+      pathConstructor.addPath(new Path2D(), transformMatrix);
     }
     context.lineWidth = strokeWidth ? parseFloat(strokeWidth) : 1;
     if (stroke && stroke !== 'null') {
       context.strokeStyle = stroke;
-    }
-    if (scale) {
-      const coordinates = scale.match(decimalNumberRegExpGlobal);
-      const x = coordinates?.[0] ?? '1';
-      const y = coordinates?.[1] ?? '1';
-      if (x && y) {
-        context.scale(parseFloat(x), parseFloat(y));
-      }
     }
     if (fill && fill !== 'none') {
       context.fillStyle = fill;
@@ -93,24 +71,16 @@ const Pen = {
   drawPath: (
     path: Path,
     context?: CanvasRenderingContext2D,
-    styleAttributes?: Partial<SVGParamsBase>
+    svgParams?: Partial<SVGParamsBase>
   ) => {
     const pathConstructor = new Path2D();
-    pathConstructor.moveTo(path.offset[0], path.offset[1]);
     pathConstructor.addPath(new Path2D(path.toString()));
 
     if (context) {
-      const {
-        fill,
-        stroke,
-        strokeWidth,
-        matrix,
-        scale,
-        translate,
-        skewX,
-        skewY,
-        rotate,
-      } = { ...path.getStyleAttributes(), ...styleAttributes };
+      const { fill, stroke, strokeWidth, transformMatrix } = {
+        ...path.getsvgParams(),
+        ...svgParams,
+      };
       if (fill) {
         context.fillStyle = fill;
       }
@@ -120,12 +90,9 @@ const Pen = {
       if (strokeWidth) {
         context.lineWidth = parseFloat(strokeWidth);
       }
-      if (matrix) {
-        const matrixValues = matrix.match(decimalNumberRegExpGlobal);
-        if (matrixValues) {
-          const domMatrix = new DOMMatrix(matrixValues.map(parseFloat));
-          pathConstructor.addPath(new Path2D(), domMatrix);
-        }
+      if (transformMatrix) {
+        pathConstructor.addPath(new Path2D(), transformMatrix);
+        console.log(transformMatrix, path);
       }
       context.lineWidth = strokeWidth ? parseFloat(strokeWidth) : 1;
       if (stroke && stroke !== 'null') {
@@ -149,23 +116,16 @@ const Pen = {
   drawFreehand: (
     freehand: Freehand,
     context?: CanvasRenderingContext2D,
-    styleAttributes?: Partial<SVGParamsBase>
+    svgParams?: Partial<SVGParamsBase>
   ) => {
     const path = new Path2D();
     const points = freehand.getPoints();
     const start = points[0];
     const rest = points.slice(1);
-    const {
-      fill,
-      stroke,
-      strokeWidth,
-      matrix,
-      scale,
-      translate,
-      skewX,
-      skewY,
-      rotate,
-    } = { ...freehand.getStyleAttributes(), ...styleAttributes };
+    const { fill, stroke, strokeWidth, transformMatrix } = {
+      ...freehand.getsvgParams(),
+      ...svgParams,
+    };
     if (context) {
       if (fill) {
         context.fillStyle = fill;
@@ -176,15 +136,8 @@ const Pen = {
       if (strokeWidth) {
         context.lineWidth = parseFloat(strokeWidth);
       }
-      console.log(matrix);
-      if (matrix) {
-        const matrixValues = decimalNumberRegExpGlobal.exec(matrix);
-        if (matrixValues) {
-          console.log(matrixValues);
-        }
-        return;
-        // const domMatrix = new DOMMatrix(matrixValues);
-        // path.addPath(new Path2D(), matrix);
+      if (transformMatrix) {
+        path.addPath(new Path2D(), transformMatrix);
       }
       path.moveTo(...start);
       rest.forEach(point => {
@@ -198,7 +151,7 @@ const Pen = {
   drawLine: (
     line: Line,
     context?: CanvasRenderingContext2D,
-    styleAttributes?: Partial<SVGParamsBase>
+    svgParams?: Partial<SVGParamsBase>
   ) => {
     const path = new Path2D();
     path.moveTo(...line.points[0]);
@@ -210,7 +163,7 @@ const Pen = {
   drawRectangle: (
     rectangle: Rectangle,
     context?: CanvasRenderingContext2D,
-    styleAttributes?: Partial<SVGParamsBase>
+    svgParams?: Partial<SVGParamsBase>
   ) => {
     const path = new Path2D();
     const values = Object.values(rectangle.toPathParams()) as [
@@ -227,7 +180,7 @@ const Pen = {
   drawEllipse: (
     ellipse: Ellipse,
     context?: CanvasRenderingContext2D,
-    styleAttributes?: Partial<SVGParamsBase>
+    svgParams?: Partial<SVGParamsBase>
   ) => {
     const path = new Path2D();
     const values = Object.values(ellipse.toPathParams()) as [

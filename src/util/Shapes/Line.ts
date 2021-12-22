@@ -15,12 +15,12 @@ export class Line extends Shape {
   constructor(
     startPoint: Coordinates,
     endPoint: Coordinates,
-    styleAttributes?: Partial<SVGParamsBase>,
+    svgParams?: Partial<SVGParamsBase>,
     countShapeCountUp?: boolean
   ) {
     super(
       getLineBoundaries(startPoint, endPoint),
-      styleAttributes,
+      svgParams,
       countShapeCountUp
     );
     this.points = [startPoint, endPoint];

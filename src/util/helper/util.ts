@@ -1,5 +1,5 @@
 import { ShapeType } from '../../types/shapes';
-import { BoundaryCoordinates, Coordinates } from '../../types/types';
+import { BoundaryCoordinates, Coordinates, Matrix } from '../../types/types';
 import { FlattenedElement, Partition } from '../../types/util.types';
 import { Ellipse } from '../Shapes/Ellipse';
 import { Freehand } from '../Shapes/Freehand';
@@ -73,34 +73,6 @@ export const elementArrayToObject = (elements: Element[]) =>
     return { ...acc, [elem.tagName]: [...(acc[elem.tagName] ?? []), elem] };
   }, {});
 
-export const flattenElementsAndCalculateOffset = (
-  element: Element,
-  elementOffset: [number, number] = [0, 0]
-): FlattenedElement[] => {
-  const children: Element[] = arrayFrom(element.children);
-  if (!!children.length) {
-    return children.reduce((acc: FlattenedElement[], innerElement: Element) => {
-      const translate = innerElement
-        .getAttribute('transform')
-        ?.match(translateRegExp);
-      const offset = [parseFloat(translate?.[1]), parseFloat(translate?.[2])];
-
-      const addedOffset: [number, number] = [
-        elementOffset[0] + offset[0],
-        elementOffset[1] + offset[1],
-      ];
-
-      const result = flattenElementsAndCalculateOffset(
-        innerElement,
-        addedOffset
-      );
-      return [...acc, ...result];
-    }, []);
-  } else {
-    return [{ element, elementOffset }];
-  }
-};
-
 const acceptedTags = ['circle', 'ellipse', 'rect', 'polyline', 'line', 'path'];
 
 const isShapeElement = (flattenedElement: FlattenedElement) => {
@@ -111,57 +83,45 @@ Element.prototype.getFloatAttribute = function (attribute: string) {
   return parseFloat(this.getAttribute(attribute));
 };
 
-const getStyleAttributes = (element: Element) => {
+const getsvgParams = (element: SVGGraphicsElement) => {
   const fill = element.getAttribute('fill') ?? '';
   const stroke = element.getAttribute('stroke') ?? '';
   const strokeWidth = element.getAttribute('stroke-width') ?? '';
-  const transform = element.getAttribute('transform') ?? '';
-  const matrix = matrixRegExp.exec(transform)?.shift();
-  console.log(matrixRegExp, transform);
-  const rotate = rotateRegExp.exec(transform)?.shift();
-  const scale = scaleRegExp.exec(transform)?.shift();
-  const skewX = skewXRegExp.exec(transform)?.shift();
-  const skewY = skewYRegExp.exec(transform)?.shift();
-  const translate = translateRegExp.exec(transform)?.shift();
+  const transformMatrix = element.getCTM() ?? undefined;
+  console.log(element.getCTM(), element.getScreenCTM());
   return {
     fill,
     stroke,
     strokeWidth,
-    matrix,
-    rotate,
-    scale,
-    skewX,
-    skewY,
-    translate,
+    transformMatrix,
   };
 };
 
-const convertToShapeType = ({ element, elementOffset }: FlattenedElement) => {
-  const [dx, dy] = elementOffset;
-  const styleAttributes = getStyleAttributes(element);
+const convertToShapeType = (element: SVGGraphicsElement): ShapeType => {
+  const svgParams = getsvgParams(element);
   switch (element.tagName) {
     case acceptedTags[0]: {
-      const cx = element.getFloatAttribute('cx') + dx;
-      const cy = element.getFloatAttribute('cy') + dy;
+      const cx = element.getFloatAttribute('cx');
+      const cy = element.getFloatAttribute('cy');
       const r = element.getFloatAttribute('r');
-      return new Ellipse([cx, cy], r, r, styleAttributes);
+      return new Ellipse([cx, cy], r, r, svgParams);
     }
     case acceptedTags[1]: {
       {
-        const cx = element.getFloatAttribute('cx') + dx;
-        const cy = element.getFloatAttribute('cy') + dy;
+        const cx = element.getFloatAttribute('cx');
+        const cy = element.getFloatAttribute('cy');
         const rx = element.getFloatAttribute('rx');
         const ry = element.getFloatAttribute('ry');
-        return new Ellipse([cx, cy], rx, ry, styleAttributes);
+        return new Ellipse([cx, cy], rx, ry, svgParams);
       }
     }
     case acceptedTags[2]: {
       {
-        const x = element.getFloatAttribute('x') + dx;
-        const y = element.getFloatAttribute('y') + dy;
+        const x = element.getFloatAttribute('x');
+        const y = element.getFloatAttribute('y');
         const width = element.getFloatAttribute('width');
         const height = element.getFloatAttribute('height');
-        return new Rectangle([x, y], width, height, styleAttributes);
+        return new Rectangle([x, y], width, height, svgParams);
       }
     }
     case acceptedTags[3]: {
@@ -172,7 +132,7 @@ const convertToShapeType = ({ element, elementOffset }: FlattenedElement) => {
             const [x, y] = coordinate.split(',');
             return [parseFloat(x), parseFloat(y)];
           });
-        return new Freehand(points, styleAttributes);
+        return new Freehand(points, svgParams);
       }
     }
     case acceptedTags[4]: {
@@ -181,23 +141,47 @@ const convertToShapeType = ({ element, elementOffset }: FlattenedElement) => {
         const x2 = element.getFloatAttribute('x2');
         const y1 = element.getFloatAttribute('y1');
         const y2 = element.getFloatAttribute('y2');
-        return new Line([x1, y1], [x2, y2], styleAttributes);
+        return new Line([x1, y1], [x2, y2], svgParams);
       }
     }
-    case acceptedTags[5]: {
+    default: {
       const pathDString = element.getAttribute('d') ?? '';
       const pathCommands = getPathCommands(pathDString);
-      return new Path(pathCommands, styleAttributes, true, elementOffset);
+      return new Path(pathCommands, svgParams, true);
     }
   }
 };
 
-export const convertElementToShapeType = (element: Element): ShapeType[] => {
-  const useableElements = flattenElementsAndCalculateOffset(element);
-  const shapeElements = useableElements.filter(isShapeElement);
-  return shapeElements
-    .map(convertToShapeType)
-    .filter(value => value !== undefined) as ShapeType[];
+export const getAllSVGShapesFromElement = (element: Element) => {
+  element;
+};
+
+export const convertSVGDocumentToShapes = (svg: Document): ShapeType[] => {
+  return acceptedTags
+    .map(tag =>
+      (Array.from(svg.getElementsByTagName(tag)) as SVGGraphicsElement[]).map(
+        convertToShapeType
+      )
+    )
+    .flat();
+};
+
+// ref: https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/transform
+export const transformCoordinatesByMatrix =
+  (matrix: Matrix) =>
+  (coordinates: Coordinates): Coordinates => {
+    const [a, b, c, d, e, f] = matrix;
+    const [oldX, oldY] = coordinates;
+    const newX = a * oldX + c * oldX + e;
+    const newY = b * oldY + d * oldY + f;
+    return [newX, newY];
+  };
+
+export const transformAllCoordinatesByMatrix = (
+  matrix: Matrix,
+  coordinates: Coordinates[]
+) => {
+  return coordinates.map(transformCoordinatesByMatrix(matrix));
 };
 
 export const relativeCoordinatesCommands = [

@@ -11,12 +11,12 @@ export class Rectangle extends Shape {
     startingCorner: Coordinates,
     width: number,
     height: number,
-    styleAttributes?: Partial<SVGParamsBase>,
+    svgParams?: Partial<SVGParamsBase>,
     isPreview?: boolean
   ) {
     super(
       getRectBoundaries(startingCorner, width, height),
-      styleAttributes,
+      svgParams,
       isPreview
     );
     this.#startingCorner = startingCorner;

@@ -12,12 +12,7 @@ export abstract class Shape {
   #id?: string;
   #stroke?: string;
   #strokeWidth?: string;
-  #matrix?: string;
-  #skewX?: string;
-  #skewY?: string;
-  #translate?: string;
-  #rotate?: string;
-  #scale?: string;
+  #transformMatrix?: DOMMatrix;
 
   boundaries: BoundaryCoordinates;
   index: number = 0;
@@ -30,7 +25,7 @@ export abstract class Shape {
       [-1, -1],
     ],
 
-    styleAttributes: Partial<SVGParamsBase> = {
+    svgParams: Partial<SVGParamsBase> = {
       stroke: '#000000',
       fill: 'rgba(0,0,0,0)',
       strokeWidth: '1',
@@ -43,15 +38,10 @@ export abstract class Shape {
       this.#id = nanoid();
     }
 
-    this.#fill = styleAttributes.fill;
-    this.#stroke = styleAttributes.stroke;
-    this.#strokeWidth = styleAttributes.strokeWidth;
-    this.#matrix = styleAttributes.matrix;
-    this.#skewX = styleAttributes.skewX;
-    this.#skewY = styleAttributes.skewY;
-    this.#translate = styleAttributes.translate;
-    this.#rotate = styleAttributes.rotate;
-    this.#scale = styleAttributes.scale;
+    this.#fill = svgParams.fill;
+    this.#stroke = svgParams.stroke;
+    this.#strokeWidth = svgParams.strokeWidth;
+    this.#transformMatrix = svgParams.transformMatrix;
     this.boundaries = boundaries;
     this.index = Shape.#counter;
   }
@@ -76,17 +66,12 @@ export abstract class Shape {
     return this.#fill;
   };
 
-  getStyleAttributes = () => {
+  getsvgParams = () => {
     return {
       fill: this.#fill,
       stroke: this.#stroke,
       strokeWidth: this.#strokeWidth,
-      matrix: this.#matrix,
-      skewX: this.#skewX,
-      skewY: this.#skewY,
-      translate: this.#translate,
-      rotate: this.#rotate,
-      scale: this.#scale,
+      transformMatrix: this.#transformMatrix,
     };
   };
 

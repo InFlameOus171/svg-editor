@@ -1,7 +1,8 @@
 import { EditorLayout } from '../../components/organisms/EditorLayout';
 import { ShapeType } from '../../types/shapes';
 import { Coordinates } from '../../types/types';
-import { convertElementToShapeType } from '../helper/util';
+import { flattenSVG } from 'flatten-svg';
+import { convertSVGDocumentToShapes } from '../helper/util';
 import { Tool } from './Tool';
 
 export class ImportTool extends Tool<ShapeType> {
@@ -17,9 +18,13 @@ export class ImportTool extends Tool<ShapeType> {
   }
 
   drawSvg = (svg: Document) => {
-    const shapes = convertElementToShapeType(svg.documentElement);
-    this.allShapes.push(...shapes);
-    shapes.forEach(this.#draw);
+    if (svg.firstChild) {
+      const appendedSvg = document.body.appendChild(svg.firstChild);
+      const shapes = convertSVGDocumentToShapes(appendedSvg);
+      document.body.removeChild(appendedSvg);
+      this.allShapes.push(...shapes);
+      shapes.forEach(this.#draw);
+    }
   };
 
   destroy = () => {
