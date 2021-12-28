@@ -1,4 +1,5 @@
 import { Line } from '../util/Shapes/Line';
+import { SupportedStyles } from './globalStyles.types';
 
 declare global {
   interface Element {
@@ -18,10 +19,7 @@ export type BoundaryCoordinates = [
   Coordinates
 ];
 
-export type SVGParamsBase = {
-  fill?: string;
-  stroke?: string;
-  strokeWidth?: string;
+export type SVGParamsBase = SupportedStyles & {
   transformMatrix?: DOMMatrix;
 };
 

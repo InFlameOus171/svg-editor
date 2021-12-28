@@ -250,18 +250,30 @@ export const getFreehandBoundaries = (
 export const getRectBoundaries = (
   startingCorner: Coordinates,
   width: number,
-  height: number
+  height: number,
+  transformMatrix?: DOMMatrix
 ): BoundaryCoordinates => {
+  let domPoint = document
+    .createElementNS('http://www.w3.org/2000/svg', 'svg')
+    .createSVGPoint();
   const xMin = startingCorner[0];
   const yMax = startingCorner[1];
   const xMax = startingCorner[0] + width;
   const yMin = startingCorner[1] + height;
-  return [
+  const unformattedBoundary = [
     [xMin, yMin],
     [xMin, yMax],
     [xMax, yMin],
     [xMax, yMax],
   ];
+  return unformattedBoundary.map(boundaryCoordinates => {
+    domPoint.x = boundaryCoordinates[0];
+    domPoint.y = boundaryCoordinates[1];
+    if (transformMatrix) {
+      domPoint = domPoint.matrixTransform(transformMatrix);
+    }
+    return [domPoint.x, domPoint.y];
+  }) as BoundaryCoordinates;
 };
 
 export const getLineBoundaries = (
@@ -414,23 +426,37 @@ export const getMinMaxValuesOfCoordinates = (coordinates: Coordinates[]) => {
 };
 
 export const getBoundaryFromCoordinates = (
-  coordinates: Coordinates[]
+  coordinates: Coordinates[],
+  transformMatrix?: DOMMatrix
 ): BoundaryCoordinates => {
+  let domPoint = document
+    .createElementNS('http://www.w3.org/2000/svg', 'svg')
+    .createSVGPoint();
   const { xMin, xMax, yMin, yMax } = getMinMaxValuesOfCoordinates(coordinates);
-  return [
+
+  const unformattedBoundaryCoordinates = [
     [xMin, yMin],
     [xMax, yMin],
     [xMin, yMax],
     [xMax, yMax],
   ];
+  return unformattedBoundaryCoordinates.map(boundaryCoordinates => {
+    domPoint.x = boundaryCoordinates[0];
+    domPoint.y = boundaryCoordinates[1];
+    if (transformMatrix) {
+      domPoint = domPoint.matrixTransform(transformMatrix);
+    }
+    return [domPoint.x, domPoint.y];
+  }) as BoundaryCoordinates;
 };
 
 export const getPathBoundaries = (
-  drawPath: SVGDrawPath[]
+  drawPath: SVGDrawPath[],
+  transformMatrix?: DOMMatrix
 ): BoundaryCoordinates => {
   const absoluteDrawPath = relativePathToAbsolutePath(drawPath);
   const absolutePointsOfDrawPath = getPointsOfDrawPath(absoluteDrawPath);
-  return getBoundaryFromCoordinates(absolutePointsOfDrawPath);
+  return getBoundaryFromCoordinates(absolutePointsOfDrawPath, transformMatrix);
 };
 
 export const sumOfCoordinates =

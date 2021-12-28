@@ -15,7 +15,7 @@ export class Ellipse extends Shape {
     center: Coordinates,
     radiusX: number,
     radiusY: number,
-    svgParams?: Partial<SVGParamsBase>,
+    svgParams?: SVGParamsBase,
     dontCountUp?: boolean
   ) {
     super(
@@ -51,9 +51,7 @@ export class Ellipse extends Shape {
     cy: this.#center[1].toString(),
     rx: this.radiusX.toString(),
     ry: this.radiusY.toString(),
-    fill: this.getFill(),
-    stroke: this.getStroke(),
-    strokeWidth: this.getStrokeWidth(),
+    ...this.styles,
   });
 
   toString = () => {

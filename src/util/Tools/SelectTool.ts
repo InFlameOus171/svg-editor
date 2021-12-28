@@ -67,7 +67,6 @@ export class SelectTool extends Tool<ShapeType> {
       this.#selectedShape = selectedShape;
 
       if (this.previewContext) {
-        this.highlightPreview();
         const shapeType = typeOfShape(selectedShape);
         const { startingCorner, width, height } = rectangleParamsFromBoundaries(
           selectedShape.boundaries
@@ -75,7 +74,7 @@ export class SelectTool extends Tool<ShapeType> {
         this.drawTools['Rectangle'](
           new Rectangle(startingCorner, width, height, {
             stroke: 'red',
-            strokeWidth: '2',
+            'stroke-width': '2',
           }),
           this.previewContext
         );

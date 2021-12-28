@@ -35,6 +35,7 @@ export abstract class Tool<T extends ShapeType, V extends ShapeType = T> {
       this.context.strokeStyle = '#000000';
       this.context.lineWidth = 2;
       this.context.fillStyle = '#000000';
+      renderingContext.save();
     }
     const previewContext = this.previewLayer?.getContext('2d');
     if (previewContext) {
@@ -42,6 +43,7 @@ export abstract class Tool<T extends ShapeType, V extends ShapeType = T> {
       this.previewContext.strokeStyle = '#000000';
       this.previewContext.lineWidth = 2;
       this.previewContext.fillStyle = '#000000';
+      previewContext.save();
     }
   }
 

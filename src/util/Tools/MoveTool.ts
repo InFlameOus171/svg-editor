@@ -1,6 +1,6 @@
 import { EditorLayout } from '../../components/organisms/EditorLayout';
 import { ShapeType, Shapes, Tools_List } from '../../types/shapes';
-import { Coordinates } from '../../types/types';
+import { Coordinates, SVGParamsBase } from '../../types/types';
 import {
   isPointInsideAnotherShape,
   rectangleParamsFromBoundaries,
@@ -30,7 +30,7 @@ export class MoveTool extends Tool<ShapeType> {
     this.#draw = this.pen.generatePen(this.context).draw;
   }
   #dCenter?: Coordinates;
-  #drawOnPreview: (shape: ShapeType) => void;
+  #drawOnPreview: (shape: ShapeType, svgParams: SVGParamsBase) => void;
   #draw: (shape: ShapeType) => void;
 
   #getIndexOfSelectedShape = () =>
@@ -73,14 +73,14 @@ export class MoveTool extends Tool<ShapeType> {
       const { startingCorner, width, height } = rectangleParamsFromBoundaries(
         this.currentShape.boundaries
       );
-      this.#drawOnPreview(this.currentShape);
-      this.#drawOnPreview(
-        new Rectangle(startingCorner, width, height, {
-          stroke: 'red',
-          strokeWidth: '2',
-        })
-      );
-      this.highlightPreview();
+      this.#drawOnPreview(this.currentShape, {
+        stroke: 'red',
+        'stroke-width': '2',
+      });
+      this.#drawOnPreview(new Rectangle(startingCorner, width, height), {
+        stroke: 'red',
+        'stroke-width': '2',
+      });
     }
   };
 
@@ -93,6 +93,9 @@ export class MoveTool extends Tool<ShapeType> {
         this.currentShape
       );
       this.resetView();
+      this.allShapes = this.allShapes.sort(
+        (shapeA, shapeB) => shapeA.index - shapeB.index
+      );
       this.allShapes.forEach(shape => {
         this.#draw(shape);
       });

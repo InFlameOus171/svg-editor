@@ -15,7 +15,12 @@ export class Rectangle extends Shape {
     isPreview?: boolean
   ) {
     super(
-      getRectBoundaries(startingCorner, width, height),
+      getRectBoundaries(
+        startingCorner,
+        width,
+        height,
+        svgParams?.transformMatrix
+      ),
       svgParams,
       isPreview
     );
@@ -60,9 +65,7 @@ export class Rectangle extends Shape {
     y: this.#startingCorner[1].toString(),
     width: this.#width.toString(),
     height: this.#height.toString(),
-    fill: this.getFill(),
-    stroke: this.getStroke(),
-    strokeWidth: this.getStrokeWidth(),
+    ...this.styles,
   });
 
   toString = () => {

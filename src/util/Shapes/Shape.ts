@@ -1,4 +1,5 @@
 import { nanoid } from 'nanoid';
+import { SupportedStyles } from '../../types/globalStyles.types';
 import {
   BoundaryCoordinates,
   Coordinates,
@@ -8,12 +9,8 @@ import {
 export abstract class Shape {
   static #counter: number = 0;
 
-  #fill?: string;
   #id?: string;
-  #stroke?: string;
-  #strokeWidth?: string;
-  #transformMatrix?: DOMMatrix;
-
+  styles?: SVGParamsBase;
   boundaries: BoundaryCoordinates;
   index: number = 0;
 
@@ -24,24 +21,14 @@ export abstract class Shape {
       [-1, -1],
       [-1, -1],
     ],
-
-    svgParams: Partial<SVGParamsBase> = {
-      stroke: '#000000',
-      fill: 'rgba(0,0,0,0)',
-      strokeWidth: '1',
-    },
-
+    svgParams?: SVGParamsBase,
     countShapecountUp: boolean = true
   ) {
     if (countShapecountUp) {
       Shape.#counter++;
       this.#id = nanoid();
     }
-
-    this.#fill = svgParams.fill;
-    this.#stroke = svgParams.stroke;
-    this.#strokeWidth = svgParams.strokeWidth;
-    this.#transformMatrix = svgParams.transformMatrix;
+    this.styles = svgParams;
     this.boundaries = boundaries;
     this.index = Shape.#counter;
   }
@@ -52,27 +39,6 @@ export abstract class Shape {
       boundary =>
         [boundary[0] + xDifference, boundary[1] + yDifference] as Coordinates
     ) as BoundaryCoordinates;
-  };
-
-  getStroke = () => {
-    return this.#stroke;
-  };
-
-  getStrokeWidth = () => {
-    return this.#strokeWidth;
-  };
-
-  getFill = () => {
-    return this.#fill;
-  };
-
-  getsvgParams = () => {
-    return {
-      fill: this.#fill,
-      stroke: this.#stroke,
-      strokeWidth: this.#strokeWidth,
-      transformMatrix: this.#transformMatrix,
-    };
   };
 
   getId = () => {

@@ -120,7 +120,12 @@ export class Editor {
 
   importSVG = (data: Document) => {
     if (this.#canvas) {
-      const importTool = new ImportTool(this.#canvas, this.#self, this.#offset);
+      const importTool = new ImportTool(
+        this.#canvas,
+        this.#self,
+        this.#offset,
+        this.#shapes
+      );
       importTool.drawSvg(data);
       this.#shapes.push(...importTool.destroy());
     }

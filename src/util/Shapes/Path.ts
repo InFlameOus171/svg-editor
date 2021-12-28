@@ -13,7 +13,7 @@ export class Path extends Shape {
 
   constructor(
     drawPath: SVGDrawPath[],
-    svgParams?: Partial<SVGParamsBase>,
+    svgParams?: SVGParamsBase,
     dontCountUp?: boolean
   ) {
     super(undefined, svgParams, dontCountUp);
@@ -26,7 +26,10 @@ export class Path extends Shape {
         points: path.points,
       };
     });
-    this.boundaries = getPathBoundaries(this.drawPath);
+    this.boundaries = getPathBoundaries(
+      this.drawPath,
+      svgParams?.transformMatrix
+    );
     const sumOfBoundaries = this.boundaries.reduce(
       (acc, curr) => sumOfCoordinates(acc)(curr),
       [0, 0]
@@ -40,9 +43,7 @@ export class Path extends Shape {
 
   toSVGPathParams = () => ({
     d: this.toString(),
-    fill: this.getFill(),
-    stroke: this.getStroke(),
-    strokeWidth: this.getStrokeWidth(),
+    ...this.styles,
   });
 
   moveTo = (coordinates: Coordinates) => {
@@ -51,10 +52,10 @@ export class Path extends Shape {
       coordinates[0] - this.#center[0],
       coordinates[1] - this.#center[1],
     ];
+    const transformMatrix = this.styles?.transformMatrix;
+    const { a = 1, b = 0, c = 0, d = 1, e = 0, f = 0 } = transformMatrix || {};
     const newPathCommands = pathCommands.map(pathCommand => {
-      if (
-        ['M', 'm', ...absoluteCoordinatesCommands].includes(pathCommand.command)
-      ) {
+      if (['m', ...absoluteCoordinatesCommands].includes(pathCommand.command)) {
         return {
           command: pathCommand.command,
           points: (pathCommand.points as Array<Coordinates>).map(
@@ -65,15 +66,7 @@ export class Path extends Shape {
       }
       return pathCommand;
     });
-    const newPath = new Path(
-      newPathCommands,
-      {
-        fill: this.getFill(),
-        stroke: this.getStroke(),
-        strokeWidth: this.getStrokeWidth(),
-      },
-      false
-    );
+    const newPath = new Path(newPathCommands, this.styles, false);
     this.#center = newPath.getCenter();
     this.boundaries = newPath.boundaries;
     this.drawPath = newPath.drawPath;

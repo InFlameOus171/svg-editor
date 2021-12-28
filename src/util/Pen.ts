@@ -1,6 +1,11 @@
+import { SupportedStyle, SupportedStyles } from '../types/globalStyles.types';
 import { ShapeType } from '../types/shapes';
 import { SVGParamsBase } from '../types/types';
-import { decimalNumberRegExpGlobal } from './helper/regularExpressions';
+import { decimalNumberRegExpGlobal } from './constants/regularExpressions';
+import {
+  canvasRenderingContextStylesMap,
+  CanvasRenderingContextStylesTypes,
+} from './constants/styles';
 import { typeOfShape } from './helper/typeguards';
 import { Ellipse } from './Shapes/Ellipse';
 import { Freehand } from './Shapes/Freehand';
@@ -11,7 +16,7 @@ import { Rectangle } from './Shapes/Rectangle';
 const Pen = {
   generatePen: (context?: CanvasRenderingContext2D) => {
     return {
-      draw: (shape: ShapeType, svgParams?: Partial<SVGParamsBase>) => {
+      draw: (shape: ShapeType, svgParams?: SVGParamsBase) => {
         const shapeType = typeOfShape(shape);
         switch (shapeType) {
           case 'Ellipse':
@@ -33,84 +38,70 @@ const Pen = {
     };
   },
 
-  setStyles: (
-    pathConstructor: Path2D,
-    context: CanvasRenderingContext2D,
-    svgParams: Partial<SVGParamsBase>
-  ) => {
-    const { fill, stroke, strokeWidth, transformMatrix } = svgParams;
-    if (fill) {
-      context.fillStyle = fill;
+  applyStyles: (context: CanvasRenderingContext2D, styles: SupportedStyles) => {
+    if (styles['fill']) {
+      if (styles['fill'] === 'none') {
+        context.fillStyle = 'transparent';
+      } else {
+        context.fillStyle = styles.fill;
+      }
     }
-    if (stroke) {
-      context.strokeStyle = stroke;
+    if (styles['stroke']) {
+      if (styles['stroke'] === 'none') {
+        context.strokeStyle = 'transparent';
+      } else {
+        context.strokeStyle = styles.stroke;
+      }
     }
-    if (strokeWidth) {
-      context.lineWidth = parseFloat(strokeWidth);
+    if (styles['stroke-width']) {
+      context.lineWidth = parseFloat(styles['stroke-width']);
     }
-    if (transformMatrix) {
-      pathConstructor.addPath(new Path2D(), transformMatrix);
+    if (styles['stroke-linecap']) {
+      context.lineCap = styles['stroke-linecap'] as CanvasLineCap;
     }
-    context.lineWidth = strokeWidth ? parseFloat(strokeWidth) : 1;
-    if (stroke && stroke !== 'null') {
-      context.strokeStyle = stroke;
+    if (styles['stroke-linejoin']) {
+      context.lineJoin = styles['stroke-linejoin'] as CanvasLineJoin;
     }
-    if (fill && fill !== 'none') {
-      context.fillStyle = fill;
-      context.fill(pathConstructor);
-    }
-    if (stroke || strokeWidth) {
-      context.stroke(pathConstructor);
-    }
-    if (!stroke && !fill && !strokeWidth) {
-      context.stroke(pathConstructor);
-      context.fill(pathConstructor);
+    if (styles['stroke-miterlimit']) {
+      context.miterLimit = parseFloat(styles['stroke-miterlimit'] ?? '4');
     }
   },
 
   drawPath: (
     path: Path,
     context?: CanvasRenderingContext2D,
-    svgParams?: Partial<SVGParamsBase>
+    svgParams?: SVGParamsBase
   ) => {
-    const pathConstructor = new Path2D();
-    pathConstructor.addPath(new Path2D(path.toString()));
-
-    if (context) {
-      const { fill, stroke, strokeWidth, transformMatrix } = {
-        ...path.getsvgParams(),
-        ...svgParams,
-      };
-      if (fill) {
-        context.fillStyle = fill;
-      }
-      if (stroke) {
-        context.strokeStyle = stroke;
-      }
-      if (strokeWidth) {
-        context.lineWidth = parseFloat(strokeWidth);
-      }
-      if (transformMatrix) {
-        pathConstructor.addPath(new Path2D(), transformMatrix);
-        console.log(transformMatrix, path);
-      }
-      context.lineWidth = strokeWidth ? parseFloat(strokeWidth) : 1;
-      if (stroke && stroke !== 'null') {
-        context.strokeStyle = stroke;
-      }
-      if (fill && fill !== 'none') {
-        context.fillStyle = fill;
-        context.fill(pathConstructor);
-      }
-      if (stroke || strokeWidth) {
-        context.stroke(pathConstructor);
-      }
-      if (!stroke && !fill && !strokeWidth) {
-        context.stroke(pathConstructor);
-        context.fill(pathConstructor);
-      }
-      context.closePath();
+    if (!context) {
+      return;
     }
+    let pathConstructor = new Path2D();
+
+    const allSVGParams = { ...path.styles, ...svgParams };
+    const { transformMatrix, ...rest } = allSVGParams;
+    const { styles } = (rest as { styles: SupportedStyles }) || {};
+    const cleanedUpStyles = Object.fromEntries(
+      Object.entries(styles).filter(([key, value]) => !!value)
+    );
+
+    pathConstructor.addPath(new Path2D(path.toString()));
+    cleanedUpStyles && Pen.applyStyles(context, cleanedUpStyles);
+
+    if (transformMatrix) {
+      const temporaryPath = new Path2D();
+      temporaryPath.addPath(pathConstructor, transformMatrix);
+      pathConstructor = temporaryPath;
+    }
+    context.fill(
+      pathConstructor,
+      cleanedUpStyles['fill-rule'] as CanvasFillRule | undefined
+    );
+    cleanedUpStyles['clip-rule'] &&
+      context.clip(
+        pathConstructor,
+        cleanedUpStyles['clip-rule'] as CanvasFillRule | undefined
+      );
+    context.stroke(pathConstructor);
   },
 
   drawFreehand: (
@@ -118,34 +109,43 @@ const Pen = {
     context?: CanvasRenderingContext2D,
     svgParams?: Partial<SVGParamsBase>
   ) => {
-    const path = new Path2D();
+    if (!context) {
+      return;
+    }
+    let pathConstructor = new Path2D();
     const points = freehand.getPoints();
     const start = points[0];
     const rest = points.slice(1);
-    const { fill, stroke, strokeWidth, transformMatrix } = {
-      ...freehand.getsvgParams(),
+    const allSVGParams = {
+      ...freehand.styles,
       ...svgParams,
     };
-    if (context) {
-      if (fill) {
-        context.fillStyle = fill;
-      }
-      if (stroke) {
-        context.strokeStyle = stroke;
-      }
-      if (strokeWidth) {
-        context.lineWidth = parseFloat(strokeWidth);
-      }
-      if (transformMatrix) {
-        path.addPath(new Path2D(), transformMatrix);
-      }
-      path.moveTo(...start);
-      rest.forEach(point => {
-        path.lineTo(...point);
-      });
-      context?.stroke(path);
-      context?.closePath();
+    const { transformMatrix, ...restParams } = allSVGParams;
+    const { styles } = (restParams as { styles: SupportedStyles }) || {};
+    const cleanedUpStyles = Object.fromEntries(
+      Object.entries(styles).filter(([key, value]) => !!value)
+    );
+    if (transformMatrix) {
+      const temporaryPath = new Path2D();
+      temporaryPath.addPath(pathConstructor, transformMatrix);
+      pathConstructor = temporaryPath;
     }
+    cleanedUpStyles && Pen.applyStyles(context, cleanedUpStyles);
+    pathConstructor.moveTo(...start);
+    rest.forEach(point => {
+      pathConstructor.lineTo(...point);
+    });
+
+    context.fill(
+      pathConstructor,
+      cleanedUpStyles['fill-rule'] as CanvasFillRule | undefined
+    );
+    context.clip(
+      pathConstructor,
+      cleanedUpStyles['clip-rule'] as CanvasFillRule | undefined
+    );
+    context.stroke(pathConstructor);
+    context?.closePath();
   },
 
   drawLine: (
@@ -153,27 +153,80 @@ const Pen = {
     context?: CanvasRenderingContext2D,
     svgParams?: Partial<SVGParamsBase>
   ) => {
-    const path = new Path2D();
-    path.moveTo(...line.points[0]);
-    path.lineTo(...line.points[1]);
-    context?.stroke(path);
+    if (!context) {
+      return;
+    }
+    const allSVGParams = {
+      ...line.styles,
+      ...svgParams,
+    };
+    const { transformMatrix, ...rest } = allSVGParams;
+    const { styles } = (rest as { styles: SupportedStyles }) || {};
+    const cleanedUpStyles = Object.fromEntries(
+      Object.entries(styles).filter(([key, value]) => !!value)
+    );
+    let pathConstructor = new Path2D();
+    if (transformMatrix) {
+      const temporaryPath = new Path2D();
+      temporaryPath.addPath(pathConstructor, transformMatrix);
+      pathConstructor = temporaryPath;
+    }
+    cleanedUpStyles && Pen.applyStyles(context, cleanedUpStyles);
+    pathConstructor.moveTo(...line.points[0]);
+    pathConstructor.lineTo(...line.points[1]);
+
+    context.fill(
+      pathConstructor,
+      cleanedUpStyles['fill-rule'] as CanvasFillRule | undefined
+    );
+    context.clip(
+      pathConstructor,
+      cleanedUpStyles['clip-rule'] as CanvasFillRule | undefined
+    );
+    context.stroke(pathConstructor);
     context?.closePath();
   },
 
   drawRectangle: (
     rectangle: Rectangle,
     context?: CanvasRenderingContext2D,
-    svgParams?: Partial<SVGParamsBase>
+    svgParams?: SVGParamsBase
   ) => {
-    const path = new Path2D();
+    if (!context) {
+      return;
+    }
+    let pathConstructor = new Path2D();
+
+    const allSVGParams = { ...rectangle.styles, ...svgParams };
+    const { transformMatrix, ...rest } = allSVGParams;
+    const { styles } = (rest as { styles: SupportedStyles }) || {};
+    const cleanedUpStyles = styles
+      ? Object.fromEntries(
+          Object.entries(styles).filter(([key, value]) => !!value)
+        )
+      : rest;
+    if (transformMatrix) {
+      const temporaryPath = new Path2D();
+      temporaryPath.addPath(pathConstructor, transformMatrix);
+      pathConstructor = temporaryPath;
+    }
     const values = Object.values(rectangle.toPathParams()) as [
       number,
       number,
       number,
       number
     ];
-    path.rect(...values);
-    context?.stroke(path);
+    pathConstructor.rect(...values);
+    cleanedUpStyles && Pen.applyStyles(context, cleanedUpStyles);
+    context.fill(
+      pathConstructor,
+      cleanedUpStyles['fill-rule'] as CanvasFillRule | undefined
+    );
+    context.clip(
+      pathConstructor,
+      cleanedUpStyles['clip-rule'] as CanvasFillRule | undefined
+    );
+    context.stroke(pathConstructor);
     context?.closePath();
   },
 
@@ -182,16 +235,43 @@ const Pen = {
     context?: CanvasRenderingContext2D,
     svgParams?: Partial<SVGParamsBase>
   ) => {
-    const path = new Path2D();
+    if (!context) {
+      return;
+    }
+    let pathConstructor = new Path2D();
+
+    const allSVGParams = {
+      ...ellipse.styles,
+      ...svgParams,
+    };
+    const { transformMatrix, ...rest } = allSVGParams;
+    const { styles } = (rest as { styles: SupportedStyles }) || {};
+    const cleanedUpStyles = Object.fromEntries(
+      Object.entries(styles).filter(([key, value]) => !!value)
+    );
+    if (transformMatrix) {
+      const temporaryPath = new Path2D();
+      temporaryPath.addPath(pathConstructor, transformMatrix);
+      pathConstructor = temporaryPath;
+    }
     const values = Object.values(ellipse.toPathParams()) as [
       number,
       number,
       number,
       number
     ];
-    path.ellipse(...values, 0, 0, 2 * Math.PI);
-    context?.stroke(path);
-    context?.closePath;
+    pathConstructor.ellipse(...values, 0, 0, 2 * Math.PI);
+    cleanedUpStyles && Pen.applyStyles(context, cleanedUpStyles);
+    context.fill(
+      pathConstructor,
+      cleanedUpStyles['fill-rule'] as CanvasFillRule | undefined
+    );
+    context.clip(
+      pathConstructor,
+      cleanedUpStyles['clip-rule'] as CanvasFillRule | undefined
+    );
+    context.stroke(pathConstructor);
+    context?.closePath();
   },
 
   clearCanvas: (

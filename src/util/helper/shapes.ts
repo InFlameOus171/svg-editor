@@ -9,15 +9,17 @@ import {
   PathSVGParams,
   RectSVGParams,
   SVGDrawPath,
+  SVGParamsBase,
 } from '../../types/types';
 import { Ellipse } from '../Shapes/Ellipse';
 import { Freehand } from '../Shapes/Freehand';
 import { Line } from '../Shapes/Line';
 import { Path } from '../Shapes/Path';
 import { Rectangle } from '../Shapes/Rectangle';
-import { pathCommandsRegExp } from './regularExpressions';
+import { pathCommandsRegExp } from '../constants/regularExpressions';
 import { typeOfShape } from './typeguards';
 import { pathCommandValues, singleDirectionCommands } from './util';
+import { SupportedStyles } from '../../types/globalStyles.types';
 
 export const createRect = (
   x: number,
@@ -31,79 +33,88 @@ export const createRect = (
 };
 
 export const setSVGStyleParams = (
-  svgShape: Element,
-  fill?: string,
-  stroke?: string,
-  strokeWidth?: string
+  svgShape: SVGGraphicsElement,
+  { transformMatrix, ...rest }: SVGParamsBase
 ) => {
-  stroke && svgShape.setAttribute('stroke', stroke);
-  strokeWidth && svgShape.setAttribute('stroke-width', strokeWidth);
-  fill && svgShape.setAttribute('fill', fill);
+  const { styles } = (rest as { styles: SupportedStyles }) || {};
+  console.log(transformMatrix, transformMatrix?.toString());
+  const { a, b, c, d, e, f } = transformMatrix || {};
+  Object.entries(styles)
+    .filter(([key, value]) => !!value)
+    .forEach(([key, value]) => {
+      console.log(key, value);
+      svgShape.setAttribute(key, value);
+      transformMatrix &&
+        svgShape.setAttribute(
+          'transform',
+          `matrix(${a},${b},${c},${d},${e},${f})`
+        );
+    });
 };
 
 export const setRectSVGParams = (
-  svgShape: Element,
+  svgShape: SVGGraphicsElement,
   rectParams: RectSVGParams
 ) => {
-  const { x, y, width, height, fill, stroke, strokeWidth } = rectParams;
+  const { x, y, width, height, ...rest } = rectParams;
   svgShape.setAttribute('x', x);
   svgShape.setAttribute('y', y);
   svgShape.setAttribute('width', width);
   svgShape.setAttribute('height', height);
-  setSVGStyleParams(svgShape, fill, stroke, strokeWidth);
+  setSVGStyleParams(svgShape, rest);
 };
 
 export const setEllipseSVGParams = (
-  svgShape: Element,
+  svgShape: SVGGraphicsElement,
   ellipseParams: EllipseSVGParams
 ) => {
-  const { cx, cy, rx, ry, fill, stroke, strokeWidth } = ellipseParams;
+  const { cx, cy, rx, ry, ...rest } = ellipseParams;
   svgShape.setAttribute('cx', cx);
   svgShape.setAttribute('cy', cy);
   svgShape.setAttribute('rx', rx);
   svgShape.setAttribute('ry', ry);
-  setSVGStyleParams(svgShape, fill, stroke, strokeWidth);
+  setSVGStyleParams(svgShape, rest);
 };
 
 export const setCircleSVGParams = (
-  svgShape: Element,
+  svgShape: SVGGraphicsElement,
   circleParams: EllipseSVGParams
 ) => {
-  const { cx, cy, rx, fill, stroke, strokeWidth } = circleParams;
+  const { cx, cy, rx, ...rest } = circleParams;
   svgShape.setAttribute('cx', cx);
   svgShape.setAttribute('cy', cy);
   svgShape.setAttribute('r', rx);
-  setSVGStyleParams(svgShape, fill, stroke, strokeWidth);
+  setSVGStyleParams(svgShape, rest);
 };
 
 export const setLineSVGParams = (
-  svgShape: Element,
+  svgShape: SVGGraphicsElement,
   lineParams: LineSVGParams
 ) => {
-  const { x1, y1, x2, y2, fill, stroke, strokeWidth } = lineParams;
+  const { x1, y1, x2, y2, ...rest } = lineParams;
   svgShape.setAttribute('x1', x1);
   svgShape.setAttribute('y1', y1);
   svgShape.setAttribute('x2', x2);
   svgShape.setAttribute('y2', y2);
-  setSVGStyleParams(svgShape, fill, stroke, strokeWidth);
+  setSVGStyleParams(svgShape, rest);
 };
 
 export const setFreehandSVGParams = (
-  svgShape: Element,
+  svgShape: SVGGraphicsElement,
   freehandParams: FreehandSVGParams
 ) => {
-  const { points, fill, stroke, strokeWidth } = freehandParams;
+  const { points, ...rest } = freehandParams;
   svgShape.setAttribute('points', points);
-  setSVGStyleParams(svgShape, fill, stroke, strokeWidth);
+  setSVGStyleParams(svgShape, rest);
 };
 
 export const setPathSVGParams = (
-  svgShape: Element,
+  svgShape: SVGGraphicsElement,
   pathParams: PathSVGParams
 ) => {
-  const { d, fill, stroke, strokeWidth } = pathParams;
+  const { d, ...rest } = pathParams;
   svgShape.setAttribute('d', d);
-  setSVGStyleParams(svgShape, fill, stroke, strokeWidth);
+  setSVGStyleParams(svgShape, rest);
 };
 
 export const appendAsSVGShapeGeneratorFunction =
@@ -112,7 +123,10 @@ export const appendAsSVGShapeGeneratorFunction =
     switch (typeOfShape(shape)) {
       case 'Rectangle': {
         const rectangleObject = shape as Rectangle;
-        const rect = document.createElementNS(svgNameSpace, 'rect');
+        const rect = document.createElementNS(
+          svgNameSpace,
+          'rect'
+        ) as SVGGraphicsElement;
         setRectSVGParams(rect, rectangleObject.toSvgRectParams());
         parent?.appendChild(rect);
         break;
@@ -121,11 +135,17 @@ export const appendAsSVGShapeGeneratorFunction =
         const ellipseObject = shape as Ellipse;
         const isCircle = ellipseObject.radiusX === ellipseObject.radiusY;
         if (isCircle) {
-          const circle = document.createElementNS(svgNameSpace, 'circle');
+          const circle = document.createElementNS(
+            svgNameSpace,
+            'circle'
+          ) as SVGGraphicsElement;
           setCircleSVGParams(circle, ellipseObject.toSVGEllipseParams());
           parent?.appendChild(circle);
         } else {
-          const ellipse = document.createElementNS(svgNameSpace, 'ellipse');
+          const ellipse = document.createElementNS(
+            svgNameSpace,
+            'ellipse'
+          ) as SVGGraphicsElement;
           setEllipseSVGParams(ellipse, ellipseObject.toSVGEllipseParams());
           parent?.appendChild(ellipse);
         }
@@ -133,21 +153,30 @@ export const appendAsSVGShapeGeneratorFunction =
       }
       case 'Line': {
         const lineObject = shape as Line;
-        const line = document.createElementNS(svgNameSpace, 'line');
+        const line = document.createElementNS(
+          svgNameSpace,
+          'line'
+        ) as SVGGraphicsElement;
         setLineSVGParams(line, lineObject.toSVGLineParams());
         parent?.appendChild(line);
         break;
       }
       case 'Freehand': {
         const freehandObject = shape as Freehand;
-        const freehand = document.createElementNS(svgNameSpace, 'polyline');
+        const freehand = document.createElementNS(
+          svgNameSpace,
+          'polyline'
+        ) as SVGGraphicsElement;
         setFreehandSVGParams(freehand, freehandObject.toSVGFreehandParams());
         parent?.appendChild(freehand);
         break;
       }
       case 'Path': {
         const pathObject = shape as Path;
-        const path = document.createElementNS(svgNameSpace, 'path');
+        const path = document.createElementNS(
+          svgNameSpace,
+          'path'
+        ) as SVGGraphicsElement;
         setPathSVGParams(path, pathObject.toSVGPathParams());
         parent?.append(path);
         break;
@@ -162,13 +191,9 @@ export const getPathCommands = (d: string) => {
   const indices = matches.reduce((acc: number[], match, index) => {
     if (pathCommandValues.includes(match)) {
       return [...acc, index];
-    } else {
-      if (index === matches.length - 1) {
-        return [...acc, index];
-      }
-      return acc;
-    }
+    } else return acc;
   }, []);
+
   const segments = indices.reduce(
     (acc: string[][], commandIndex, currentIndex) => {
       if (currentIndex === indices.length - 1) {

@@ -13,8 +13,13 @@ import {
   skewXRegExp,
   skewYRegExp,
   translateRegExp,
-} from './regularExpressions';
+} from '../constants/regularExpressions';
 import { getPathCommands } from './shapes';
+import { supportedStyles } from '../constants/styles';
+import {
+  SupportedStyle,
+  SupportedStyles,
+} from '../../types/globalStyles.types';
 
 export const partition = <T>(
   array: Array<T>,
@@ -83,84 +88,145 @@ Element.prototype.getFloatAttribute = function (attribute: string) {
   return parseFloat(this.getAttribute(attribute));
 };
 
-const getsvgParams = (element: SVGGraphicsElement) => {
-  const fill = element.getAttribute('fill') ?? '';
-  const stroke = element.getAttribute('stroke') ?? '';
-  const strokeWidth = element.getAttribute('stroke-width') ?? '';
+const getsvgParams = (
+  element: SVGGraphicsElement,
+  svgParentStyles?: SupportedStyles
+): { styles?: SupportedStyles; transformMatrix?: DOMMatrix } => {
+  const styles: SupportedStyles = Object.fromEntries(
+    supportedStyles.map(style => {
+      const key = style;
+      const value = element.getAttribute(key) ?? svgParentStyles?.[key] ?? '';
+      return [key, value];
+    })
+  );
   const transformMatrix = element.getCTM() ?? undefined;
-  console.log(element.getCTM(), element.getScreenCTM());
   return {
-    fill,
-    stroke,
-    strokeWidth,
+    styles,
     transformMatrix,
   };
 };
 
-const convertToShapeType = (element: SVGGraphicsElement): ShapeType => {
-  const svgParams = getsvgParams(element);
-  switch (element.tagName) {
-    case acceptedTags[0]: {
-      const cx = element.getFloatAttribute('cx');
-      const cy = element.getFloatAttribute('cy');
-      const r = element.getFloatAttribute('r');
-      return new Ellipse([cx, cy], r, r, svgParams);
-    }
-    case acceptedTags[1]: {
-      {
-        const cx = element.getFloatAttribute('cx');
-        const cy = element.getFloatAttribute('cy');
-        const rx = element.getFloatAttribute('rx');
-        const ry = element.getFloatAttribute('ry');
-        return new Ellipse([cx, cy], rx, ry, svgParams);
-      }
-    }
-    case acceptedTags[2]: {
-      {
-        const x = element.getFloatAttribute('x');
-        const y = element.getFloatAttribute('y');
-        const width = element.getFloatAttribute('width');
-        const height = element.getFloatAttribute('height');
-        return new Rectangle([x, y], width, height, svgParams);
-      }
-    }
-    case acceptedTags[3]: {
-      {
-        const points = (element.getAttribute('points') ?? '')
-          .split(' ')
-          .map((coordinate): [number, number] => {
-            const [x, y] = coordinate.split(',');
-            return [parseFloat(x), parseFloat(y)];
-          });
-        return new Freehand(points, svgParams);
-      }
-    }
-    case acceptedTags[4]: {
-      {
-        const x1 = element.getFloatAttribute('x1');
-        const x2 = element.getFloatAttribute('x2');
-        const y1 = element.getFloatAttribute('y1');
-        const y2 = element.getFloatAttribute('y2');
-        return new Line([x1, y1], [x2, y2], svgParams);
-      }
-    }
-    default: {
-      const pathDString = element.getAttribute('d') ?? '';
-      const pathCommands = getPathCommands(pathDString);
-      return new Path(pathCommands, svgParams, true);
-    }
+const getStyleObject = (
+  style: string
+): [SupportedStyle, string] | undefined => {
+  const [key, value] = style.split(':').map(splitStyle => splitStyle.trim());
+  if ((supportedStyles as ReadonlyArray<string>).includes(key)) {
+    return [key as SupportedStyle, value];
   }
 };
 
+const convertToShapeType = (svgElementStyles?: string[]) => {
+  const svgParentStyles: SupportedStyles = Object.fromEntries(
+    svgElementStyles
+      ?.map(getStyleObject)
+      .filter(
+        (value): value is [SupportedStyle, string] => value !== undefined
+      ) ?? []
+  );
+
+  return (element: SVGGraphicsElement): ShapeType => {
+    const directParent = element.parentElement;
+    const svgParams = getsvgParams(element, svgParentStyles);
+    console.log(svgParams);
+    if (directParent?.tagName === 'g') {
+      const fill = directParent.getAttribute('fill');
+      const stroke = directParent.getAttribute('stroke');
+      if (
+        (!svgParams.styles?.fill || svgParams.styles.fill === 'none') &&
+        fill
+      ) {
+        if (svgParams.styles) {
+          console.log('fill set', svgParams.styles.fill, fill);
+          svgParams.styles.fill = fill;
+        } else {
+          console.log(Object.assign(svgParams, { styles: { fill } }));
+        }
+      }
+      if (
+        (!svgParams.styles?.stroke || svgParams.styles.stroke === 'none') &&
+        stroke
+      ) {
+        if (svgParams.styles) {
+          svgParams.styles.stroke = stroke;
+        } else {
+          console.log(Object.assign(svgParams, { styles: { stroke } }));
+        }
+      }
+    }
+    console.log(svgParams);
+
+    switch (element.tagName) {
+      case acceptedTags[0]: {
+        const cx = element.getFloatAttribute('cx');
+        const cy = element.getFloatAttribute('cy');
+        const r = element.getFloatAttribute('r');
+        return new Ellipse([cx, cy], r, r, svgParams);
+      }
+      case acceptedTags[1]: {
+        {
+          const cx = element.getFloatAttribute('cx');
+          const cy = element.getFloatAttribute('cy');
+          const rx = element.getFloatAttribute('rx');
+          const ry = element.getFloatAttribute('ry');
+          return new Ellipse([cx, cy], rx, ry, svgParams);
+        }
+      }
+      case acceptedTags[2]: {
+        {
+          const x = element.getFloatAttribute('x');
+          const y = element.getFloatAttribute('y');
+          const width = element.getFloatAttribute('width');
+          const height = element.getFloatAttribute('height');
+          return new Rectangle([x, y], width, height, svgParams);
+        }
+      }
+      case acceptedTags[3]: {
+        {
+          const points = (element.getAttribute('points') ?? '')
+            .split(' ')
+            .map((coordinate): [number, number] => {
+              const [x, y] = coordinate.split(',');
+              return [parseFloat(x), parseFloat(y)];
+            });
+          return new Freehand(points, svgParams);
+        }
+      }
+      case acceptedTags[4]: {
+        {
+          const x1 = element.getFloatAttribute('x1');
+          const x2 = element.getFloatAttribute('x2');
+          const y1 = element.getFloatAttribute('y1');
+          const y2 = element.getFloatAttribute('y2');
+          return new Line([x1, y1], [x2, y2], svgParams);
+        }
+      }
+      default: {
+        const d = element.getAttribute('d') ?? '';
+        const pathCommands = getPathCommands(d);
+        return new Path(pathCommands, svgParams, true);
+      }
+    }
+  };
+};
 export const getAllSVGShapesFromElement = (element: Element) => {
   element;
 };
 
-export const convertSVGDocumentToShapes = (svg: Document): ShapeType[] => {
+export const convertSVGDocumentToShapes = (
+  importedElementID: string
+): ShapeType[] => {
+  const svg = document.getElementById(
+    importedElementID
+  ) as unknown as SVGSVGElement;
+  const styles = svg
+    .getAttribute('style')
+    ?.split(';')
+    .map(styleValue => styleValue.trim());
+  const convertToShape = convertToShapeType(styles);
   return acceptedTags
     .map(tag =>
       (Array.from(svg.getElementsByTagName(tag)) as SVGGraphicsElement[]).map(
-        convertToShapeType
+        convertToShape
       )
     )
     .flat();
@@ -212,11 +278,11 @@ export const absoluteSingleDirectionCommands = ['H', 'V'];
 
 export const relativeCommands = [
   ...relativeCoordinatesCommands,
-  relativeSingleDirectionCommands,
+  ...relativeSingleDirectionCommands,
 ];
 export const absoluteCommands = [
   ...absoluteCoordinatesCommands,
-  absoluteSingleDirectionCommands,
+  ...absoluteSingleDirectionCommands,
 ];
 
 export const singleDirectionCommands = [
@@ -224,8 +290,4 @@ export const singleDirectionCommands = [
   ...absoluteSingleDirectionCommands,
 ];
 
-export const pathCommandValues = [
-  ...relativeCoordinatesCommands,
-  ...absoluteCoordinatesCommands,
-  ...singleDirectionCommands,
-];
+export const pathCommandValues = [...relativeCommands, ...absoluteCommands];
