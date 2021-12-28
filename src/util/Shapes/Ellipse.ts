@@ -51,9 +51,7 @@ export class Ellipse extends Shape {
     cy: this.#center[1].toString(),
     rx: this.radiusX.toString(),
     ry: this.radiusY.toString(),
-    fill: this.getFill(),
-    stroke: this.getStroke(),
-    strokeWidth: this.getStrokeWidth(),
+    ...this.getsvgParams(),
   });
 
   toString = () => {

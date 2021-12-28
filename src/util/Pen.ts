@@ -73,7 +73,7 @@ const Pen = {
     context?: CanvasRenderingContext2D,
     svgParams?: Partial<SVGParamsBase>
   ) => {
-    const pathConstructor = new Path2D();
+    let pathConstructor = new Path2D();
     pathConstructor.addPath(new Path2D(path.toString()));
 
     if (context) {
@@ -81,6 +81,12 @@ const Pen = {
         ...path.getsvgParams(),
         ...svgParams,
       };
+      if (transformMatrix) {
+        console.log(transformMatrix);
+        const newPath = new Path2D();
+        newPath.addPath(pathConstructor, transformMatrix);
+        pathConstructor = newPath;
+      }
       if (fill) {
         context.fillStyle = fill;
       }
@@ -89,10 +95,6 @@ const Pen = {
       }
       if (strokeWidth) {
         context.lineWidth = parseFloat(strokeWidth);
-      }
-      if (transformMatrix) {
-        pathConstructor.addPath(new Path2D(), transformMatrix);
-        console.log(transformMatrix, path);
       }
       context.lineWidth = strokeWidth ? parseFloat(strokeWidth) : 1;
       if (stroke && stroke !== 'null') {
@@ -109,6 +111,7 @@ const Pen = {
         context.stroke(pathConstructor);
         context.fill(pathConstructor);
       }
+
       context.closePath();
     }
   },

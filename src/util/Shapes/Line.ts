@@ -50,9 +50,7 @@ export class Line extends Shape {
     y1: this.points[0][1].toString(),
     x2: this.points[1][0].toString(),
     y2: this.points[1][1].toString(),
-    fill: this.getFill(),
-    stroke: this.getStroke(),
-    strokeWidth: this.getStrokeWidth(),
+    ...this.getsvgParams(),
   });
 
   toString = () => {

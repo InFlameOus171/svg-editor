@@ -34,11 +34,19 @@ export const setSVGStyleParams = (
   svgShape: Element,
   fill?: string,
   stroke?: string,
-  strokeWidth?: string
+  strokeWidth?: string,
+  transformMatrix?: DOMMatrix
 ) => {
+  const { a, b, c, d, e, f } = transformMatrix || {};
+  console.log(svgShape, fill, stroke, strokeWidth, transformMatrix);
   stroke && svgShape.setAttribute('stroke', stroke);
   strokeWidth && svgShape.setAttribute('stroke-width', strokeWidth);
   fill && svgShape.setAttribute('fill', fill);
+  transformMatrix &&
+    svgShape.setAttribute(
+      'transform',
+      `matrix(${[a, b, c, d, e, f].join(',')})`
+    );
 };
 
 export const setRectSVGParams = (
@@ -99,11 +107,11 @@ export const setFreehandSVGParams = (
 
 export const setPathSVGParams = (
   svgShape: Element,
-  pathParams: PathSVGParams
+  svgParams: PathSVGParams
 ) => {
-  const { d, fill, stroke, strokeWidth } = pathParams;
+  const { d, fill, stroke, strokeWidth, transformMatrix } = svgParams;
   svgShape.setAttribute('d', d);
-  setSVGStyleParams(svgShape, fill, stroke, strokeWidth);
+  setSVGStyleParams(svgShape, fill, stroke, strokeWidth, transformMatrix);
 };
 
 export const appendAsSVGShapeGeneratorFunction =
@@ -162,12 +170,8 @@ export const getPathCommands = (d: string) => {
   const indices = matches.reduce((acc: number[], match, index) => {
     if (pathCommandValues.includes(match)) {
       return [...acc, index];
-    } else {
-      if (index === matches.length - 1) {
-        return [...acc, index];
-      }
-      return acc;
     }
+    return acc;
   }, []);
   const segments = indices.reduce(
     (acc: string[][], commandIndex, currentIndex) => {

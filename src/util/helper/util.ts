@@ -88,12 +88,13 @@ const getsvgParams = (element: SVGGraphicsElement) => {
   const stroke = element.getAttribute('stroke') ?? '';
   const strokeWidth = element.getAttribute('stroke-width') ?? '';
   const transformMatrix = element.getCTM() ?? undefined;
-  console.log(element.getCTM(), element.getScreenCTM());
+  const bBox = element.getBBox();
   return {
     fill,
     stroke,
     strokeWidth,
     transformMatrix,
+    bBox,
   };
 };
 
@@ -156,14 +157,18 @@ export const getAllSVGShapesFromElement = (element: Element) => {
   element;
 };
 
-export const convertSVGDocumentToShapes = (svg: Document): ShapeType[] => {
-  return acceptedTags
-    .map(tag =>
-      (Array.from(svg.getElementsByTagName(tag)) as SVGGraphicsElement[]).map(
-        convertToShapeType
+export const convertSVGDocumentToShapes = (id: string): ShapeType[] => {
+  const svg = document.getElementById(id);
+  if (svg) {
+    return acceptedTags
+      .map(tag =>
+        (Array.from(svg.getElementsByTagName(tag)) as SVGGraphicsElement[]).map(
+          convertToShapeType
+        )
       )
-    )
-    .flat();
+      .flat();
+  }
+  return [];
 };
 
 // ref: https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/transform

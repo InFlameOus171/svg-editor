@@ -4,6 +4,7 @@ import {
   Coordinates,
   SVGParamsBase,
 } from '../../types/types';
+import { Pen } from '../Pen';
 
 export abstract class Shape {
   static #counter: number = 0;
@@ -12,8 +13,7 @@ export abstract class Shape {
   #id?: string;
   #stroke?: string;
   #strokeWidth?: string;
-  #transformMatrix?: DOMMatrix;
-
+  transformMatrix?: DOMMatrix;
   boundaries: BoundaryCoordinates;
   index: number = 0;
 
@@ -37,14 +37,25 @@ export abstract class Shape {
       Shape.#counter++;
       this.#id = nanoid();
     }
-
     this.#fill = svgParams.fill;
     this.#stroke = svgParams.stroke;
     this.#strokeWidth = svgParams.strokeWidth;
-    this.#transformMatrix = svgParams.transformMatrix;
+    this.transformMatrix = svgParams.transformMatrix;
     this.boundaries = boundaries;
     this.index = Shape.#counter;
   }
+
+  moveTransformMatrix = (x: number, y: number) => {
+    const {
+      a = 1,
+      b = 0,
+      c = 0,
+      d = 1,
+      e = 0,
+      f = 0,
+    } = this.transformMatrix || {};
+    this.transformMatrix = new DOMMatrix([a, b, c, d, e + x, f + y]);
+  };
 
   moveBoundaries = (difference: Coordinates) => {
     const [xDifference, yDifference] = difference;
@@ -54,24 +65,12 @@ export abstract class Shape {
     ) as BoundaryCoordinates;
   };
 
-  getStroke = () => {
-    return this.#stroke;
-  };
-
-  getStrokeWidth = () => {
-    return this.#strokeWidth;
-  };
-
-  getFill = () => {
-    return this.#fill;
-  };
-
   getsvgParams = () => {
     return {
       fill: this.#fill,
       stroke: this.#stroke,
       strokeWidth: this.#strokeWidth,
-      transformMatrix: this.#transformMatrix,
+      transformMatrix: this.transformMatrix,
     };
   };
 

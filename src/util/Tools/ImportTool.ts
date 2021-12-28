@@ -20,8 +20,17 @@ export class ImportTool extends Tool<ShapeType> {
   drawSvg = (svg: Document) => {
     if (svg.firstChild) {
       // TODO document not appendable ?
-      const appendedSvg = document.body.appendChild(svg);
-      const shapes = convertSVGDocumentToShapes(appendedSvg);
+      const createdSVG = document.createElementNS(
+        'http://www.w3.org/2000/svg',
+        'svg'
+      );
+      const elementId = '#imported-svg#';
+      createdSVG.setAttribute('id', elementId);
+      createdSVG.appendChild(svg.firstChild);
+      const appendedSvg = document.body.appendChild(createdSVG);
+      const shapes = convertSVGDocumentToShapes(elementId);
+      console.log(shapes);
+      shapes.forEach(shape => console.log(shape.toString()));
       document.body.removeChild(appendedSvg);
       this.allShapes.push(...shapes);
       shapes.forEach(this.#draw);

@@ -23,6 +23,7 @@ export type SVGParamsBase = {
   stroke?: string;
   strokeWidth?: string;
   transformMatrix?: DOMMatrix;
+  bBox?: SVGRect;
 };
 
 export type EllipseSVGParams = SVGParamsBase & {

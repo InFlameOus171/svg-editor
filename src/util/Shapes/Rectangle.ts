@@ -60,9 +60,7 @@ export class Rectangle extends Shape {
     y: this.#startingCorner[1].toString(),
     width: this.#width.toString(),
     height: this.#height.toString(),
-    fill: this.getFill(),
-    stroke: this.getStroke(),
-    strokeWidth: this.getStrokeWidth(),
+    ...this.getsvgParams(),
   });
 
   toString = () => {
