@@ -20,12 +20,13 @@ export class EllipseTool extends Tool<Ellipse> {
     this.toolName = Tools_List.ELLIPSE;
     const renderingContext = this.drawLayer.getContext('2d');
     if (renderingContext) {
-      this.context = renderingContext;
+      this.drawContext = renderingContext;
     }
   }
 
   #draw = () => {
-    this.currentShape && this.pen.drawEllipse(this.currentShape, this.context);
+    this.currentShape &&
+      this.pen.drawEllipse(this.currentShape, this.drawContext);
     this.resetPreview();
   };
 

@@ -269,8 +269,8 @@ export const getLineBoundaries = (
   endPoint: Coordinates
 ): BoundaryCoordinates => {
   const x1 = startingPoint[0];
-  const x2 = endPoint[1];
-  const y1 = startingPoint[0];
+  const x2 = endPoint[0];
+  const y1 = startingPoint[1];
   const y2 = endPoint[1];
   return [
     [x1, y1],

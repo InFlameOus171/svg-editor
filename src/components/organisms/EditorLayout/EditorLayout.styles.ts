@@ -12,6 +12,10 @@ export const layoutStyle = css`
   #footer {
     background-color: rgba(255, 255, 255, 0.8);
   }
+
+  #stroke-opacity-input {
+    max-width: '20px';
+  }
 `;
 export const layoutHeaderStyle = css`
   #header {

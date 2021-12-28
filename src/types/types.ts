@@ -65,3 +65,11 @@ export type SVGDrawPath = {
 };
 
 export type Matrix = [number, number, number, number, number, number];
+
+export type PenConfiguration = {
+  fill?: string;
+  stroke?: string;
+  strokeWidth?: number;
+  scaling?: { x: number; y: number };
+  rotation?: number;
+};

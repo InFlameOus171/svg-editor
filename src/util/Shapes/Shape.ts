@@ -2,6 +2,7 @@ import { nanoid } from 'nanoid';
 import {
   BoundaryCoordinates,
   Coordinates,
+  PenConfiguration,
   SVGParamsBase,
 } from '../../types/types';
 import { Pen } from '../Pen';
@@ -27,7 +28,7 @@ export abstract class Shape {
 
     svgParams: Partial<SVGParamsBase> = {
       stroke: '#000000',
-      fill: 'rgba(0,0,0,0)',
+      fill: 'rgba(0,0,0,1)',
       strokeWidth: '1',
     },
 
@@ -46,15 +47,28 @@ export abstract class Shape {
   }
 
   moveTransformMatrix = (x: number, y: number) => {
-    const {
-      a = 1,
-      b = 0,
-      c = 0,
-      d = 1,
-      e = 0,
-      f = 0,
-    } = this.transformMatrix || {};
-    this.transformMatrix = new DOMMatrix([a, b, c, d, e + x, f + y]);
+    this.transformMatrix = this.transformMatrix?.translate(x, y);
+  };
+
+  applyStyles = (config: PenConfiguration) => {
+    this.#fill = config.fill;
+    this.#stroke = config.stroke;
+    this.#strokeWidth = config.strokeWidth?.toString();
+    if (config.scaling || config.rotation) {
+      const { x: scaleX, y: scaleY } = config.scaling || { x: 1, y: 1 };
+      const rotation = config.rotation ?? 0;
+      this.transformMatrix = this.transformMatrix
+        ?.rotate(rotation)
+        .scale(scaleX, scaleY);
+      const basicMatrix = new DOMMatrix()
+        .rotate(rotation)
+        .scale(scaleX, scaleY);
+      this.boundaries = this.boundaries.map(boundary => {
+        const point = new DOMPoint(boundary[0], boundary[1]);
+        const transformedPoint = point.matrixTransform(basicMatrix);
+        return [transformedPoint.x, transformedPoint.y];
+      }) as BoundaryCoordinates;
+    }
   };
 
   moveBoundaries = (difference: Coordinates) => {

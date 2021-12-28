@@ -20,14 +20,14 @@ export class RectangleTool extends Tool<Rectangle> {
     this.resetPreview();
     const renderingContext = this.drawLayer.getContext('2d');
     if (renderingContext) {
-      this.context = renderingContext;
+      this.drawContext = renderingContext;
     }
     this.toolName = Tools_List.RECT;
   }
 
   #draw = () => {
     if (this.currentShape) {
-      this.pen.drawRectangle(this.currentShape, this.context);
+      this.pen.drawRectangle(this.currentShape, this.drawContext);
     }
     this.resetPreview();
   };

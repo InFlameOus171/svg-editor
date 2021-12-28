@@ -26,7 +26,7 @@ export class DrawTool extends Tool<Freehand, Line> {
   };
 
   #draw = () => {
-    this.currentShape && this.pen.drawLine(this.currentShape, this.context);
+    this.currentShape && this.pen.drawLine(this.currentShape, this.drawContext);
   };
 
   #updateShapeData = (newCoordinates: Coordinates) => {

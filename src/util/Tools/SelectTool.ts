@@ -1,6 +1,6 @@
 import { EditorLayout } from '../../components/organisms/EditorLayout';
 import { Shapes, ShapeType, Tools_List } from '../../types/shapes';
-import { Coordinates } from '../../types/types';
+import { Coordinates, PenConfiguration } from '../../types/types';
 import {
   getCanvasRectangleValuesFromPoints,
   isPointInsideAnotherShape,
@@ -8,6 +8,7 @@ import {
   rectangleParamsFromBoundaries,
 } from '../helper/coordinates';
 import { typeOfShape } from '../helper/typeguards';
+import { normalizeColorCode } from '../helper/util';
 import { Rectangle } from '../Shapes/Rectangle';
 import { Tool } from './Tool';
 
@@ -16,22 +17,24 @@ export class SelectTool extends Tool<ShapeType> {
     drawLayer: HTMLCanvasElement,
     previewLayer: HTMLCanvasElement,
     self: EditorLayout,
-    offset: Coordinates,
-    shapes: ShapeType[]
+    onSelect: (shape: ShapeType) => void,
+    shapes: ShapeType[],
+    offset?: Coordinates
   ) {
     super(drawLayer, self, offset, previewLayer);
 
     this.toolName = Tools_List.SELECT;
     this.allShapes = shapes;
-
+    this.#onSelectCallback = onSelect;
     this.previewContext && this.previewContext.setLineDash([10, 10]);
 
     const renderingContext = this.drawLayer.getContext('2d');
     if (renderingContext) {
-      this.context = renderingContext;
+      this.drawContext = renderingContext;
     }
   }
 
+  #onSelectCallback: (shape: ShapeType) => void;
   #selectedShape?: ShapeType;
 
   #onClick = (event: MouseEvent) => {
@@ -62,10 +65,43 @@ export class SelectTool extends Tool<ShapeType> {
     this.isDrawing = true;
   };
 
+  #updateInputFields = () => {
+    if (this.#selectedShape) {
+      const params = this.#selectedShape.getsvgParams();
+      const footerFields =
+        this.self.shadowRoot?.getElementById('footer-fields');
+      footerFields?.removeAttribute('disabled');
+      footerFields
+        ?.querySelector('#stroke-width-input')
+        ?.setAttribute('value', params.strokeWidth ?? '0');
+      const defaultColor = { colorCode: '#000000', opacity: '1' };
+      const strokeColor = params.stroke
+        ? normalizeColorCode(params.stroke)
+        : defaultColor;
+      const fillColor = params.fill
+        ? normalizeColorCode(params.fill)
+        : defaultColor;
+
+      footerFields
+        ?.querySelector('#stroke-color-input')
+        ?.setAttribute('value', strokeColor.colorCode);
+      footerFields
+        ?.querySelector('#stroke-opacity-input')
+        ?.setAttribute('value', strokeColor.opacity);
+      footerFields
+        ?.querySelector('#fill-color-input')
+        ?.setAttribute('value', fillColor.colorCode);
+      footerFields
+        ?.querySelector('#fill-opacity-input')
+        ?.setAttribute('value', fillColor.opacity);
+    }
+  };
+
   #onSelect = (selectedShape: ShapeType | null) => {
     if (selectedShape) {
       this.#selectedShape = selectedShape;
-
+      this.#updateInputFields();
+      this.#onSelectCallback(this.#selectedShape);
       if (this.previewContext) {
         this.highlightPreview();
         const shapeType = typeOfShape(selectedShape);
@@ -75,17 +111,17 @@ export class SelectTool extends Tool<ShapeType> {
         this.drawTools['Rectangle'](
           new Rectangle(startingCorner, width, height, {
             stroke: 'red',
-            strokeWidth: '2',
+            strokeWidth: '5',
           }),
           this.previewContext
         );
         this.drawTools[shapeType](selectedShape, this.previewContext);
       }
-      this.self.selectedElement = selectedShape.toString();
     } else {
-      this.self.selectedElement = null;
+      this.self.shadowRoot
+        ?.getElementById('footer-fields')
+        ?.setAttribute('disabled', '');
     }
-    this.self.requestUpdate();
   };
 
   drawTools: { [key in Shapes]: any } = {
@@ -143,6 +179,14 @@ export class SelectTool extends Tool<ShapeType> {
         this.resetPreview();
         this.pen.drawRectangle(this.currentShape, this.previewContext);
       }
+    }
+  };
+
+  changeStyle = (config: PenConfiguration) => {
+    if (this.#selectedShape) {
+      this.#selectedShape.applyStyles(config);
+      this.resetPreview();
+      this.pen.draw(this.#selectedShape, undefined, this.previewContext);
     }
   };
 

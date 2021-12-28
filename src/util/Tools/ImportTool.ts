@@ -1,7 +1,6 @@
 import { EditorLayout } from '../../components/organisms/EditorLayout';
 import { ShapeType } from '../../types/shapes';
 import { Coordinates } from '../../types/types';
-import { flattenSVG } from 'flatten-svg';
 import { convertSVGDocumentToShapes } from '../helper/util';
 import { Tool } from './Tool';
 
@@ -14,7 +13,7 @@ export class ImportTool extends Tool<ShapeType> {
     offset: Coordinates
   ) {
     super(drawLayer, self, offset);
-    this.#draw = this.pen.generatePen(this.context).draw;
+    this.#draw = this.pen.generatePen(this.drawContext).draw;
   }
 
   drawSvg = (svg: Document) => {

@@ -1,7 +1,12 @@
 import { html, LitElement } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
-import { Tools_List } from '../../../types/shapes.js';
+import { ShapeType, Tools_List } from '../../../types/shapes.js';
+import { PenConfiguration } from '../../../types/types.js';
 import { Editor } from '../../../util/Editor';
+import {
+  updateNextSiblingValue,
+  updatePreviousSiblingValue,
+} from '../../../util/helper/util.js';
 import {
   layoutContentStyle,
   layoutHeaderStyle,
@@ -59,6 +64,19 @@ export class EditorLayout extends LitElement {
     this.height = parseInt(getComputedStyle(this).getPropertyValue('height'));
   };
 
+  handleApplyStyles = () => {
+    const strokeWidth = (
+      this.shadowRoot?.getElementById('stroke-width-input') as HTMLInputElement
+    )?.value;
+    const stroke = (
+      this.shadowRoot?.getElementById('stroke-color-input') as HTMLInputElement
+    )?.value;
+    const fill = (
+      this.shadowRoot?.getElementById('fill-color-input') as HTMLInputElement
+    )?.value;
+    this.editor?.applyStyles(strokeWidth, stroke, fill);
+  };
+
   render() {
     return html`
       <div id="content">
@@ -72,9 +90,45 @@ export class EditorLayout extends LitElement {
         .onSave=${this.editor?.onSave}
         .onSelectSvgFile=${this.editor?.importSVG}
       ></editor-header>
-      <textarea rows="5" id="footer" disabled>
-${JSON.stringify(this.selectedElement ?? '')}</textarea
-      >
+      <div id="footer">
+        <fieldset disabled id="footer-fields">
+          <label>
+            Stroke width:
+            <input type="number" id="stroke-width-input" />
+          </label>
+          <div>
+            <label>
+              Color:
+              <input type="color" id="stroke-color-input" />
+            </label>
+            <label>
+              Opacity:
+              <input type="range" @input=${updateNextSiblingValue} />
+              <input
+                id="stroke-opacity-input"
+                type="number"
+                @change=${updatePreviousSiblingValue}
+              />
+            </label>
+          </div>
+          <div>
+            <label>
+              Fill:
+              <input type="color" id="fill-color-input" />
+            </label>
+            <label>
+              Opacity:
+              <input type="range" @input=${updateNextSiblingValue} />
+              <input
+                id="fill-opacity-input"
+                type="number"
+                @change=${updatePreviousSiblingValue}
+              />
+            </label>
+          </div>
+          <button @click=${this.handleApplyStyles}>Apply styles</button>
+        </fieldset>
+      </div>
     `;
   }
 }

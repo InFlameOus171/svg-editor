@@ -189,6 +189,60 @@ export const transformAllCoordinatesByMatrix = (
   return coordinates.map(transformCoordinatesByMatrix(matrix));
 };
 
+export const normalizeColorCode = (
+  colorCode: string
+): { colorCode: string; opacity: string } => {
+  if (colorCode.charAt(0) !== '#') {
+    const numberMatcher = new RegExp(/\d+/g);
+    console.log(...colorCode.matchAll(numberMatcher));
+    const parsedColorCodes = [...colorCode.matchAll(numberMatcher)];
+    console.log(...parsedColorCodes);
+    if (parsedColorCodes.length === 4) {
+      const opacity = parsedColorCodes.pop()?.[0] ?? '0';
+      const rgbColors = parsedColorCodes.map(colorValue =>
+        parseInt(colorValue[0]).toString(16)
+      );
+      console.log(rgbColors);
+      return { colorCode: '#'.concat(rgbColors.join('')), opacity };
+    } else {
+      const rgbColors = parsedColorCodes.map(colorValue =>
+        parseInt(colorValue[0]).toString(16)
+      );
+      return { colorCode: '#'.concat(rgbColors.join('')), opacity: '1' };
+    }
+  }
+  if (colorCode.length === 4) {
+    const code = colorCode.substring(1);
+    return {
+      colorCode: '#'.concat(
+        code[0],
+        code[0],
+        code[1],
+        code[1],
+        code[2],
+        code[2]
+      ),
+      opacity: '0',
+    };
+  }
+  return { colorCode, opacity: '0' };
+};
+
+export const updateNextSiblingValue = (event: InputEvent) => {
+  if ((event.target as HTMLInputElement)?.nextElementSibling)
+    (
+      (event.target as HTMLInputElement).nextElementSibling as HTMLInputElement
+    ).value = (event.currentTarget as HTMLInputElement)?.value;
+};
+
+export const updatePreviousSiblingValue = (event: InputEvent) => {
+  if ((event.target as HTMLInputElement)?.previousElementSibling)
+    (
+      (event.target as HTMLInputElement)
+        .previousElementSibling as HTMLInputElement
+    ).value = (event.currentTarget as HTMLInputElement)?.value;
+};
+
 export const relativeCoordinatesCommands = [
   'a',
   'c',

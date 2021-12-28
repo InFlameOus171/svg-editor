@@ -2,6 +2,7 @@ import { ShapeType } from '../types/shapes';
 import { SVGParamsBase } from '../types/types';
 import { decimalNumberRegExpGlobal } from './helper/regularExpressions';
 import { typeOfShape } from './helper/typeguards';
+import { normalizeColorCode } from './helper/util';
 import { Ellipse } from './Shapes/Ellipse';
 import { Freehand } from './Shapes/Freehand';
 import { Line } from './Shapes/Line';
@@ -31,6 +32,30 @@ const Pen = {
         }
       },
     };
+  },
+
+  draw: (
+    shape: ShapeType,
+    svgParams?: Partial<SVGParamsBase>,
+    context?: CanvasRenderingContext2D
+  ) => {
+    const shapeType = typeOfShape(shape);
+    switch (shapeType) {
+      case 'Ellipse':
+        Pen.drawEllipse(shape as Ellipse, context, svgParams);
+        break;
+      case 'Rectangle':
+        Pen.drawRectangle(shape as Rectangle, context, svgParams);
+        break;
+      case 'Line':
+        Pen.drawLine(shape as Line, context, svgParams);
+        break;
+      case 'Freehand':
+        Pen.drawFreehand(shape as Freehand, context, svgParams);
+        break;
+      case 'Path':
+        Pen.drawPath(shape as Path, context, svgParams);
+    }
   },
 
   setStyles: (
@@ -68,6 +93,49 @@ const Pen = {
     }
   },
 
+  applyStyles: (
+    pathConstructor: Path2D,
+    styles: SVGParamsBase,
+    context: CanvasRenderingContext2D
+  ) => {
+    const { fill, stroke, strokeWidth, transformMatrix } = styles;
+    if (transformMatrix) {
+      console.log(transformMatrix);
+      const newPath = new Path2D();
+      newPath.addPath(pathConstructor, transformMatrix);
+      pathConstructor = newPath;
+    }
+    if (!stroke && !fill && !strokeWidth) {
+      context.stroke(pathConstructor);
+      // context.fill(pathConstructor);
+      return;
+    }
+    if (stroke) {
+      context.strokeStyle = stroke;
+    }
+    if (strokeWidth) {
+      context.lineWidth = parseFloat(strokeWidth);
+    }
+    if (fill && fill !== 'none') {
+      console.log(fill);
+      const fillColor = normalizeColorCode(fill);
+      console.log(fillColor);
+      context.fillStyle = fillColor.colorCode;
+      context.globalAlpha = parseInt(fillColor.opacity);
+      context.fill(pathConstructor);
+      context.globalAlpha = 0;
+    }
+    if (stroke || strokeWidth) {
+      if (stroke && stroke !== 'null') {
+        const strokeColor = normalizeColorCode(stroke);
+        context.strokeStyle = strokeColor.colorCode;
+        context.globalAlpha = parseInt(strokeColor.opacity);
+      }
+      context.stroke(pathConstructor);
+      context.globalAlpha = 1;
+    }
+  },
+
   drawPath: (
     path: Path,
     context?: CanvasRenderingContext2D,
@@ -77,41 +145,14 @@ const Pen = {
     pathConstructor.addPath(new Path2D(path.toString()));
 
     if (context) {
-      const { fill, stroke, strokeWidth, transformMatrix } = {
-        ...path.getsvgParams(),
-        ...svgParams,
-      };
-      if (transformMatrix) {
-        console.log(transformMatrix);
-        const newPath = new Path2D();
-        newPath.addPath(pathConstructor, transformMatrix);
-        pathConstructor = newPath;
-      }
-      if (fill) {
-        context.fillStyle = fill;
-      }
-      if (stroke) {
-        context.strokeStyle = stroke;
-      }
-      if (strokeWidth) {
-        context.lineWidth = parseFloat(strokeWidth);
-      }
-      context.lineWidth = strokeWidth ? parseFloat(strokeWidth) : 1;
-      if (stroke && stroke !== 'null') {
-        context.strokeStyle = stroke;
-      }
-      if (fill && fill !== 'none') {
-        context.fillStyle = fill;
-        context.fill(pathConstructor);
-      }
-      if (stroke || strokeWidth) {
-        context.stroke(pathConstructor);
-      }
-      if (!stroke && !fill && !strokeWidth) {
-        context.stroke(pathConstructor);
-        context.fill(pathConstructor);
-      }
-
+      Pen.applyStyles(
+        pathConstructor,
+        {
+          ...path.getsvgParams(),
+          ...svgParams,
+        },
+        context
+      );
       context.closePath();
     }
   },
@@ -121,7 +162,7 @@ const Pen = {
     context?: CanvasRenderingContext2D,
     svgParams?: Partial<SVGParamsBase>
   ) => {
-    const path = new Path2D();
+    let pathConstructor = new Path2D();
     const points = freehand.getPoints();
     const start = points[0];
     const rest = points.slice(1);
@@ -130,23 +171,19 @@ const Pen = {
       ...svgParams,
     };
     if (context) {
-      if (fill) {
-        context.fillStyle = fill;
-      }
-      if (stroke) {
-        context.strokeStyle = stroke;
-      }
-      if (strokeWidth) {
-        context.lineWidth = parseFloat(strokeWidth);
-      }
-      if (transformMatrix) {
-        path.addPath(new Path2D(), transformMatrix);
-      }
-      path.moveTo(...start);
+      Pen.applyStyles(
+        pathConstructor,
+        {
+          ...freehand.getsvgParams(),
+          ...svgParams,
+        },
+        context
+      );
+      pathConstructor.moveTo(...start);
       rest.forEach(point => {
-        path.lineTo(...point);
+        pathConstructor.lineTo(...point);
       });
-      context?.stroke(path);
+      context?.stroke(pathConstructor);
       context?.closePath();
     }
   },
@@ -157,10 +194,20 @@ const Pen = {
     svgParams?: Partial<SVGParamsBase>
   ) => {
     const path = new Path2D();
-    path.moveTo(...line.points[0]);
-    path.lineTo(...line.points[1]);
-    context?.stroke(path);
-    context?.closePath();
+    if (context) {
+      Pen.applyStyles(
+        path,
+        {
+          ...line.getsvgParams(),
+          ...svgParams,
+        },
+        context
+      );
+      path.moveTo(...line.points[0]);
+      path.lineTo(...line.points[1]);
+      context.stroke(path);
+      context.closePath();
+    }
   },
 
   drawRectangle: (
@@ -175,9 +222,25 @@ const Pen = {
       number,
       number
     ];
-    path.rect(...values);
-    context?.stroke(path);
-    context?.closePath();
+    if (context) {
+      const params = {
+        ...rectangle.getsvgParams(),
+        ...svgParams,
+      };
+      Pen.applyStyles(
+        path,
+        {
+          ...rectangle.getsvgParams(),
+          ...svgParams,
+        },
+        context
+      );
+      const { fill, stroke } = params;
+      path.rect(...values);
+      stroke && context.stroke(path);
+      fill && context.fill(path);
+      context.closePath();
+    }
   },
 
   drawEllipse: (
@@ -192,9 +255,26 @@ const Pen = {
       number,
       number
     ];
-    path.ellipse(...values, 0, 0, 2 * Math.PI);
-    context?.stroke(path);
-    context?.closePath;
+    if (context) {
+      const params = {
+        ...ellipse.getsvgParams(),
+        ...svgParams,
+      };
+      Pen.applyStyles(
+        path,
+        {
+          ...ellipse.getsvgParams(),
+          ...svgParams,
+        },
+        context
+      );
+      const { fill, stroke } = params;
+
+      path.ellipse(...values, 0, 0, 2 * Math.PI);
+      stroke && context.stroke(path);
+      fill && context.fill(path);
+      context?.closePath;
+    }
   },
 
   clearCanvas: (

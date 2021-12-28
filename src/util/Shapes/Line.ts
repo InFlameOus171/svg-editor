@@ -23,6 +23,7 @@ export class Line extends Shape {
       svgParams,
       countShapeCountUp
     );
+    console.log(startPoint, endPoint, this.boundaries);
     this.points = [startPoint, endPoint];
     this.#center = [
       (startPoint[0] + endPoint[0]) / 2,

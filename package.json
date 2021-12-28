@@ -16,7 +16,6 @@
     "test": "jest"
   },
   "dependencies": {
-    "flatten-svg": "0.3.0",
     "lit": "^2.0.2",
     "nanoid": "^3.1.30"
   },

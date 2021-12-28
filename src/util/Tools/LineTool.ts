@@ -15,13 +15,13 @@ export class LineTool extends Tool<Line> {
     this.resetPreview();
     const renderingContext = this.drawLayer.getContext('2d');
     if (renderingContext) {
-      this.context = renderingContext;
+      this.drawContext = renderingContext;
     }
     this.toolName = Tools_List.LINE;
   }
 
   #draw = () => {
-    this.currentShape && this.pen.drawLine(this.currentShape, this.context);
+    this.currentShape && this.pen.drawLine(this.currentShape, this.drawContext);
   };
 
   #onDown = (event: MouseEvent) => {

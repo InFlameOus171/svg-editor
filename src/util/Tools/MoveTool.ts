@@ -22,12 +22,12 @@ export class MoveTool extends Tool<ShapeType> {
     this.allShapes = allShapes;
     const renderingContext = this.drawLayer.getContext('2d');
     if (renderingContext) {
-      this.context = renderingContext;
+      this.drawContext = renderingContext;
     }
     this.currentShape = selectedShape;
     this.toolName = Tools_List.MOVE;
     this.#drawOnPreview = this.pen.generatePen(this.previewContext).draw;
-    this.#draw = this.pen.generatePen(this.context).draw;
+    this.#draw = this.pen.generatePen(this.drawContext).draw;
   }
   #dCenter?: Coordinates;
   #drawOnPreview: (shape: ShapeType) => void;

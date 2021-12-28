@@ -1,6 +1,6 @@
 import { EditorLayout } from '../components/organisms/EditorLayout';
 import { ShapeType, Tools_List } from '../types/shapes';
-import { Coordinates } from '../types/types';
+import { Coordinates, PenConfiguration, SVGParamsBase } from '../types/types';
 import { appendAsSVGShapeGeneratorFunction } from './helper/shapes';
 import { isPath, typeOfShape } from './helper/typeguards';
 import { Pen } from './Pen';
@@ -23,7 +23,9 @@ export class Editor {
   #offset: Coordinates;
   #shapes: ShapeType[] = [];
   #selectedShape?: ShapeType | null = null;
-  #pen: any;
+  #pen?: {
+    draw: (shape: ShapeType, svgParams?: Partial<SVGParamsBase>) => void;
+  };
   constructor(
     canvas: HTMLCanvasElement,
     previewLayer: HTMLCanvasElement,
@@ -126,6 +128,10 @@ export class Editor {
     }
   };
 
+  #onHandleSelectShape = (selectedShape: ShapeType | null) => {
+    this.#selectedShape = selectedShape;
+  };
+
   onSelectTool = (tool: Tools_List) => {
     if (this.#selectedTool) this.#unselectTool();
     if (this.#canvas && this.#previewLayer) {
@@ -174,8 +180,9 @@ export class Editor {
             this.#canvas,
             this.#previewLayer,
             this.#self,
-            this.#offset,
-            this.#shapes
+            this.#onHandleSelectShape,
+            this.#shapes,
+            this.#offset
           );
           break;
         }
@@ -194,8 +201,11 @@ export class Editor {
               this.#canvas,
               this.#previewLayer,
               this.#self,
-              this.#offset,
-              this.#shapes
+              (selectedShape: ShapeType | null) => {
+                this.#selectedShape = selectedShape;
+              },
+              this.#shapes,
+              this.#offset
             );
           }
           break;
@@ -210,6 +220,36 @@ export class Editor {
         }
       }
       this.#selectedTool?.executeAction();
+    }
+  };
+
+  applyStyles = (strokeWidth?: string, stroke?: string, fill?: string) => {
+    if (this.#selectedShape) {
+      console.log(this.#selectedShape);
+      const strokeWidthAsFloat = strokeWidth
+        ? parseFloat(strokeWidth)
+        : undefined;
+      this.#selectedShape?.applyStyles({
+        fill,
+        stroke,
+        strokeWidth: strokeWidthAsFloat,
+      });
+      const changedShapeIndex = this.#shapes.findIndex(
+        shape => shape.getId() === this.#selectedShape?.getId()
+      );
+      this.#shapes[changedShapeIndex] = this.#selectedShape;
+      console.log(this.#shapes[changedShapeIndex].getsvgParams());
+      this.#shapes.forEach(shape => this.#pen?.draw(shape));
+      console.log(
+        'called with:',
+        this.#selectedShape,
+        'fill:',
+        fill,
+        'stroke:',
+        stroke,
+        'strokeWidth:',
+        strokeWidth
+      );
     }
   };
 
