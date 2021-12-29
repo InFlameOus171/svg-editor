@@ -5,6 +5,8 @@ import {
   PenConfiguration,
   SVGParamsBase,
 } from '../../types/types';
+import { getMinMaxValuesOfCoordinates } from '../helper/coordinates';
+import { rotate } from '../helper/util';
 import { Pen } from '../Pen';
 
 export abstract class Shape {
@@ -14,6 +16,7 @@ export abstract class Shape {
   #id?: string;
   #stroke?: string;
   #strokeWidth?: string;
+  #lineCap?: CanvasLineCap;
   transformMatrix?: DOMMatrix;
   boundaries: BoundaryCoordinates;
   index: number = 0;
@@ -27,8 +30,8 @@ export abstract class Shape {
     ],
 
     svgParams: Partial<SVGParamsBase> = {
-      stroke: '#000000',
-      fill: 'rgba(0,0,0,1)',
+      stroke: 'rgba(0,0,0,1)',
+      fill: 'rgba(0,0,0,0)',
       strokeWidth: '1',
     },
 
@@ -47,27 +50,54 @@ export abstract class Shape {
   }
 
   moveTransformMatrix = (x: number, y: number) => {
-    this.transformMatrix = this.transformMatrix?.translate(x, y);
+    const { a, b, c, d, e, f } = this.transformMatrix || new DOMMatrix();
+    this.transformMatrix = new DOMMatrix([a, b, c, d, e + x, f + y]);
+  };
+
+  scaleBoundaries = (x: number, y: number) => {
+    const { xMin, xMax, yMin, yMax } = getMinMaxValuesOfCoordinates(
+      this.boundaries
+    );
+    const point = new DOMPoint(xMax, yMax).matrixTransform(
+      new DOMMatrix().scale(x, y)
+    );
+    const [newXMax, newYMax] = [point.x, point.y];
+
+    this.boundaries = [
+      [xMin, yMin],
+      [xMin, newYMax],
+      [newXMax, yMin],
+      [newXMax, newYMax],
+    ];
+  };
+
+  rotateBoundaries = (rotation: number) => {
+    console.log('before rotation', this.boundaries);
+    const { xMin, xMax, yMin, yMax } = getMinMaxValuesOfCoordinates(
+      this.boundaries
+    );
+    this.boundaries = this.boundaries.map(boundary => {
+      const [x, y] = boundary;
+      return rotate(xMin, yMin, x, y, rotation);
+    }) as BoundaryCoordinates;
+    console.log('after rotation', this.boundaries);
   };
 
   applyStyles = (config: PenConfiguration) => {
     this.#fill = config.fill;
     this.#stroke = config.stroke;
     this.#strokeWidth = config.strokeWidth?.toString();
+    this.#lineCap = config.lineCap;
     if (config.scaling || config.rotation) {
       const { x: scaleX, y: scaleY } = config.scaling || { x: 1, y: 1 };
       const rotation = config.rotation ?? 0;
       this.transformMatrix = this.transformMatrix
         ?.rotate(rotation)
         .scale(scaleX, scaleY);
-      const basicMatrix = new DOMMatrix()
-        .rotate(rotation)
-        .scale(scaleX, scaleY);
-      this.boundaries = this.boundaries.map(boundary => {
-        const point = new DOMPoint(boundary[0], boundary[1]);
-        const transformedPoint = point.matrixTransform(basicMatrix);
-        return [transformedPoint.x, transformedPoint.y];
-      }) as BoundaryCoordinates;
+      this.scaleBoundaries(scaleX, scaleY);
+      this.rotateBoundaries(rotation);
+      const { a, b, c, d, e, f } = this.transformMatrix || {};
+      console.log(this.boundaries, { a, b, c, d, e, f });
     }
   };
 
@@ -79,12 +109,13 @@ export abstract class Shape {
     ) as BoundaryCoordinates;
   };
 
-  getsvgParams = () => {
+  getSvgParams = () => {
     return {
       fill: this.#fill,
       stroke: this.#stroke,
       strokeWidth: this.#strokeWidth,
       transformMatrix: this.transformMatrix,
+      lineCap: this.#lineCap,
     };
   };
 

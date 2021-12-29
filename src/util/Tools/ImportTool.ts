@@ -28,10 +28,9 @@ export class ImportTool extends Tool<ShapeType> {
       createdSVG.appendChild(svg.firstChild);
       const appendedSvg = document.body.appendChild(createdSVG);
       const shapes = convertSVGDocumentToShapes(elementId);
-      console.log(shapes);
-      shapes.forEach(shape => console.log(shape.toString()));
       document.body.removeChild(appendedSvg);
       this.allShapes.push(...shapes);
+      console.log(shapes.map(s => s.getSvgParams()));
       shapes.forEach(this.#draw);
     }
   };

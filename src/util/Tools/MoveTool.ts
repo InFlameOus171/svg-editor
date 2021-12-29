@@ -73,10 +73,7 @@ export class MoveTool extends Tool<ShapeType> {
       const { startingCorner, width, height } = rectangleParamsFromBoundaries(
         this.currentShape.boundaries
       );
-      console.log(
-        this.currentShape.boundaries,
-        this.currentShape.getsvgParams()
-      );
+      console.log(this.currentShape.getSvgParams());
       this.#drawOnPreview(this.currentShape);
       this.#drawOnPreview(
         new Rectangle(startingCorner, width, height, {

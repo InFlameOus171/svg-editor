@@ -67,14 +67,9 @@ export class SelectTool extends Tool<ShapeType> {
 
   #updateInputFields = () => {
     if (this.#selectedShape) {
-      const params = this.#selectedShape.getsvgParams();
-      const footerFields =
-        this.self.shadowRoot?.getElementById('footer-fields');
-      footerFields?.removeAttribute('disabled');
-      footerFields
-        ?.querySelector('#stroke-width-input')
-        ?.setAttribute('value', params.strokeWidth ?? '0');
       const defaultColor = { colorCode: '#000000', opacity: '1' };
+      const params = this.#selectedShape.getSvgParams();
+
       const strokeColor = params.stroke
         ? normalizeColorCode(params.stroke)
         : defaultColor;
@@ -82,18 +77,33 @@ export class SelectTool extends Tool<ShapeType> {
         ? normalizeColorCode(params.fill)
         : defaultColor;
 
+      const footerFields =
+        this.self.shadowRoot?.getElementById('footer-fields');
+
+      footerFields?.removeAttribute('disabled');
+
+      footerFields
+        ?.querySelector('#stroke-width-input')
+        ?.setAttribute('value', params.strokeWidth ?? '0');
       footerFields
         ?.querySelector('#stroke-color-input')
         ?.setAttribute('value', strokeColor.colorCode);
-      footerFields
-        ?.querySelector('#stroke-opacity-input')
-        ?.setAttribute('value', strokeColor.opacity);
+
       footerFields
         ?.querySelector('#fill-color-input')
         ?.setAttribute('value', fillColor.colorCode);
-      footerFields
-        ?.querySelector('#fill-opacity-input')
-        ?.setAttribute('value', fillColor.opacity);
+
+      const fillOpacityInput = footerFields?.querySelector(
+        '#fill-opacity-input'
+      );
+      const strokeOpacityInput = footerFields?.querySelector(
+        '#stroke-opacity-input'
+      );
+
+      strokeOpacityInput?.setAttribute('value', strokeColor.opacity);
+      strokeOpacityInput?.dispatchEvent(new Event('change'));
+      fillOpacityInput?.setAttribute('value', fillColor.opacity);
+      fillOpacityInput?.dispatchEvent(new Event('change'));
     }
   };
 

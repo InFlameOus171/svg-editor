@@ -38,7 +38,6 @@ export const setSVGStyleParams = (
   transformMatrix?: DOMMatrix
 ) => {
   const { a, b, c, d, e, f } = transformMatrix || {};
-  console.log(svgShape, fill, stroke, strokeWidth, transformMatrix);
   stroke && svgShape.setAttribute('stroke', stroke);
   strokeWidth && svgShape.setAttribute('stroke-width', strokeWidth);
   fill && svgShape.setAttribute('fill', fill);

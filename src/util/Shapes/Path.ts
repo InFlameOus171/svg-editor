@@ -33,6 +33,7 @@ export class Path extends Shape {
     });
     if (svgParams?.bBox) {
       const { x, y, width, height } = svgParams.bBox;
+      console.log(svgParams.bBox);
       const boundaries = [
         [x, y],
         [x, y + height],
@@ -44,6 +45,7 @@ export class Path extends Shape {
         const transformedPoint = point.matrixTransform(this.transformMatrix);
         return [transformedPoint.x, transformedPoint.y];
       }) as BoundaryCoordinates;
+      console.log(this.boundaries);
     } else {
       this.boundaries = getPathBoundaries(this.drawPath);
     }
@@ -60,7 +62,7 @@ export class Path extends Shape {
 
   toSVGPathParams = () => ({
     d: this.toString(),
-    ...this.getsvgParams(),
+    ...this.getSvgParams(),
   });
 
   moveTo = (coordinates: Coordinates) => {

@@ -52,7 +52,7 @@ export class Freehand extends Shape {
 
   toSVGFreehandParams = (): FreehandSVGParams => ({
     points: this.toString(),
-    ...this.getsvgParams(),
+    ...this.getSvgParams(),
   });
 
   toString = () => {

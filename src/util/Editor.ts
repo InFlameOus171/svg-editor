@@ -3,6 +3,7 @@ import { ShapeType, Tools_List } from '../types/shapes';
 import { Coordinates, PenConfiguration, SVGParamsBase } from '../types/types';
 import { appendAsSVGShapeGeneratorFunction } from './helper/shapes';
 import { isPath, typeOfShape } from './helper/typeguards';
+import { hexToRGBA, normalizeColorCode } from './helper/util';
 import { Pen } from './Pen';
 import { Freehand } from './Shapes/Freehand';
 import { Path } from './Shapes/Path';
@@ -26,6 +27,9 @@ export class Editor {
   #pen?: {
     draw: (shape: ShapeType, svgParams?: Partial<SVGParamsBase>) => void;
   };
+  #previewPen?: {
+    draw: (shape: ShapeType, svgParams?: Partial<SVGParamsBase>) => void;
+  };
   constructor(
     canvas: HTMLCanvasElement,
     previewLayer: HTMLCanvasElement,
@@ -39,6 +43,10 @@ export class Editor {
     const context = canvas.getContext('2d');
     if (context) {
       this.#pen = Pen.generatePen(context);
+    }
+    const previewContext = previewLayer.getContext('2d');
+    if (previewContext) {
+      this.#previewPen = Pen.generatePen(previewContext);
     }
   }
 
@@ -107,13 +115,12 @@ export class Editor {
         '<svg xmlns="http://www.w3.org/2000/svg"'
       );
     }
-    // brauch ich das überhaupt ?
-    // if (!source.match(/^<svg[^>]+"http\:\/\/www\.w3\.org\/1999\/xlink"/)) {
-    //   source = source.replace(
-    //     /^<svg/,
-    //     '<svg xmlns:xlink="http://www.w3.org/1999/xlink"'
-    //   );
-    // }
+    if (!source.match(/^<svg[^>]+"http\:\/\/www\.w3\.org\/1999\/xlink"/)) {
+      source = source.replace(
+        /^<svg/,
+        '<svg xmlns:xlink="http://www.w3.org/1999/xlink"'
+      );
+    }
     source = '<?xml version="1.0" standalone="no"?>\r\n' + source;
     const url =
       'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(source);
@@ -223,33 +230,52 @@ export class Editor {
     }
   };
 
-  applyStyles = (strokeWidth?: string, stroke?: string, fill?: string) => {
-    if (this.#selectedShape) {
-      console.log(this.#selectedShape);
+  applyStyles = (
+    strokeWidth?: string,
+    stroke: string = '#000000',
+    fill: string = '#000000',
+    fillOpacity?: string,
+    strokeOpacity?: string,
+    lineCap: CanvasLineCap = 'butt',
+    rotation?: string,
+    scaling?: [string, string]
+  ) => {
+    if (this.#selectedShape && this.#canvas) {
+      console.log(scaling);
+      const parsedScaling = scaling
+        ? {
+            x: parseFloat(scaling[0]),
+            y: parseFloat(scaling[1]),
+          }
+        : undefined;
+      const parsedRotation = rotation ? parseFloat(rotation) : undefined;
       const strokeWidthAsFloat = strokeWidth
         ? parseFloat(strokeWidth)
         : undefined;
+      const normalizedFill = hexToRGBA(fill, fillOpacity);
+      const normalizedStroke = hexToRGBA(stroke, strokeOpacity);
       this.#selectedShape?.applyStyles({
-        fill,
-        stroke,
+        fill: normalizedFill,
+        stroke: normalizedStroke,
         strokeWidth: strokeWidthAsFloat,
+        lineCap,
+        rotation: parsedRotation,
+        scaling: parsedScaling,
       });
+
       const changedShapeIndex = this.#shapes.findIndex(
         shape => shape.getId() === this.#selectedShape?.getId()
       );
       this.#shapes[changedShapeIndex] = this.#selectedShape;
-      console.log(this.#shapes[changedShapeIndex].getsvgParams());
-      this.#shapes.forEach(shape => this.#pen?.draw(shape));
-      console.log(
-        'called with:',
-        this.#selectedShape,
-        'fill:',
-        fill,
-        'stroke:',
-        stroke,
-        'strokeWidth:',
-        strokeWidth
-      );
+      Pen.clearCanvas(this.#canvas);
+      this.#shapes.forEach(shape => {
+        this.#pen?.draw(shape);
+        this.#previewPen?.draw(shape, {
+          stroke: 'red',
+          strokeWidth: '2',
+          fill: 'rgba(0,0,0,0)',
+        });
+      });
     }
   };
 

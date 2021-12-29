@@ -74,7 +74,39 @@ export class EditorLayout extends LitElement {
     const fill = (
       this.shadowRoot?.getElementById('fill-color-input') as HTMLInputElement
     )?.value;
-    this.editor?.applyStyles(strokeWidth, stroke, fill);
+    const fillOpacity = (
+      this.shadowRoot?.getElementById('fill-opacity-input') as HTMLInputElement
+    )?.value;
+    const lineCap = (
+      this.shadowRoot?.getElementById('line-cap-input') as HTMLInputElement
+    )?.value as CanvasLineCap;
+    const rotation = (
+      this.shadowRoot?.getElementById('rotation-input') as HTMLInputElement
+    )?.value;
+    const scalingX = (
+      this.shadowRoot?.getElementById('scaling-x-input') as HTMLInputElement
+    )?.value;
+    const scalingY = (
+      this.shadowRoot?.getElementById('scaling-y-input') as HTMLInputElement
+    )?.value;
+    const strokeOpacity = (
+      this.shadowRoot?.getElementById(
+        'stroke-opacity-input'
+      ) as HTMLInputElement
+    )?.value;
+    const scaling: [string, string] | undefined =
+      scalingX && scalingY ? [scalingX, scalingY] : undefined;
+
+    this.editor?.applyStyles(
+      strokeWidth,
+      stroke,
+      fill,
+      fillOpacity,
+      strokeOpacity,
+      lineCap,
+      rotation,
+      scaling
+    );
   };
 
   render() {
@@ -92,41 +124,89 @@ export class EditorLayout extends LitElement {
       ></editor-header>
       <div id="footer">
         <fieldset disabled id="footer-fields">
-          <label>
-            Stroke width:
-            <input type="number" id="stroke-width-input" />
-          </label>
-          <div>
-            <label>
-              Color:
-              <input type="color" id="stroke-color-input" />
-            </label>
-            <label>
-              Opacity:
-              <input type="range" @input=${updateNextSiblingValue} />
-              <input
-                id="stroke-opacity-input"
-                type="number"
-                @change=${updatePreviousSiblingValue}
-              />
-            </label>
+          <div id="footer-input">
+            <div id="left-input-section">
+              <div>
+                <label>
+                  Stroke width:
+                  <input type="number" id="stroke-width-input" />
+                </label>
+                <label>
+                  Linecap:
+                  <select id="line-cap-input">
+                    <option value="round">Round edge</option>
+                    <option value="butt">Flat edge</option>
+                  </select>
+                </label>
+              </div>
+              <div id="footer-input-fields">
+                <div>
+                  <label>
+                    Color:
+                    <input type="color" id="stroke-color-input" />
+                  </label>
+                  <label>
+                    Opacity:
+                    <input type="range" @input=${updateNextSiblingValue} />
+                    <input
+                      id="stroke-opacity-input"
+                      type="number"
+                      @change=${updatePreviousSiblingValue}
+                    />
+                  </label>
+                </div>
+                <div>
+                  <label>
+                    Fill:
+                    <input type="color" id="fill-color-input" />
+                  </label>
+                  <label>
+                    Opacity:
+                    <input
+                      type="range"
+                      min="0"
+                      max="1"
+                      step="0.01"
+                      @input=${updateNextSiblingValue}
+                    />
+                    <input
+                      id="fill-opacity-input"
+                      type="number"
+                      @change=${updatePreviousSiblingValue}
+                    />
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div id="right-input-section">
+              <label>
+                Rotation:
+                <input
+                  type="range"
+                  min="-180"
+                  max="180"
+                  step="0.1"
+                  @input=${updateNextSiblingValue}
+                />
+                <input
+                  id="rotation-input"
+                  type="number"
+                  @change=${updatePreviousSiblingValue}
+                />
+              </label>
+              <label>
+                Vertical scaling:
+                <input id="scaling-y-input" type="number" />
+              </label>
+              <label>
+                Horizontal scaling:
+                <input id="scaling-x-input" type="number" />
+              </label>
+            </div>
           </div>
-          <div>
-            <label>
-              Fill:
-              <input type="color" id="fill-color-input" />
-            </label>
-            <label>
-              Opacity:
-              <input type="range" @input=${updateNextSiblingValue} />
-              <input
-                id="fill-opacity-input"
-                type="number"
-                @change=${updatePreviousSiblingValue}
-              />
-            </label>
+          <div id="footer-submit-button">
+            <button @click=${this.handleApplyStyles}>Apply styles</button>
           </div>
-          <button @click=${this.handleApplyStyles}>Apply styles</button>
         </fieldset>
       </div>
     `;

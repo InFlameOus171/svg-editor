@@ -32,3 +32,9 @@ export const rotateRegExp = new RegExp(
 // Matches skewX and skewY string of a transform
 export const skewXRegExp = new RegExp(`skewX\\(${decimalNumber}\\)`);
 export const skewYRegExp = new RegExp(`skewY\\(${decimalNumber}\\)`);
+
+// Matches full hex string, r, g and b from a string
+// #ff00aa => ["#ff00aa","ff","00","aa"]
+export const hexColorCodeRegExp = new RegExp(
+  /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i
+);

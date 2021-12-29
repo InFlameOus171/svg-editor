@@ -10,7 +10,43 @@ export const layoutStyle = css`
   }
 
   #footer {
+    padding: 10px 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.3);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.3);
     background-color: rgba(255, 255, 255, 0.8);
+  }
+
+  #footer #footer-fields {
+    border: none;
+
+    display: flex;
+    flex-direction: column;
+  }
+
+  #footer #footer-input {
+    display: flex;
+    gap: 5px;
+  }
+  #footer #footer-input #left-input-section {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  #footer #footer-input #right-input-section {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  #footer #footer-input-fields {
+    display: flex;
+    flex-direction: column;
+  }
+
+  #footer #footer-submit-button {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
   }
 
   #stroke-opacity-input {

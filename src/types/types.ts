@@ -22,6 +22,7 @@ export type SVGParamsBase = {
   fill?: string;
   stroke?: string;
   strokeWidth?: string;
+  lineCap?: CanvasLineCap;
   transformMatrix?: DOMMatrix;
   bBox?: SVGRect;
 };
@@ -70,6 +71,7 @@ export type PenConfiguration = {
   fill?: string;
   stroke?: string;
   strokeWidth?: number;
+  lineCap?: CanvasLineCap;
   scaling?: { x: number; y: number };
   rotation?: number;
 };

@@ -7,6 +7,7 @@ import { Line } from '../Shapes/Line';
 import { Path } from '../Shapes/Path';
 import { Rectangle } from '../Shapes/Rectangle';
 import {
+  hexColorCodeRegExp,
   matrixRegExp,
   rotateRegExp,
   scaleRegExp,
@@ -84,8 +85,10 @@ Element.prototype.getFloatAttribute = function (attribute: string) {
 };
 
 const getsvgParams = (element: SVGGraphicsElement) => {
-  const fill = element.getAttribute('fill') ?? '';
-  const stroke = element.getAttribute('stroke') ?? '';
+  const fillValues = normalizeColorCode(element.getAttribute('fill'));
+  const strokeValues = normalizeColorCode(element.getAttribute('stroke'));
+  const fill = hexToRGBA(fillValues.colorCode, fillValues.opacity);
+  const stroke = hexToRGBA(strokeValues.colorCode, strokeValues.opacity);
   const strokeWidth = element.getAttribute('stroke-width') ?? '';
   const transformMatrix = element.getCTM() ?? undefined;
   const bBox = element.getBBox();
@@ -189,25 +192,42 @@ export const transformAllCoordinatesByMatrix = (
   return coordinates.map(transformCoordinatesByMatrix(matrix));
 };
 
+export const parseToFixed2HexString = (colorValue: RegExpMatchArray) => {
+  let codeValue = parseInt(colorValue[0]).toString(16);
+  if (codeValue.length < 2) {
+    codeValue = '0'.concat(codeValue);
+  }
+
+  return codeValue;
+};
+
+export const hexToRGBA = (colorCode: string, opacity: string = '1') => {
+  const [, r, g, b] = hexColorCodeRegExp.exec(colorCode) ?? [
+    '#000000',
+    '00',
+    '00',
+    '00',
+  ];
+  const parsedColorCodes = [parseInt(r, 16), parseInt(g, 16), parseInt(b, 16)];
+  return 'rgba('.concat(parsedColorCodes.join(','), ',', opacity, ')');
+};
+
 export const normalizeColorCode = (
-  colorCode: string
+  colorCode?: string | null
 ): { colorCode: string; opacity: string } => {
+  console.log(colorCode);
+  if (!colorCode) {
+    return { colorCode: '#000000', opacity: '0' };
+  }
   if (colorCode.charAt(0) !== '#') {
     const numberMatcher = new RegExp(/\d+/g);
-    console.log(...colorCode.matchAll(numberMatcher));
     const parsedColorCodes = [...colorCode.matchAll(numberMatcher)];
-    console.log(...parsedColorCodes);
     if (parsedColorCodes.length === 4) {
       const opacity = parsedColorCodes.pop()?.[0] ?? '0';
-      const rgbColors = parsedColorCodes.map(colorValue =>
-        parseInt(colorValue[0]).toString(16)
-      );
-      console.log(rgbColors);
+      const rgbColors = parsedColorCodes.map(parseToFixed2HexString);
       return { colorCode: '#'.concat(rgbColors.join('')), opacity };
     } else {
-      const rgbColors = parsedColorCodes.map(colorValue =>
-        parseInt(colorValue[0]).toString(16)
-      );
+      const rgbColors = parsedColorCodes.map(parseToFixed2HexString);
       return { colorCode: '#'.concat(rgbColors.join('')), opacity: '1' };
     }
   }
@@ -222,10 +242,32 @@ export const normalizeColorCode = (
         code[2],
         code[2]
       ),
-      opacity: '0',
+      opacity: '1',
     };
   }
-  return { colorCode, opacity: '0' };
+  return { colorCode, opacity: '1' };
+};
+
+// https://stackoverflow.com/questions/17410809/how-to-calculate-rotation-in-2d-in-javascript
+/*
+The first two parameters are the X and Y coordinates of the central point 
+(the origin around which the second point will be rotated). The next two parameters are the 
+coordinates of the point that we'll be rotating. The last parameter is the angle, in degrees.
+- theftprevention, https://stackoverflow.com/users/2038227/theftprevention
+*/
+export const rotate = (
+  cx: number,
+  cy: number,
+  x: number,
+  y: number,
+  angle: number
+): Coordinates => {
+  var radians = (Math.PI / 180) * angle,
+    cos = Math.cos(radians),
+    sin = Math.sin(radians),
+    nx = cos * (x - cx) + sin * (y - cy) + cx,
+    ny = cos * (y - cy) - sin * (x - cx) + cy;
+  return [nx, ny];
 };
 
 export const updateNextSiblingValue = (event: InputEvent) => {
