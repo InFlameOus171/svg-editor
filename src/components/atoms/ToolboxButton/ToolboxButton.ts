@@ -8,6 +8,12 @@ export class ToolboxButton extends LitElement {
   isSelected?: boolean;
 
   @property({ type: String })
+  toolName?: string;
+
+  @property({ type: String })
+  icon?: string;
+
+  @property({ type: String })
   buttonId?: string;
 
   @property()
@@ -26,7 +32,9 @@ export class ToolboxButton extends LitElement {
       class=${this.isSelected ? 'isSelected' : ''}
       @click=${this.#handleClick}
     >
-      ${this.title}
+      ${this.icon
+        ? html`<img height="75px" width="75px" src=${this.icon}>${this.title}</img>`
+        : this.toolName}
     </button>`;
   }
 }

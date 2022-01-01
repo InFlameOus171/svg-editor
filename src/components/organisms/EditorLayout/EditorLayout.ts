@@ -77,26 +77,19 @@ export class EditorLayout extends LitElement {
     const fillOpacity = (
       this.shadowRoot?.getElementById('fill-opacity-input') as HTMLInputElement
     )?.value;
+    const lineDash = (
+      this.shadowRoot?.getElementById('line-dash-input') as HTMLInputElement
+    )?.value
+      .split(',')
+      .map(value => parseInt(value.trim()));
     const lineCap = (
       this.shadowRoot?.getElementById('line-cap-input') as HTMLInputElement
     )?.value as CanvasLineCap;
-    const rotation = (
-      this.shadowRoot?.getElementById('rotation-input') as HTMLInputElement
-    )?.value;
-    const scalingX = (
-      this.shadowRoot?.getElementById('scaling-x-input') as HTMLInputElement
-    )?.value;
-    const scalingY = (
-      this.shadowRoot?.getElementById('scaling-y-input') as HTMLInputElement
-    )?.value;
     const strokeOpacity = (
       this.shadowRoot?.getElementById(
         'stroke-opacity-input'
       ) as HTMLInputElement
     )?.value;
-    const scaling: [string, string] | undefined =
-      scalingX && scalingY ? [scalingX, scalingY] : undefined;
-
     this.editor?.applyStyles(
       strokeWidth,
       stroke,
@@ -104,8 +97,7 @@ export class EditorLayout extends LitElement {
       fillOpacity,
       strokeOpacity,
       lineCap,
-      rotation,
-      scaling
+      lineDash
     );
   };
 
@@ -132,6 +124,14 @@ export class EditorLayout extends LitElement {
                   <input type="number" id="stroke-width-input" />
                 </label>
                 <label>
+                  Line dash:
+                  <input
+                    type="text"
+                    id="line-dash-input"
+                    placeholder="3,3,3,12..."
+                  />
+                </label>
+                <label>
                   Linecap:
                   <select id="line-cap-input">
                     <option value="round">Round edge</option>
@@ -147,7 +147,12 @@ export class EditorLayout extends LitElement {
                   </label>
                   <label>
                     Opacity:
-                    <input type="range" @input=${updateNextSiblingValue} />
+                    <input
+                      type="range"
+                      min="0"
+                      max="1"
+                      @input=${updateNextSiblingValue}
+                    />
                     <input
                       id="stroke-opacity-input"
                       type="number"
@@ -177,31 +182,6 @@ export class EditorLayout extends LitElement {
                   </label>
                 </div>
               </div>
-            </div>
-            <div id="right-input-section">
-              <label>
-                Rotation:
-                <input
-                  type="range"
-                  min="-180"
-                  max="180"
-                  step="0.1"
-                  @input=${updateNextSiblingValue}
-                />
-                <input
-                  id="rotation-input"
-                  type="number"
-                  @change=${updatePreviousSiblingValue}
-                />
-              </label>
-              <label>
-                Vertical scaling:
-                <input id="scaling-y-input" type="number" />
-              </label>
-              <label>
-                Horizontal scaling:
-                <input id="scaling-x-input" type="number" />
-              </label>
             </div>
           </div>
           <div id="footer-submit-button">

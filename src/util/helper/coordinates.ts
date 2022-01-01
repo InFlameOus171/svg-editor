@@ -2,36 +2,11 @@ import { ShapeType } from '../../types/shapes';
 import {
   BoundaryCoordinates,
   Coordinates,
-  RectangleComponents,
   SVGDrawPath,
-  SVGParamsBase,
   VectorCoordinates,
 } from '../../types/types';
 import { Partition } from '../../types/util.types';
-import { Ellipse } from '../Shapes/Ellipse';
-import { Line } from '../Shapes/Line';
-import {
-  getUniqueXandYCoordinatesFromBoundaries,
-  relativeCommands,
-  singleDirectionCommands,
-} from './util';
-
-export const getEdgesFromPoints = (
-  startPoint: Coordinates,
-  endPoint: Coordinates,
-  svgParams?: Partial<SVGParamsBase>,
-  countShapecountUp?: boolean
-): RectangleComponents => {
-  const corner1: Coordinates = startPoint;
-  const corner2: Coordinates = [endPoint[0], startPoint[1]];
-  const corner3: Coordinates = endPoint;
-  const corner4: Coordinates = [startPoint[0], endPoint[1]];
-  const edge1 = new Line(corner1, corner2, svgParams, countShapecountUp);
-  const edge2 = new Line(corner2, corner3, svgParams, false);
-  const edge3 = new Line(corner3, corner4, svgParams, false);
-  const edge4 = new Line(corner4, corner1, svgParams, false);
-  return [edge1, edge2, edge3, edge4];
-};
+import { relativeCommands, singleDirectionCommands } from './util';
 
 export const getCanvasRectangleValuesFromPoints = (
   startPoint: Coordinates,
@@ -72,41 +47,6 @@ export const calculateDistanceBetweenPoints = (
   const cathete2 = startPoint[1] - endPoint[1];
   const result = cathete1 ** 2 + cathete2 ** 2;
   return Math.sqrt(result);
-};
-
-export const generateEllipse = (
-  startCoordinates: [number, number],
-  endCoordinates: [number, number],
-  svgParams?: Partial<SVGParamsBase>,
-  countShapecountUp?: boolean
-) => {
-  const center: Coordinates = [
-    (startCoordinates[0] + endCoordinates[0]) / 2,
-    (startCoordinates[1] + endCoordinates[1]) / 2,
-  ];
-  const radiusX = calculateDistanceBetweenPoints(center, [
-    endCoordinates[0],
-    (startCoordinates[1] + endCoordinates[1]) / 2,
-  ]);
-  const radiusY = calculateDistanceBetweenPoints(center, [
-    (startCoordinates[0] + endCoordinates[0]) / 2,
-    endCoordinates[1],
-  ]);
-  return new Ellipse(center, radiusX, radiusY, svgParams, countShapecountUp);
-};
-
-export const generateCircle = (
-  startCoordinates: [number, number],
-  endCoordinates: [number, number],
-  svgParams?: Partial<SVGParamsBase>,
-  countShapecountUp?: boolean
-) => {
-  const center: Coordinates = startCoordinates;
-  const radius = calculateDistanceBetweenPoints(
-    startCoordinates,
-    endCoordinates
-  );
-  return new Ellipse(center, radius, radius, svgParams, countShapecountUp);
 };
 
 export const calculateVectorFromCoordinates = (
@@ -228,23 +168,6 @@ export const getCircleBoundaries = (
     center[1] - radiusY,
   ];
   return [topLeftCorner, topRightCorner, bottomLeftCorner, bottomRightCorner];
-};
-
-export const getFreehandBoundaries = (
-  points: Coordinates[]
-): BoundaryCoordinates => {
-  const [uniqueXCoordinates, uniqueYCoordinates] =
-    getUniqueXandYCoordinatesFromBoundaries(points);
-  const maxX = Math.max(...uniqueXCoordinates);
-  const maxY = Math.max(...uniqueYCoordinates);
-  const minX = Math.min(...uniqueXCoordinates);
-  const minY = Math.min(...uniqueYCoordinates);
-  return [
-    [minX, minY],
-    [minX, maxY],
-    [maxX, minY],
-    [maxX, maxY],
-  ];
 };
 
 export const getRectBoundaries = (

@@ -1,5 +1,3 @@
-import { Line } from '../util/Shapes/Line';
-
 declare global {
   interface Element {
     getFloatAttribute: (value: string) => number;
@@ -9,7 +7,6 @@ declare global {
 export type NullableString = null | string;
 export type NullableNumber = null | number;
 export type Coordinates = [number, number];
-export type RectangleComponents = [Line, Line, Line, Line];
 export type VectorCoordinates = [Coordinates, Coordinates];
 export type BoundaryCoordinates = [
   Coordinates,
@@ -22,6 +19,7 @@ export type SVGParamsBase = {
   fill?: string;
   stroke?: string;
   strokeWidth?: string;
+  lineDash?: number[];
   lineCap?: CanvasLineCap;
   transformMatrix?: DOMMatrix;
   bBox?: SVGRect;
@@ -72,6 +70,7 @@ export type PenConfiguration = {
   stroke?: string;
   strokeWidth?: number;
   lineCap?: CanvasLineCap;
-  scaling?: { x: number; y: number };
-  rotation?: number;
+  lineDash?: number[];
+  // scaling?: { x: number; y: number };
+  // rotation?: number;
 };

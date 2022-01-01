@@ -3,7 +3,7 @@ import {
   FreehandSVGParams,
   SVGParamsBase,
 } from '../../types/types';
-import { getFreehandBoundaries } from '../helper/coordinates';
+import { getFreehandBoundaries } from './Freehand.util';
 import { Shape } from './Shape';
 
 export class Freehand extends Shape {

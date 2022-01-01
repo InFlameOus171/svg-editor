@@ -1,21 +1,21 @@
 import { EditorLayout } from '../../components/organisms/EditorLayout';
-import { Tools_List } from '../../types/shapes';
+import { ShapeType, Tools_List } from '../../types/shapes';
 import { Coordinates } from '../../types/types';
-import {
-  generateCircle,
-  generateEllipse as generateEllipse,
-} from '../helper/coordinates';
 import { Ellipse } from '../Shapes/Ellipse';
+import { generateCircle, generateEllipse } from './EllipseTool.util';
 import { Tool } from './Tool';
 
 export class EllipseTool extends Tool<Ellipse> {
+  isCircle: boolean = false;
+
   constructor(
     drawLayer: HTMLCanvasElement,
     previewLayer: HTMLCanvasElement,
     self: EditorLayout,
+    onCreate: (shape: ShapeType | null) => void,
     offset: Coordinates
   ) {
-    super(drawLayer, self, offset, previewLayer);
+    super(drawLayer, self, onCreate, offset, previewLayer);
     this.resetPreview();
     this.toolName = Tools_List.ELLIPSE;
     const renderingContext = this.drawLayer.getContext('2d');
@@ -59,10 +59,9 @@ export class EllipseTool extends Tool<Ellipse> {
         this.currentCoordinates
       );
     }
-    this.allShapes.push(this.currentShape);
+    this.onUpdateEditor(this.currentShape);
     this.#draw();
   };
-  isCircle: boolean = false;
 
   #onMove = (event: MouseEvent) => {
     this.currentCoordinates = this.getCoords(event);

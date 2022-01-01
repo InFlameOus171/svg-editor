@@ -7,7 +7,6 @@ import {
 } from '../../types/types';
 import { getMinMaxValuesOfCoordinates } from '../helper/coordinates';
 import { rotate } from '../helper/util';
-import { Pen } from '../Pen';
 
 export abstract class Shape {
   static #counter: number = 0;
@@ -17,6 +16,7 @@ export abstract class Shape {
   #stroke?: string;
   #strokeWidth?: string;
   #lineCap?: CanvasLineCap;
+  #lineDash?: number[];
   transformMatrix?: DOMMatrix;
   boundaries: BoundaryCoordinates;
   index: number = 0;
@@ -72,7 +72,6 @@ export abstract class Shape {
   };
 
   rotateBoundaries = (rotation: number) => {
-    console.log('before rotation', this.boundaries);
     const { xMin, xMax, yMin, yMax } = getMinMaxValuesOfCoordinates(
       this.boundaries
     );
@@ -80,25 +79,26 @@ export abstract class Shape {
       const [x, y] = boundary;
       return rotate(xMin, yMin, x, y, rotation);
     }) as BoundaryCoordinates;
-    console.log('after rotation', this.boundaries);
   };
 
   applyStyles = (config: PenConfiguration) => {
+    console.log(config.lineDash);
     this.#fill = config.fill;
     this.#stroke = config.stroke;
     this.#strokeWidth = config.strokeWidth?.toString();
     this.#lineCap = config.lineCap;
-    if (config.scaling || config.rotation) {
-      const { x: scaleX, y: scaleY } = config.scaling || { x: 1, y: 1 };
-      const rotation = config.rotation ?? 0;
-      this.transformMatrix = this.transformMatrix
-        ?.rotate(rotation)
-        .scale(scaleX, scaleY);
-      this.scaleBoundaries(scaleX, scaleY);
-      this.rotateBoundaries(rotation);
-      const { a, b, c, d, e, f } = this.transformMatrix || {};
-      console.log(this.boundaries, { a, b, c, d, e, f });
-    }
+    this.#lineDash = config.lineDash;
+    // @TODO: To be implemented
+    // if (config.scaling || config.rotation) {
+    //   const { x: scaleX, y: scaleY } = config.scaling || { x: 1, y: 1 };
+    //   const rotation = config.rotation ?? 0;
+    //   this.transformMatrix = this.transformMatrix
+    //     ?.rotate(rotation)
+    //     .scale(scaleX, scaleY);
+    //   this.scaleBoundaries(scaleX, scaleY);
+    //   this.rotateBoundaries(rotation);
+    //   const { a, b, c, d, e, f } = this.transformMatrix || {};
+    // }
   };
 
   moveBoundaries = (difference: Coordinates) => {
@@ -116,6 +116,7 @@ export abstract class Shape {
       strokeWidth: this.#strokeWidth,
       transformMatrix: this.transformMatrix,
       lineCap: this.#lineCap,
+      lineDash: this.#lineDash,
     };
   };
 

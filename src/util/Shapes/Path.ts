@@ -5,11 +5,7 @@ import {
   SVGParamsBase,
 } from '../../types/types';
 import { getPathBoundaries, sumOfCoordinates } from '../helper/coordinates';
-import { getPathCommands } from '../helper/shapes';
-import {
-  absoluteCoordinatesCommands,
-  singleDirectionCommands,
-} from '../helper/util';
+import { singleDirectionCommands } from '../helper/util';
 import { Shape } from './Shape';
 
 export class Path extends Shape {
@@ -33,7 +29,6 @@ export class Path extends Shape {
     });
     if (svgParams?.bBox) {
       const { x, y, width, height } = svgParams.bBox;
-      console.log(svgParams.bBox);
       const boundaries = [
         [x, y],
         [x, y + height],
@@ -45,7 +40,6 @@ export class Path extends Shape {
         const transformedPoint = point.matrixTransform(this.transformMatrix);
         return [transformedPoint.x, transformedPoint.y];
       }) as BoundaryCoordinates;
-      console.log(this.boundaries);
     } else {
       this.boundaries = getPathBoundaries(this.drawPath);
     }

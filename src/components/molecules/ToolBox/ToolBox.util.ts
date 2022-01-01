@@ -3,7 +3,7 @@ import { IToolboxButtonProps } from '../../atoms/ToolboxButton/ToolboxButton.typ
 
 export const getButtonColumn = (
   interval: [number, number],
-  tools?: Array<any>
+  tools?: Array<IToolboxButtonProps>
 ) =>
   tools?.slice(interval[0], interval[1]).map(
     (tool, index) =>
@@ -12,7 +12,8 @@ export const getButtonColumn = (
           <toolbox-button
             .onClick=${tool.onClick}
             .buttonId=${tool.id}
-            .title=${tool.title}
+            .toolName=${tool.toolName}
+            .icon=${tool.icon}
             .isSelected=${tool.isSelected}
           >
           </toolbox-button>

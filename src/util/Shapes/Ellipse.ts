@@ -1,5 +1,4 @@
 import {
-  BoundaryCoordinates,
   Coordinates,
   EllipseSVGParams,
   SVGParamsBase,

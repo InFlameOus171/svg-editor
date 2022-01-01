@@ -20,16 +20,18 @@ export abstract class Tool<T extends ShapeType, V extends ShapeType = T> {
   isDrawing: boolean = false;
   previousCoordinates: [number, number] = [0, 0];
   currentCoordinates: [number, number] = [0, 0];
-
+  onUpdateEditor: (shape: ShapeType | null) => void;
   constructor(
     drawLayer: HTMLCanvasElement,
     self: EditorLayout,
+    onUpdateEditor: (shape: ShapeType | null) => void,
     offset: Coordinates = [0, 0],
     previewLayer?: HTMLCanvasElement,
     drawPenConfig?: PenConfiguration,
     previewPenConfig?: PenConfiguration
   ) {
     this.drawLayer = drawLayer;
+    this.onUpdateEditor = onUpdateEditor;
     this.self = self;
     this.offset = offset;
     this.previewLayer = previewLayer;
@@ -52,12 +54,14 @@ export abstract class Tool<T extends ShapeType, V extends ShapeType = T> {
     if (context) {
       const config = this[`${contextType}PenConfig`];
       if (config) {
-        const { stroke, fill, strokeWidth, scaling, rotation } = config;
+        const { stroke, fill, strokeWidth, lineDash } = config;
         if (stroke) context.strokeStyle = stroke;
         if (fill) context.fillStyle = fill;
         if (strokeWidth) context.lineWidth = strokeWidth;
-        if (scaling) context.scale(scaling.x, scaling.y);
-        if (rotation) context.rotate(rotation);
+        if (lineDash) context.setLineDash(lineDash);
+        // TODO: To be implemented
+        // if (scaling) context.scale(scaling.x, scaling.y);
+        // if (rotation) context.rotate(rotation);
       } else {
         context.strokeStyle = '#000000';
         context.lineWidth = 1;
@@ -68,6 +72,7 @@ export abstract class Tool<T extends ShapeType, V extends ShapeType = T> {
 
   resetPreview = () => {
     if (this.previewLayer && this.previewContext) {
+      this.unHighlightpreview();
       this.pen.clearCanvas(this.previewLayer, this.previewContext);
     }
   };
@@ -116,7 +121,7 @@ export abstract class Tool<T extends ShapeType, V extends ShapeType = T> {
   executeAction = (): void => {
     throw new Error('not implemented');
   };
-  destroy = (): T | T[] | undefined => {
+  destroy = (): void => {
     throw new Error('not implemented');
   };
 }

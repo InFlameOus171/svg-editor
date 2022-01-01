@@ -1,5 +1,5 @@
 import { EditorLayout } from '../../components/organisms/EditorLayout';
-import { Tools_List } from '../../types/shapes';
+import { ShapeType, Tools_List } from '../../types/shapes';
 import { Coordinates } from '../../types/types';
 import {
   getCanvasRectangleValuesFromPoints,
@@ -14,9 +14,10 @@ export class RectangleTool extends Tool<Rectangle> {
     drawLayer: HTMLCanvasElement,
     previewLayer: HTMLCanvasElement,
     self: EditorLayout,
+    onCreate: (shape: ShapeType | null) => void,
     offset: Coordinates
   ) {
-    super(drawLayer, self, offset, previewLayer);
+    super(drawLayer, self, onCreate, offset, previewLayer);
     this.resetPreview();
     const renderingContext = this.drawLayer.getContext('2d');
     if (renderingContext) {
@@ -42,10 +43,10 @@ export class RectangleTool extends Tool<Rectangle> {
     this.drawLayer.removeEventListener('mousemove', this.onMove);
     this.drawLayer.removeEventListener('mousedown', this.onDown);
     this.drawLayer.removeEventListener('mouseup', this.onUp);
-    return this.allShapes;
   };
 
   onDown = (event: MouseEvent) => {
+    this.highlightPreview();
     this.currentCoordinates = this.getCoords(event);
     this.previousCoordinates = this.currentCoordinates;
     this.isDrawing = true;
@@ -55,8 +56,9 @@ export class RectangleTool extends Tool<Rectangle> {
     this.isDrawing = false;
     if (this.currentShape) {
       this.createRectangle();
-      this.allShapes.push(this.currentShape);
+      this.onUpdateEditor(this.currentShape);
     }
+    this.unHighlightpreview();
     this.resetPreview();
     this.#draw();
     this.resetCoordinates();

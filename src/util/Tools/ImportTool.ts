@@ -1,7 +1,7 @@
 import { EditorLayout } from '../../components/organisms/EditorLayout';
 import { ShapeType } from '../../types/shapes';
 import { Coordinates } from '../../types/types';
-import { convertSVGDocumentToShapes } from '../helper/util';
+import { convertSVGDocumentToShapes } from '../helper/shapes';
 import { Tool } from './Tool';
 
 export class ImportTool extends Tool<ShapeType> {
@@ -10,9 +10,10 @@ export class ImportTool extends Tool<ShapeType> {
   constructor(
     drawLayer: HTMLCanvasElement,
     self: EditorLayout,
+    onCreate: (shape: ShapeType | null) => void,
     offset: Coordinates
   ) {
-    super(drawLayer, self, offset);
+    super(drawLayer, self, onCreate, offset);
     this.#draw = this.pen.generatePen(this.drawContext).draw;
   }
 
@@ -30,7 +31,6 @@ export class ImportTool extends Tool<ShapeType> {
       const shapes = convertSVGDocumentToShapes(elementId);
       document.body.removeChild(appendedSvg);
       this.allShapes.push(...shapes);
-      console.log(shapes.map(s => s.getSvgParams()));
       shapes.forEach(this.#draw);
     }
   };

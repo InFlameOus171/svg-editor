@@ -17,15 +17,14 @@ export class SelectTool extends Tool<ShapeType> {
     drawLayer: HTMLCanvasElement,
     previewLayer: HTMLCanvasElement,
     self: EditorLayout,
-    onSelect: (shape: ShapeType) => void,
+    onSelect: (shape: ShapeType | null) => void,
     shapes: ShapeType[],
     offset?: Coordinates
   ) {
-    super(drawLayer, self, offset, previewLayer);
+    super(drawLayer, self, onSelect, offset, previewLayer);
 
     this.toolName = Tools_List.SELECT;
     this.allShapes = shapes;
-    this.#onSelectCallback = onSelect;
     this.previewContext && this.previewContext.setLineDash([10, 10]);
 
     const renderingContext = this.drawLayer.getContext('2d');
@@ -34,7 +33,6 @@ export class SelectTool extends Tool<ShapeType> {
     }
   }
 
-  #onSelectCallback: (shape: ShapeType) => void;
   #selectedShape?: ShapeType;
 
   #onClick = (event: MouseEvent) => {
@@ -92,6 +90,9 @@ export class SelectTool extends Tool<ShapeType> {
       footerFields
         ?.querySelector('#fill-color-input')
         ?.setAttribute('value', fillColor.colorCode);
+      footerFields
+        ?.querySelector('#line-dash-input')
+        ?.setAttribute('value', params.lineDash?.join(', ') ?? '0');
 
       const fillOpacityInput = footerFields?.querySelector(
         '#fill-opacity-input'
@@ -111,7 +112,7 @@ export class SelectTool extends Tool<ShapeType> {
     if (selectedShape) {
       this.#selectedShape = selectedShape;
       this.#updateInputFields();
-      this.#onSelectCallback(this.#selectedShape);
+      this.onUpdateEditor(this.#selectedShape);
       if (this.previewContext) {
         this.highlightPreview();
         const shapeType = typeOfShape(selectedShape);
@@ -156,8 +157,6 @@ export class SelectTool extends Tool<ShapeType> {
       this.#onSelect(highestShape);
     }
   };
-
-  // 448 71 229.510498046875 399
 
   #onUp = (event: MouseEvent) => {
     this.resetPreview();

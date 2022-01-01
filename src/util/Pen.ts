@@ -98,12 +98,16 @@ const Pen = {
     styles: SVGParamsBase,
     context: CanvasRenderingContext2D
   ) => {
-    console.log(styles);
-    const { fill, stroke, strokeWidth, transformMatrix, lineCap } = styles;
+    const { fill, stroke, strokeWidth, transformMatrix, lineCap, lineDash } =
+      styles;
     if (transformMatrix) {
       const newPath = new Path2D();
       newPath.addPath(pathConstructor, transformMatrix);
       pathConstructor = newPath;
+    }
+    if (lineDash) {
+      console.log(lineDash);
+      context.setLineDash(lineDash);
     }
     if (lineCap) {
       context.lineCap = lineCap;
@@ -130,7 +134,6 @@ const Pen = {
     context?: CanvasRenderingContext2D,
     svgParams?: Partial<SVGParamsBase>
   ) => {
-    console.log(path.getSvgParams(), path.toString(), svgParams);
     let pathConstructor = new Path2D(path.toString());
     if (context) {
       const params = {
@@ -138,8 +141,6 @@ const Pen = {
         ...svgParams,
       };
       pathConstructor = Pen.applyStyles(pathConstructor, params, context);
-      console.log(params.stroke, params.fill);
-      console.log(context.strokeStyle, context.fillStyle);
       params.stroke && context.stroke(pathConstructor);
       params.fill && context.fill(pathConstructor);
       context.closePath();

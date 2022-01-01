@@ -1,5 +1,5 @@
 import { EditorLayout } from '../../components/organisms/EditorLayout';
-import { Tools_List } from '../../types/shapes';
+import { ShapeType, Tools_List } from '../../types/shapes';
 import { Coordinates } from '../../types/types';
 import { Freehand } from '../Shapes/Freehand';
 import { Line } from '../Shapes/Line';
@@ -11,9 +11,10 @@ export class DrawTool extends Tool<Freehand, Line> {
   constructor(
     drawLayer: HTMLCanvasElement,
     self: EditorLayout,
+    onCreate: (shape: ShapeType | null) => void,
     offset: Coordinates
   ) {
-    super(drawLayer, self, offset);
+    super(drawLayer, self, onCreate, offset);
     this.resetPreview();
     this.toolName = Tools_List.DRAW;
   }

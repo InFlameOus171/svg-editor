@@ -5,7 +5,6 @@ import {
   VectorCoordinates,
 } from '../../types/types';
 import { getLineBoundaries } from '../helper/coordinates';
-import { Pen } from '../Pen';
 import { Shape } from './Shape';
 
 export class Line extends Shape {
