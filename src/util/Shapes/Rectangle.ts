@@ -11,7 +11,7 @@ export class Rectangle extends Shape {
     startingCorner: Coordinates,
     width: number,
     height: number,
-    svgParams?: Partial<SVGParamsBase>,
+    svgParams: Partial<SVGParamsBase> = {},
     isPreview?: boolean
   ) {
     super(

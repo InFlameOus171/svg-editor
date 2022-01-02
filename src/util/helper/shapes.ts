@@ -1,7 +1,6 @@
 import { ShapeType } from '../../types/shapes';
 import {
   BoundaryCoordinates,
-  CircleSVGParams,
   Coordinates,
   EllipseSVGParams,
   FreehandSVGParams,
@@ -15,7 +14,9 @@ import { Freehand } from '../Shapes/Freehand';
 import { Line } from '../Shapes/Line';
 import { Path } from '../Shapes/Path';
 import { Rectangle } from '../Shapes/Rectangle';
+import { TextShape } from '../Shapes/Text';
 import { acceptedTags } from './constants';
+import { getMinMaxValuesOfCoordinates } from './coordinates';
 import { pathCommandsRegExp } from './regularExpressions';
 import { typeOfShape } from './typeguards';
 import {
@@ -312,4 +313,44 @@ export const convertSVGDocumentToShapes = (id: string): ShapeType[] => {
       .flat();
   }
   return [];
+};
+
+export const generateSVGURLFromShapes = (shapes: ShapeType[]) => {
+  const xmlSerializer = new XMLSerializer();
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(svgNS, 'svg');
+  // const g = document.createElementNS(svgNS, 'g');
+
+  const allBoundaryCoordinates = shapes.reduce(
+    (acc: Coordinates[], shape) => [...acc, ...shape.boundaries],
+    []
+  );
+  const minMaxCoordinates = getMinMaxValuesOfCoordinates(
+    allBoundaryCoordinates
+  );
+  svg.setAttribute('height', minMaxCoordinates.yMax.toString());
+  svg.setAttribute('width', minMaxCoordinates.xMax.toString());
+  svg.setAttribute(
+    'transform',
+    'translate(' + -minMaxCoordinates.xMin + ',' + -minMaxCoordinates.yMin + ')'
+  );
+  // svg.appendChild(g);
+
+  const appendAsSVGShape = appendAsSVGShapeGeneratorFunction(svg, svgNS);
+  shapes.forEach(appendAsSVGShape);
+
+  let source = xmlSerializer.serializeToString(svg);
+  //add name spaces.
+  //https://stackoverflow.com/questions/23218174/how-do-i-save-export-an-svg-file-after-creating-an-svg-with-d3-js-ie-safari-an
+  if (!source.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)) {
+    source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
+  }
+  if (!source.match(/^<svg[^>]+"http\:\/\/www\.w3\.org\/1999\/xlink"/)) {
+    source = source.replace(
+      /^<svg/,
+      '<svg xmlns:xlink="http://www.w3.org/1999/xlink"'
+    );
+  }
+  source = '<?xml version="1.0" standalone="no"?>\r\n' + source;
+  return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(source);
 };

@@ -31,21 +31,27 @@ export const getToolboxButtonsProps = (
     isSelected: false,
   },
   {
+    toolName: 'Text Tool',
+    onClick: () => selectToolFunction(Tools_List.TEXT),
+    id: '5',
+    isSelected: false,
+  },
+  {
     toolName: 'Select Tool',
     onClick: () => selectToolFunction(Tools_List.SELECT),
-    id: '5',
+    id: '6',
     isSelected: false,
   },
   {
     toolName: 'Move Tool',
     onClick: () => selectToolFunction(Tools_List.MOVE),
-    id: '6',
+    id: '7',
     isSelected: false,
   },
   {
     toolName: 'Delete',
     onClick: () => selectToolFunction(Tools_List.DELETE),
-    id: '7',
+    id: '8',
     isSelected: false,
   },
   {

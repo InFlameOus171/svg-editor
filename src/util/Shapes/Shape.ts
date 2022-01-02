@@ -2,7 +2,6 @@ import { nanoid } from 'nanoid';
 import {
   BoundaryCoordinates,
   Coordinates,
-  PenConfiguration,
   SVGParamsBase,
 } from '../../types/types';
 import { getMinMaxValuesOfCoordinates } from '../helper/coordinates';
@@ -17,6 +16,8 @@ export abstract class Shape {
   #strokeWidth?: string;
   #lineCap?: CanvasLineCap;
   #lineDash?: number[];
+  #fontSize?: number;
+  #fontFamily?: string;
   transformMatrix?: DOMMatrix;
   boundaries: BoundaryCoordinates;
   index: number = 0;
@@ -29,11 +30,7 @@ export abstract class Shape {
       [-1, -1],
     ],
 
-    svgParams: Partial<SVGParamsBase> = {
-      stroke: 'rgba(0,0,0,1)',
-      fill: 'rgba(0,0,0,0)',
-      strokeWidth: '1',
-    },
+    svgParams: Partial<SVGParamsBase> = {},
 
     countShapecountUp: boolean = true
   ) {
@@ -44,6 +41,9 @@ export abstract class Shape {
     this.#fill = svgParams.fill;
     this.#stroke = svgParams.stroke;
     this.#strokeWidth = svgParams.strokeWidth;
+    this.#lineDash = svgParams.lineDash;
+    this.#fontSize = svgParams.fontSize;
+    this.#fontFamily = svgParams.fontFamily;
     this.transformMatrix = svgParams.transformMatrix;
     this.boundaries = boundaries;
     this.index = Shape.#counter;
@@ -81,13 +81,14 @@ export abstract class Shape {
     }) as BoundaryCoordinates;
   };
 
-  applyStyles = (config: PenConfiguration) => {
-    console.log(config.lineDash);
+  applyStyles = (config: SVGParamsBase) => {
     this.#fill = config.fill;
     this.#stroke = config.stroke;
-    this.#strokeWidth = config.strokeWidth?.toString();
+    this.#strokeWidth = config.strokeWidth;
     this.#lineCap = config.lineCap;
     this.#lineDash = config.lineDash;
+    this.#fontFamily = config.fontFamily;
+    this.#fontSize = config.fontSize;
     // @TODO: To be implemented
     // if (config.scaling || config.rotation) {
     //   const { x: scaleX, y: scaleY } = config.scaling || { x: 1, y: 1 };
@@ -109,7 +110,7 @@ export abstract class Shape {
     ) as BoundaryCoordinates;
   };
 
-  getSvgParams = () => {
+  getSvgParams = (): SVGParamsBase => {
     return {
       fill: this.#fill,
       stroke: this.#stroke,
@@ -117,6 +118,8 @@ export abstract class Shape {
       transformMatrix: this.transformMatrix,
       lineCap: this.#lineCap,
       lineDash: this.#lineDash,
+      fontSize: this.#fontSize,
+      fontFamily: this.#fontFamily,
     };
   };
 

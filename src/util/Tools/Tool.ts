@@ -1,6 +1,6 @@
 import { EditorLayout } from '../../components/organisms/EditorLayout';
 import { ShapeType, Tools_List } from '../../types/shapes';
-import { Coordinates, PenConfiguration } from '../../types/types';
+import { Coordinates, SVGParamsBase } from '../../types/types';
 import { Pen } from '../Pen';
 
 export abstract class Tool<T extends ShapeType, V extends ShapeType = T> {
@@ -13,8 +13,8 @@ export abstract class Tool<T extends ShapeType, V extends ShapeType = T> {
   drawContext?: CanvasRenderingContext2D;
   previewContext?: CanvasRenderingContext2D;
   pen = Pen;
-  previewPenConfig?: PenConfiguration;
-  drawPenConfig?: PenConfiguration;
+  previewPenConfig?: SVGParamsBase;
+  drawPenConfig?: SVGParamsBase;
   toolName?: Tools_List;
   offset: Coordinates;
   isDrawing: boolean = false;
@@ -27,13 +27,14 @@ export abstract class Tool<T extends ShapeType, V extends ShapeType = T> {
     onUpdateEditor: (shape: ShapeType | null) => void,
     offset: Coordinates = [0, 0],
     previewLayer?: HTMLCanvasElement,
-    drawPenConfig?: PenConfiguration,
-    previewPenConfig?: PenConfiguration
+    drawPenConfig?: SVGParamsBase,
+    previewPenConfig?: SVGParamsBase
   ) {
     this.drawLayer = drawLayer;
     this.onUpdateEditor = onUpdateEditor;
     this.self = self;
-    this.offset = offset;
+    this.offset = offset ?? [drawLayer.offsetLeft, drawLayer.offsetTop];
+    console.log(this.offset);
     this.previewLayer = previewLayer;
     this.previewPenConfig = previewPenConfig;
     this.drawPenConfig = drawPenConfig;
@@ -49,6 +50,10 @@ export abstract class Tool<T extends ShapeType, V extends ShapeType = T> {
     }
   }
 
+  setStyles = (drawPenConfig: SVGParamsBase) => {
+    this.drawPenConfig = drawPenConfig;
+  };
+
   setContextConfig = (contextType: 'preview' | 'draw') => {
     const context = this[`${contextType}Context`];
     if (context) {
@@ -57,7 +62,7 @@ export abstract class Tool<T extends ShapeType, V extends ShapeType = T> {
         const { stroke, fill, strokeWidth, lineDash } = config;
         if (stroke) context.strokeStyle = stroke;
         if (fill) context.fillStyle = fill;
-        if (strokeWidth) context.lineWidth = strokeWidth;
+        if (strokeWidth) context.lineWidth = parseInt(strokeWidth);
         if (lineDash) context.setLineDash(lineDash);
         // TODO: To be implemented
         // if (scaling) context.scale(scaling.x, scaling.y);
@@ -93,16 +98,12 @@ export abstract class Tool<T extends ShapeType, V extends ShapeType = T> {
       this.previewContext.strokeStyle = 'red';
       this.previewContext.setLineDash([10, 10]);
       this.previewContext.lineWidth = 3;
-      this.previewContext.fillStyle = 'red';
     }
   };
 
   unHighlightpreview = () => {
     if (this.previewContext) {
-      this.previewContext.strokeStyle =
-        this.previewPenConfig?.stroke ?? '#000000';
-      this.previewContext.lineWidth = this.previewPenConfig?.strokeWidth ?? 2;
-      this.previewContext.fillStyle = this.previewPenConfig?.fill ?? '#000000';
+      this.previewContext.clearRect(0, 0, this.self.width, this.self.height);
     }
   };
 

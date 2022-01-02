@@ -1,6 +1,7 @@
 import { EditorLayout } from '../../components/organisms/EditorLayout';
 import { Shapes, ShapeType, Tools_List } from '../../types/shapes';
-import { Coordinates, PenConfiguration } from '../../types/types';
+import { Coordinates, SVGParamsBase } from '../../types/types';
+import { highlightStyle } from '../helper/constants';
 import {
   getCanvasRectangleValuesFromPoints,
   isPointInsideAnotherShape,
@@ -8,7 +9,6 @@ import {
   rectangleParamsFromBoundaries,
 } from '../helper/coordinates';
 import { typeOfShape } from '../helper/typeguards';
-import { normalizeColorCode } from '../helper/util';
 import { Rectangle } from '../Shapes/Rectangle';
 import { Tool } from './Tool';
 
@@ -63,88 +63,27 @@ export class SelectTool extends Tool<ShapeType> {
     this.isDrawing = true;
   };
 
-  #updateInputFields = () => {
-    if (this.#selectedShape) {
-      const defaultColor = { colorCode: '#000000', opacity: '1' };
-      const params = this.#selectedShape.getSvgParams();
-
-      const strokeColor = params.stroke
-        ? normalizeColorCode(params.stroke)
-        : defaultColor;
-      const fillColor = params.fill
-        ? normalizeColorCode(params.fill)
-        : defaultColor;
-
-      const footerFields =
-        this.self.shadowRoot?.getElementById('footer-fields');
-
-      footerFields?.removeAttribute('disabled');
-
-      footerFields
-        ?.querySelector('#stroke-width-input')
-        ?.setAttribute('value', params.strokeWidth ?? '0');
-      footerFields
-        ?.querySelector('#stroke-color-input')
-        ?.setAttribute('value', strokeColor.colorCode);
-
-      footerFields
-        ?.querySelector('#fill-color-input')
-        ?.setAttribute('value', fillColor.colorCode);
-      footerFields
-        ?.querySelector('#line-dash-input')
-        ?.setAttribute('value', params.lineDash?.join(', ') ?? '0');
-
-      const fillOpacityInput = footerFields?.querySelector(
-        '#fill-opacity-input'
-      );
-      const strokeOpacityInput = footerFields?.querySelector(
-        '#stroke-opacity-input'
-      );
-
-      strokeOpacityInput?.setAttribute('value', strokeColor.opacity);
-      strokeOpacityInput?.dispatchEvent(new Event('change'));
-      fillOpacityInput?.setAttribute('value', fillColor.opacity);
-      fillOpacityInput?.dispatchEvent(new Event('change'));
-    }
-  };
-
   #onSelect = (selectedShape: ShapeType | null) => {
     if (selectedShape) {
       this.#selectedShape = selectedShape;
-      this.#updateInputFields();
       this.onUpdateEditor(this.#selectedShape);
       if (this.previewContext) {
-        this.highlightPreview();
-        const shapeType = typeOfShape(selectedShape);
         const { startingCorner, width, height } = rectangleParamsFromBoundaries(
           selectedShape.boundaries
         );
-        this.drawTools['Rectangle'](
-          new Rectangle(startingCorner, width, height, {
-            stroke: 'red',
-            strokeWidth: '5',
-          }),
+        console.log(startingCorner, width, height, highlightStyle);
+        this.pen.draw(
+          new Rectangle(startingCorner, width, height, highlightStyle),
+          undefined,
           this.previewContext
         );
-        this.drawTools[shapeType](selectedShape, this.previewContext);
       }
-    } else {
-      this.self.shadowRoot
-        ?.getElementById('footer-fields')
-        ?.setAttribute('disabled', '');
     }
-  };
-
-  drawTools: { [key in Shapes]: any } = {
-    Rectangle: this.pen.drawRectangle,
-    Ellipse: this.pen.drawEllipse,
-    Line: this.pen.drawLine,
-    Freehand: this.pen.drawFreehand,
-    Path: this.pen.drawPath,
   };
 
   #onZoneSelection = (selectedZone?: Rectangle) => {
     const compareFunction = isShapeInsideAnotherShape(selectedZone);
+    console.log(this.allShapes);
     const shapesInsideSelectedZone = this.allShapes.filter(compareFunction);
     const highestIndex = Math.max(
       ...shapesInsideSelectedZone.map(shape => shape.index)
@@ -152,6 +91,7 @@ export class SelectTool extends Tool<ShapeType> {
     const highestShape = shapesInsideSelectedZone.find(
       shape => shape.index === highestIndex
     );
+    console.log(highestShape);
     const shapeType = highestShape && typeOfShape(highestShape);
     if (shapeType && this.previewContext) {
       this.#onSelect(highestShape);
@@ -181,17 +121,20 @@ export class SelectTool extends Tool<ShapeType> {
         startingCorner,
         width,
         height,
-        undefined,
+        highlightStyle,
         false
       );
       if (this.currentShape) {
         this.resetPreview();
-        this.pen.drawRectangle(this.currentShape, this.previewContext);
+        this.pen.drawRectangle(
+          this.currentShape as Rectangle,
+          this.previewContext
+        );
       }
     }
   };
 
-  changeStyle = (config: PenConfiguration) => {
+  changeStyle = (config: SVGParamsBase) => {
     if (this.#selectedShape) {
       this.#selectedShape.applyStyles(config);
       this.resetPreview();

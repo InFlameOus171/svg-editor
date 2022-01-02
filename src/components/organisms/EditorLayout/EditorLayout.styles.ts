@@ -18,21 +18,27 @@ export const layoutStyle = css`
 
   #footer #footer-fields {
     border: none;
-
     display: flex;
     flex-direction: column;
   }
 
-  #footer #footer-input {
+  #footer-fields > #footer-input {
+    width: 100%;
+    justify-content: space-between;
     display: flex;
-    gap: 5px;
   }
+
   #footer #footer-input #left-input-section {
     display: flex;
     flex-direction: column;
     gap: 5px;
   }
   #footer #footer-input #right-input-section {
+    visibility: hidden;
+    border: none;
+    padding: 0 20px 20px;
+    background-color: inherit;
+    border-left: 1px solid rgba(0, 0, 0, 0.3);
     display: flex;
     flex-direction: column;
     gap: 5px;

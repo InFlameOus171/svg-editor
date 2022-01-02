@@ -203,6 +203,22 @@ export const getLineBoundaries = (
   ];
 };
 
+export const getTextBoundaries = (
+  position: Coordinates,
+  width: number,
+  height: number
+): BoundaryCoordinates => {
+  console.log(width, height, position);
+  const x = parseInt(position[0].toString());
+  const y = parseInt(position[0].toString());
+  const pos1: Coordinates = [x, position[1]];
+  const pos2: Coordinates = [x, position[1] - height];
+  const pos3: Coordinates = [position[0] + width, position[1]];
+  const pos4: Coordinates = [position[0] + width, position[1] - height];
+  console.log(pos1, pos2, pos3, pos4);
+  return [pos1, pos2, pos3, pos4];
+};
+
 export const relativePathToAbsolutePath = (
   drawPath: SVGDrawPath[],
   offset?: Coordinates

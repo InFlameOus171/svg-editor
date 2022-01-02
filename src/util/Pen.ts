@@ -8,6 +8,7 @@ import { Freehand } from './Shapes/Freehand';
 import { Line } from './Shapes/Line';
 import { Path } from './Shapes/Path';
 import { Rectangle } from './Shapes/Rectangle';
+import { TextShape } from './Shapes/Text';
 
 const Pen = {
   generatePen: (context?: CanvasRenderingContext2D) => {
@@ -55,6 +56,10 @@ const Pen = {
         break;
       case 'Path':
         Pen.drawPath(shape as Path, context, svgParams);
+        break;
+      case 'TextShape':
+        Pen.drawText(shape as TextShape, context, svgParams);
+        break;
     }
   },
 
@@ -106,7 +111,6 @@ const Pen = {
       pathConstructor = newPath;
     }
     if (lineDash) {
-      console.log(lineDash);
       context.setLineDash(lineDash);
     }
     if (lineCap) {
@@ -144,6 +148,31 @@ const Pen = {
       params.stroke && context.stroke(pathConstructor);
       params.fill && context.fill(pathConstructor);
       context.closePath();
+    }
+  },
+
+  drawText: (
+    textShape: TextShape,
+    context?: CanvasRenderingContext2D,
+    svgParams?: SVGParamsBase
+  ) => {
+    console.log(textShape.toSVGTextParams());
+    const params = {
+      ...textShape.toSVGTextParams(),
+      ...svgParams,
+    };
+    const { text, position, fontSize, fontFamily, ...rest } = params;
+    if (context) {
+      context.fillStyle = rest.fill ?? '#000000';
+      context.lineWidth = parseInt(rest.strokeWidth ?? '1');
+      context.font = (fontSize?.toString() ?? '12px').concat(
+        ' ',
+        (fontFamily ?? 'Arial').toLowerCase()
+      );
+      context.fillText(text, ...position);
+      context.strokeText(text, ...position);
+      console.log(context.font, context.fillStyle, position);
+      context?.closePath();
     }
   },
 

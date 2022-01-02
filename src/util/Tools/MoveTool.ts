@@ -1,6 +1,7 @@
 import { EditorLayout } from '../../components/organisms/EditorLayout';
 import { ShapeType, Tools_List } from '../../types/shapes';
 import { Coordinates } from '../../types/types';
+import { highlightStyle } from '../helper/constants';
 import {
   isPointInsideAnotherShape,
   rectangleParamsFromBoundaries,
@@ -54,14 +55,10 @@ export class MoveTool extends Tool<ShapeType> {
       const { startingCorner, width, height } = rectangleParamsFromBoundaries(
         this.currentShape.boundaries
       );
-      this.#drawOnPreview(this.currentShape);
+      // this.#drawOnPreview(this.currentShape);
       this.#drawOnPreview(
-        new Rectangle(startingCorner, width, height, {
-          stroke: 'red',
-          strokeWidth: '5',
-        })
+        new Rectangle(startingCorner, width, height, highlightStyle)
       );
-      this.highlightPreview();
     }
   };
 

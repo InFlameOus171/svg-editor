@@ -2,9 +2,18 @@ import { EditorLayout } from '../components/organisms/EditorLayout';
 import { ShapeType, Tools_List } from '../types/shapes';
 import { Coordinates, SVGParamsBase } from '../types/types';
 import { getMinMaxValuesOfCoordinates } from './helper/coordinates';
-import { appendAsSVGShapeGeneratorFunction } from './helper/shapes';
-import { hexToRGBA } from './helper/util';
+import {
+  appendAsSVGShapeGeneratorFunction,
+  generateSVGURLFromShapes,
+} from './helper/shapes';
+import { isText, isTextTool } from './helper/typeguards';
+import {
+  hexToRGBA,
+  setIsTextInputSectionVisible,
+  updateStyleInputFields,
+} from './helper/util';
 import { Pen } from './Pen';
+import { TextShape } from './Shapes/Text';
 import { DrawTool } from './Tools/DrawTool';
 import { EllipseTool } from './Tools/EllipseTool';
 import { ImportTool } from './Tools/ImportTool';
@@ -12,8 +21,8 @@ import { LineTool } from './Tools/LineTool';
 import { MoveTool } from './Tools/MoveTool';
 import { RectangleTool } from './Tools/RectangleTool';
 import { SelectTool } from './Tools/SelectTool';
+import { TextTool } from './Tools/TextTool';
 import { Tool } from './Tools/Tool';
-import { Shape } from './Shapes/Shape';
 
 export class Editor {
   #selectedTool: Tool<ShapeType> | null = null;
@@ -22,6 +31,13 @@ export class Editor {
   #self: EditorLayout;
   #offset: Coordinates;
   #shapes: ShapeType[] = [];
+  #currentStyles: SVGParamsBase = {
+    strokeWidth: '1',
+    stroke: 'rgba(0,0,0,1)',
+    fill: 'rgba(0,0,0,0)',
+    lineCap: 'butt',
+    lineDash: [0],
+  };
   #selectedShape?: ShapeType | null = null;
   #pen?: {
     draw: (shape: ShapeType, svgParams?: Partial<SVGParamsBase>) => void;
@@ -39,6 +55,12 @@ export class Editor {
     this.#previewLayer = previewLayer;
     this.#self = self;
     this.#offset = offset;
+    this.#currentStyles = {
+      strokeWidth: '1',
+      stroke: 'rgba(0,0,0,1)',
+      fill: 'rgba(0,0,0,0)',
+    };
+    updateStyleInputFields(this.#self, this.#currentStyles);
     const context = canvas.getContext('2d');
     if (context) {
       this.#pen = Pen.generatePen(context);
@@ -69,91 +91,28 @@ export class Editor {
     const mainContext = this.#canvas?.getContext('2d');
     if (mainContext && this.#canvas) {
       Pen.clearCanvas(this.#canvas, mainContext);
-      this.#shapes.forEach(shape => Pen.draw(shape, undefined, mainContext));
+      this.#shapes.forEach(shape => {
+        if (isText(shape)) {
+          console.log(shape.toSVGTextParams());
+        }
+        Pen.draw(shape, undefined, mainContext);
+      });
     }
   };
 
-  // #unselectTool = () => {
-  //   if (!this.#selectedTool) {
-  //     return;
-  //   }
+  onUpdateStyleInputFields = () => {
+    updateStyleInputFields(this.#self, this.#currentStyles);
+  };
 
-  //   switch (this.#selectedTool.toolName) {
-  //     case Tools_List.SELECT: {
-  //       const result = this.#selectedTool?.destroy();
-  //       if (!Array.isArray(result)) {
-  //         this.#selectedShape = result;
-  //       }
-  //       break;
-  //     }
-  //     case Tools_List.MOVE: {
-  //       const result = this.#selectedTool?.destroy();
-  //       if (Array.isArray(result)) {
-  //         this.#shapes = result;
-  //       }
-  //       this.#selectedShape = null;
-  //       break;
-  //     }
-  //     default: {
-  //       const result = this.#selectedTool?.destroy();
-  //       if (Array.isArray(result)) {
-  //         this.#shapes.push(...result);
-  //         this.#selectedShape = null;
-  //       }
-  //       break;
-  //     }
-  //   }
-  //   this.#selectedTool = null;
-  // };
+  handleUpdateText = () => {
+    if (isTextTool(this.#selectedTool)) {
+      this.#selectedTool.updateText();
+    }
+  };
 
   onSave = () => {
     this.onUnselectTool();
-    const xmlSerializer = new XMLSerializer();
-    const svgNS = 'http://www.w3.org/2000/svg';
-    const svg = document.createElementNS(svgNS, 'svg');
-    // const g = document.createElementNS(svgNS, 'g');
-
-    const allBoundaryCoordinates = this.#shapes.reduce(
-      (acc: Coordinates[], shape) => [...acc, ...shape.boundaries],
-      []
-    );
-    const minMaxCoordinates = getMinMaxValuesOfCoordinates(
-      allBoundaryCoordinates
-    );
-    svg.setAttribute('height', minMaxCoordinates.yMax.toString());
-    svg.setAttribute('width', minMaxCoordinates.xMax.toString());
-    svg.setAttribute(
-      'transform',
-      'translate(' +
-        -minMaxCoordinates.xMin +
-        ',' +
-        -minMaxCoordinates.yMin +
-        ')'
-    );
-    // svg.appendChild(g);
-
-    const appendAsSVGShape = appendAsSVGShapeGeneratorFunction(svg, svgNS);
-    this.#shapes.forEach(appendAsSVGShape);
-
-    let source = xmlSerializer.serializeToString(svg);
-    //add name spaces.
-    //https://stackoverflow.com/questions/23218174/how-do-i-save-export-an-svg-file-after-creating-an-svg-with-d3-js-ie-safari-an
-    if (!source.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)) {
-      source = source.replace(
-        /^<svg/,
-        '<svg xmlns="http://www.w3.org/2000/svg"'
-      );
-    }
-    if (!source.match(/^<svg[^>]+"http\:\/\/www\.w3\.org\/1999\/xlink"/)) {
-      source = source.replace(
-        /^<svg/,
-        '<svg xmlns:xlink="http://www.w3.org/1999/xlink"'
-      );
-    }
-    source = '<?xml version="1.0" standalone="no"?>\r\n' + source;
-    const url =
-      'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(source);
-    this.#openDownloadDialog(url);
+    this.#openDownloadDialog(generateSVGURLFromShapes(this.#shapes));
   };
 
   #appendToShapes = (shape: ShapeType | null) => {
@@ -165,12 +124,13 @@ export class Editor {
       innerShape => innerShape.getId() === shape.getId()
     );
     if (index >= 0) {
-      console.log(shape);
       this.#shapes[index] = shape;
-      console.log(this.#shapes);
     } else {
       this.#shapes.push(shape);
     }
+    console.log(shape.getSvgParams());
+    this.#currentStyles = shape.getSvgParams();
+    this.onUpdateStyleInputFields();
     this.redrawShapes();
   };
 
@@ -183,9 +143,7 @@ export class Editor {
       innerShape => innerShape.getId() === shape.getId()
     );
     if (index >= 0) {
-      console.log(shape);
       this.#shapes[index] = shape;
-      console.log(this.#shapes);
     } else {
       this.#shapes.push(shape);
     }
@@ -207,17 +165,23 @@ export class Editor {
 
   #onHandleSelectShape = (selectedShape: ShapeType | null) => {
     this.#selectedShape = selectedShape;
+    if (this.#selectedShape) {
+      this.#currentStyles = this.#selectedShape.getSvgParams();
+      this.onUpdateStyleInputFields();
+      this.applyStyles();
+
+      if (isText(this.#selectedShape)) {
+        setIsTextInputSectionVisible(this.#self, true);
+      }
+    }
   };
 
   onDeleteSelectedShape = () => {
-    console.log(this.#shapes, this.#selectedShape);
     if (this.#selectedShape) {
       const index = this.#shapes.findIndex(
         shape => shape.getId() === this.#selectedShape?.getId()
       );
-      console.log(index);
       this.#shapes.splice(index, 1);
-      console.log(this.#shapes);
       this.#selectedShape = null;
     }
   };
@@ -225,6 +189,7 @@ export class Editor {
   onSelectTool = (tool: Tools_List) => {
     if (this.#selectedTool) this.#selectedTool?.destroy();
     if (this.#canvas && this.#previewLayer) {
+      this.onUpdateStyleInputFields();
       switch (tool) {
         case Tools_List.DRAW: {
           this.#self.selectedElement = null;
@@ -232,6 +197,7 @@ export class Editor {
             this.#canvas,
             this.#self,
             this.#appendToShapes,
+            this.#currentStyles,
             this.#offset
           );
           break;
@@ -254,6 +220,7 @@ export class Editor {
             this.#previewLayer,
             this.#self,
             this.#appendToShapes,
+            this.#currentStyles,
             this.#offset
           );
           break;
@@ -277,6 +244,16 @@ export class Editor {
             this.#onHandleSelectShape,
             this.#shapes,
             this.#offset
+          );
+          break;
+        }
+        case Tools_List.TEXT: {
+          this.#selectedTool = new TextTool(
+            this.#canvas,
+            this.#previewLayer,
+            this.#self,
+            this.#appendToShapes,
+            this.#currentStyles
           );
           break;
         }
@@ -311,49 +288,53 @@ export class Editor {
           break;
         }
       }
-      // TODO Styles Setzen
+      this.applyStyles();
       this.#self.shadowRoot?.getElementById('');
       this.#selectedTool?.executeAction();
     }
   };
 
-  applyStyles = (
+  setStyles = (
     strokeWidth?: string,
     stroke: string = '#000000',
     fill: string = '#000000',
     fillOpacity?: string,
     strokeOpacity?: string,
     lineCap: CanvasLineCap = 'butt',
-    lineDash: number[] = []
+    lineDash: number[] = [],
+    fontFamily: string = 'Arial',
+    fontSize: number = 12
     // @TODO: Optional -> To be implemented
     // rotation?: string,
     // scaling?: [string, string]
   ) => {
-    if (this.#selectedShape && this.#canvas) {
-      // @TODO: Optional -> To be implemented
-      // const parsedScaling = scaling
-      //   ? {
-      //       x: parseFloat(scaling[0]),
-      //       y: parseFloat(scaling[1]),
-      //     }
-      //   : undefined;
-      // const parsedRotation = rotation ? parseFloat(rotation) : undefined;
-      const strokeWidthAsFloat = strokeWidth
-        ? parseFloat(strokeWidth)
-        : undefined;
-      const normalizedFill = hexToRGBA(fill, fillOpacity);
-      const normalizedStroke = hexToRGBA(stroke, strokeOpacity);
-      console.log(lineDash);
-      this.#selectedShape?.applyStyles({
-        fill: normalizedFill,
-        stroke: normalizedStroke,
-        strokeWidth: strokeWidthAsFloat,
-        lineCap,
-        lineDash,
-        // rotation: parsedRotation,
-        // scaling: parsedScaling,
-      });
+    // @TODO: Optional -> To be implemented
+    // const parsedScaling = scaling
+    //   ? {
+    //       x: parseFloat(scaling[0]),
+    //       y: parseFloat(scaling[1]),
+    //     }
+    //   : undefined;
+    // const parsedRotation = rotation ? parseFloat(rotation) : undefined;
+    const normalizedFill = hexToRGBA(fill, fillOpacity);
+    const normalizedStroke = hexToRGBA(stroke, strokeOpacity);
+    this.#currentStyles = {
+      fill: normalizedFill,
+      stroke: normalizedStroke,
+      strokeWidth,
+      lineCap,
+      lineDash,
+      fontFamily,
+      fontSize,
+      // rotation: parsedRotation,
+      // scaling: parsedScaling,
+    };
+    this.#selectedTool?.setStyles(this.#currentStyles);
+  };
 
+  applyStyles = () => {
+    if (this.#selectedShape && this.#canvas) {
+      this.#selectedShape?.applyStyles(this.#currentStyles);
       const changedShapeIndex = this.#shapes.findIndex(
         shape => shape.getId() === this.#selectedShape?.getId()
       );
@@ -361,11 +342,11 @@ export class Editor {
       Pen.clearCanvas(this.#canvas);
       this.#shapes.forEach(shape => {
         this.#pen?.draw(shape);
-        this.#previewPen?.draw(shape, {
-          stroke: 'red',
-          strokeWidth: '2',
-          fill: 'rgba(0,0,0,0)',
-        });
+        // this.#previewPen?.draw(shape, {
+        //   stroke: 'red',
+        //   strokeWidth: '2',
+        //   fill: 'rgba(0,0,0,0)',
+        // });
       });
     }
   };

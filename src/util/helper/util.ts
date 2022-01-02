@@ -1,5 +1,5 @@
-import { ShapeType } from '../../types/shapes';
-import { Coordinates, Matrix } from '../../types/types';
+import { EditorLayout } from '../../components/organisms/EditorLayout';
+import { Coordinates, Matrix, SVGParamsBase } from '../../types/types';
 import { FlattenedElement, Partition } from '../../types/util.types';
 import { acceptedTags } from './constants';
 import { hexColorCodeRegExp } from './regularExpressions';
@@ -110,7 +110,7 @@ export const normalizeColorCode = (
     return { colorCode: '#000000', opacity: '0' };
   }
   if (colorCode.charAt(0) !== '#') {
-    const numberMatcher = new RegExp(/\d+/g);
+    const numberMatcher = new RegExp(/\d*\.?\d+/g);
     const parsedColorCodes = [...colorCode.matchAll(numberMatcher)];
     if (parsedColorCodes.length === 4) {
       const opacity = parsedColorCodes.pop()?.[0] ?? '0';
@@ -118,6 +118,7 @@ export const normalizeColorCode = (
       return { colorCode: '#'.concat(rgbColors.join('')), opacity };
     } else {
       const rgbColors = parsedColorCodes.map(parseToFixed2HexString);
+      console.log(parsedColorCodes);
       return { colorCode: '#'.concat(rgbColors.join('')), opacity: '1' };
     }
   }
@@ -220,3 +221,68 @@ export const pathCommandValues = [
   ...absoluteCoordinatesCommands,
   ...singleDirectionCommands,
 ];
+
+export const updateStyleInputFields = (
+  self: EditorLayout,
+  params: SVGParamsBase
+) => {
+  const defaultColor = { colorCode: '#000000', opacity: '1' };
+  console.log(params);
+  const strokeColor = params.stroke
+    ? normalizeColorCode(params.stroke)
+    : defaultColor;
+  const fillColor = params.fill
+    ? normalizeColorCode(params.fill)
+    : defaultColor;
+
+  const footerFields = self.shadowRoot?.getElementById('footer-fields');
+
+  footerFields
+    ?.querySelector('#stroke-width-input')
+    ?.setAttribute('value', params.strokeWidth ?? '0');
+  footerFields
+    ?.querySelector('#stroke-color-input')
+    ?.setAttribute('value', strokeColor.colorCode);
+
+  console.log(fillColor.colorCode, strokeColor.opacity);
+  footerFields
+    ?.querySelector('#fill-color-input')
+    ?.setAttribute('value', fillColor.colorCode);
+  footerFields
+    ?.querySelector('#line-dash-input')
+    ?.setAttribute('value', params.lineDash?.join(', ') ?? '0');
+  footerFields
+    ?.querySelector('#text-font-family-input')
+    ?.setAttribute('value', params.fontFamily ?? 'Arial');
+  footerFields
+    ?.querySelector('#text-font-size-input')
+    ?.setAttribute('value', params.fontSize?.toString() ?? '12');
+  const fillOpacityInput = footerFields?.querySelector('#fill-opacity-input');
+  const strokeOpacityInput = footerFields?.querySelector(
+    '#stroke-opacity-input'
+  );
+
+  strokeOpacityInput?.setAttribute('value', strokeColor.opacity);
+  strokeOpacityInput?.dispatchEvent(new Event('change'));
+  fillOpacityInput?.setAttribute('value', fillColor.opacity);
+  fillOpacityInput?.dispatchEvent(new Event('change'));
+  console.log(strokeColor.colorCode, strokeColor.opacity);
+};
+
+export const setIsTextInputSectionVisible = (
+  self: EditorLayout,
+  value: boolean
+) => {
+  const rightInputSection = self.shadowRoot?.getElementById(
+    'right-input-section'
+  );
+  if (rightInputSection) {
+    if (value) {
+      rightInputSection.style.visibility = 'hidden';
+      rightInputSection.setAttribute('disabled', '');
+    } else {
+      rightInputSection.style.visibility = 'visible';
+      rightInputSection.removeAttribute('disabled');
+    }
+  }
+};

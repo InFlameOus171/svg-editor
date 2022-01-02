@@ -1,11 +1,11 @@
 import { EditorLayout } from '../../components/organisms/EditorLayout';
 import { ShapeType, Tools_List } from '../../types/shapes';
-import { Coordinates } from '../../types/types';
+import { Coordinates, SVGParamsBase } from '../../types/types';
+import { highlightStyle } from '../helper/constants';
 import {
   getCanvasRectangleValuesFromPoints,
   getFormattedRectangleValuesFromPoints,
 } from '../helper/coordinates';
-import { createRect } from '../helper/shapes';
 import { Rectangle } from '../Shapes/Rectangle';
 import { Tool } from './Tool';
 
@@ -15,9 +15,10 @@ export class RectangleTool extends Tool<Rectangle> {
     previewLayer: HTMLCanvasElement,
     self: EditorLayout,
     onCreate: (shape: ShapeType | null) => void,
+    styles: SVGParamsBase,
     offset: Coordinates
   ) {
-    super(drawLayer, self, onCreate, offset, previewLayer);
+    super(drawLayer, self, onCreate, offset, previewLayer, styles);
     this.resetPreview();
     const renderingContext = this.drawLayer.getContext('2d');
     if (renderingContext) {
@@ -25,13 +26,6 @@ export class RectangleTool extends Tool<Rectangle> {
     }
     this.toolName = Tools_List.RECT;
   }
-
-  #draw = () => {
-    if (this.currentShape) {
-      this.pen.drawRectangle(this.currentShape, this.drawContext);
-    }
-    this.resetPreview();
-  };
 
   executeAction = () => {
     this.drawLayer.addEventListener('mousemove', this.onMove);
@@ -53,14 +47,13 @@ export class RectangleTool extends Tool<Rectangle> {
   };
 
   onUp = () => {
+    this.resetPreview();
+    this.resetView();
     this.isDrawing = false;
     if (this.currentShape) {
       this.createRectangle();
       this.onUpdateEditor(this.currentShape);
     }
-    this.unHighlightpreview();
-    this.resetPreview();
-    this.#draw();
     this.resetCoordinates();
   };
 
@@ -71,7 +64,12 @@ export class RectangleTool extends Tool<Rectangle> {
         this.previousCoordinates,
         this.currentCoordinates
       );
-    this.currentShape = new Rectangle(startingCorner, width, height);
+    this.currentShape = new Rectangle(
+      startingCorner,
+      width,
+      height,
+      this.drawPenConfig
+    );
   };
 
   createRectanglePreview = () => {
@@ -84,7 +82,7 @@ export class RectangleTool extends Tool<Rectangle> {
       startingCorner,
       width,
       height,
-      undefined,
+      this.drawPenConfig,
       false
     );
   };
@@ -95,7 +93,11 @@ export class RectangleTool extends Tool<Rectangle> {
       this.createRectanglePreview();
       if (this.currentShape) {
         this.resetPreview();
-        this.pen.drawRectangle(this.currentShape, this.previewContext);
+        this.pen.drawRectangle(
+          this.currentShape,
+          this.previewContext,
+          highlightStyle
+        );
       }
     }
   };

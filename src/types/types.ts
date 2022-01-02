@@ -21,6 +21,8 @@ export type SVGParamsBase = {
   strokeWidth?: string;
   lineDash?: number[];
   lineCap?: CanvasLineCap;
+  fontFamily?: string;
+  fontSize?: number;
   transformMatrix?: DOMMatrix;
   bBox?: SVGRect;
 };
@@ -64,13 +66,3 @@ export type SVGDrawPath = {
 };
 
 export type Matrix = [number, number, number, number, number, number];
-
-export type PenConfiguration = {
-  fill?: string;
-  stroke?: string;
-  strokeWidth?: number;
-  lineCap?: CanvasLineCap;
-  lineDash?: number[];
-  // scaling?: { x: number; y: number };
-  // rotation?: number;
-};
