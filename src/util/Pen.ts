@@ -11,7 +11,7 @@ import { Rectangle } from './Shapes/Rectangle';
 import { TextShape } from './Shapes/Text';
 
 const Pen = {
-  generatePen: (context?: CanvasRenderingContext2D) => {
+  generatePen: (context?: CanvasRenderingContext2D | null) => {
     return {
       draw: (shape: ShapeType, svgParams?: Partial<SVGParamsBase>) => {
         const shapeType = typeOfShape(shape);
@@ -28,6 +28,9 @@ const Pen = {
           case 'Freehand':
             Pen.drawFreehand(shape as Freehand, context, svgParams);
             break;
+          case 'TextShape':
+            Pen.drawText(shape as TextShape, context, svgParams);
+            break;
           case 'Path':
             Pen.drawPath(shape as Path, context, svgParams);
         }
@@ -38,7 +41,7 @@ const Pen = {
   draw: (
     shape: ShapeType,
     svgParams?: Partial<SVGParamsBase>,
-    context?: CanvasRenderingContext2D
+    context?: CanvasRenderingContext2D | null
   ) => {
     const shapeType = typeOfShape(shape);
     switch (shapeType) {
@@ -135,7 +138,7 @@ const Pen = {
 
   drawPath: (
     path: Path,
-    context?: CanvasRenderingContext2D,
+    context?: CanvasRenderingContext2D | null,
     svgParams?: Partial<SVGParamsBase>
   ) => {
     let pathConstructor = new Path2D(path.toString());
@@ -153,20 +156,28 @@ const Pen = {
 
   drawText: (
     textShape: TextShape,
-    context?: CanvasRenderingContext2D,
+    context?: CanvasRenderingContext2D | null,
     svgParams?: SVGParamsBase
   ) => {
-    console.log(textShape.toSVGTextParams());
-    const params = {
-      ...textShape.toSVGTextParams(),
-      ...svgParams,
-    };
-    const { text, position, fontSize, fontFamily, ...rest } = params;
-    if (context) {
+    console.debug('SVGPARAMS', svgParams);
+    const { position } = textShape.toPathParams();
+    const params = svgParams ?? textShape.getSvgParams();
+    const { text, fontSize, fontFamily, ...rest } = params;
+
+    if (context && text) {
+      if (rest.stroke) {
+        context.strokeStyle = rest.stroke;
+      }
+      if (params.lineDash) {
+        context.setLineDash(params.lineDash);
+      }
+      if (params.lineCap) {
+        context.lineCap = params.lineCap;
+      }
       context.fillStyle = rest.fill ?? '#000000';
       context.lineWidth = parseInt(rest.strokeWidth ?? '1');
-      context.font = (fontSize?.toString() ?? '12px').concat(
-        ' ',
+      context.font = (fontSize?.toString() ?? '12').concat(
+        'px ',
         (fontFamily ?? 'Arial').toLowerCase()
       );
       context.fillText(text, ...position);
@@ -178,17 +189,14 @@ const Pen = {
 
   drawFreehand: (
     freehand: Freehand,
-    context?: CanvasRenderingContext2D,
+    context?: CanvasRenderingContext2D | null,
     svgParams?: Partial<SVGParamsBase>
   ) => {
     let pathConstructor = new Path2D();
     const points = freehand.getPoints();
     const start = points[0];
     const rest = points.slice(1);
-    const params = {
-      ...freehand.getSvgParams(),
-      ...svgParams,
-    };
+    const params = svgParams ?? freehand.getSvgParams();
     if (context) {
       Pen.applyStyles(pathConstructor, params, context);
       pathConstructor.moveTo(...start);
@@ -202,15 +210,12 @@ const Pen = {
 
   drawLine: (
     line: Line,
-    context?: CanvasRenderingContext2D,
+    context?: CanvasRenderingContext2D | null,
     svgParams?: Partial<SVGParamsBase>
   ) => {
     let pathConstructor = new Path2D();
     if (context) {
-      const params = {
-        ...line.getSvgParams(),
-        ...svgParams,
-      };
+      const params = svgParams ?? line.getSvgParams();
       Pen.applyStyles(pathConstructor, params, context);
       const { fill, stroke } = params;
       pathConstructor.moveTo(...line.points[0]);
@@ -223,7 +228,7 @@ const Pen = {
 
   drawRectangle: (
     rectangle: Rectangle,
-    context?: CanvasRenderingContext2D,
+    context?: CanvasRenderingContext2D | null,
     svgParams?: Partial<SVGParamsBase>
   ) => {
     let path = new Path2D();
@@ -234,11 +239,8 @@ const Pen = {
       number
     ];
     if (context) {
-      const params = {
-        ...rectangle.getSvgParams(),
-        ...svgParams,
-      };
-      Pen.applyStyles(path, params, context);
+      const params = svgParams ?? rectangle.getSvgParams();
+      path = Pen.applyStyles(path, params, context);
       const { fill, stroke } = params;
       path.rect(...values);
       stroke && context.stroke(path);
@@ -249,7 +251,7 @@ const Pen = {
 
   drawEllipse: (
     ellipse: Ellipse,
-    context?: CanvasRenderingContext2D,
+    context?: CanvasRenderingContext2D | null,
     svgParams?: Partial<SVGParamsBase>
   ) => {
     const path = new Path2D();
@@ -260,10 +262,7 @@ const Pen = {
       number
     ];
     if (context) {
-      const params = {
-        ...ellipse.getSvgParams(),
-        ...svgParams,
-      };
+      const params = svgParams ?? ellipse.getSvgParams();
       Pen.applyStyles(path, params, context);
       const { fill, stroke } = params;
 
@@ -276,7 +275,7 @@ const Pen = {
 
   clearCanvas: (
     canvas: HTMLCanvasElement,
-    canvasContext?: CanvasRenderingContext2D
+    canvasContext?: CanvasRenderingContext2D | null
   ) => {
     if (canvas) {
       let context: CanvasRenderingContext2D | null | undefined = canvasContext;

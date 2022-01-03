@@ -1,6 +1,8 @@
 import { EditorLayout } from '../../components/organisms/EditorLayout';
 import { ShapeType, Tools_List } from '../../types/shapes';
-import { Coordinates } from '../../types/types';
+import { Coordinates, SVGParamsBase } from '../../types/types';
+import { highlightStyle } from '../helper/constants';
+import { Pen } from '../Pen';
 import { Ellipse } from '../Shapes/Ellipse';
 import { generateCircle, generateEllipse } from './EllipseTool.util';
 import { Tool } from './Tool';
@@ -13,9 +15,19 @@ export class EllipseTool extends Tool<Ellipse> {
     previewLayer: HTMLCanvasElement,
     self: EditorLayout,
     onCreate: (shape: ShapeType | null) => void,
+    drawPenConfig: SVGParamsBase,
     offset: Coordinates
   ) {
-    super(drawLayer, self, onCreate, offset, previewLayer);
+    super(
+      drawLayer,
+      self,
+      onCreate,
+      offset,
+      previewLayer,
+      drawPenConfig,
+      highlightStyle
+    );
+    console.log(this.drawPenConfig, this.previewPenConfig);
     this.resetPreview();
     this.toolName = Tools_List.ELLIPSE;
     const renderingContext = this.drawLayer.getContext('2d');
@@ -26,7 +38,7 @@ export class EllipseTool extends Tool<Ellipse> {
 
   #draw = () => {
     this.currentShape &&
-      this.pen.drawEllipse(this.currentShape, this.drawContext);
+      Pen.drawEllipse(this.currentShape, this.drawContext, this.drawPenConfig);
     this.resetPreview();
   };
 
@@ -51,12 +63,14 @@ export class EllipseTool extends Tool<Ellipse> {
     if (this.isCircle) {
       this.currentShape = generateCircle(
         this.previousCoordinates,
-        this.currentCoordinates
+        this.currentCoordinates,
+        this.drawPenConfig
       );
     } else {
       this.currentShape = generateEllipse(
         this.previousCoordinates,
-        this.currentCoordinates
+        this.currentCoordinates,
+        this.drawPenConfig
       );
     }
     this.onUpdateEditor(this.currentShape);
@@ -72,20 +86,20 @@ export class EllipseTool extends Tool<Ellipse> {
         const previewShape = generateCircle(
           this.previousCoordinates,
           this.currentCoordinates,
-          undefined,
+          this.previewPenConfig,
           false
         );
         this.currentShape = previewShape;
-        this.pen.drawEllipse(previewShape, this.previewContext);
+        Pen.drawEllipse(previewShape, this.previewContext);
       } else {
         const previewShape = generateEllipse(
           this.previousCoordinates,
           this.currentCoordinates,
-          undefined,
+          this.previewPenConfig,
           false
         );
         this.currentShape = previewShape;
-        this.pen.drawEllipse(previewShape, this.previewContext);
+        Pen.drawEllipse(previewShape, this.previewContext);
       }
     }
   };
@@ -104,6 +118,5 @@ export class EllipseTool extends Tool<Ellipse> {
     this.drawLayer.removeEventListener('mouseup', this.#onUp);
     window.removeEventListener('keydown', this.#onKeyDown);
     window.removeEventListener('keyup', this.#onKeyUp);
-    return this.allShapes;
   };
 }

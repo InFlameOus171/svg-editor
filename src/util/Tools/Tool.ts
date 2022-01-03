@@ -1,6 +1,7 @@
 import { EditorLayout } from '../../components/organisms/EditorLayout';
 import { ShapeType, Tools_List } from '../../types/shapes';
 import { Coordinates, SVGParamsBase } from '../../types/types';
+import { highlightStyle, textPlaceHolder } from '../helper/constants';
 import { Pen } from '../Pen';
 
 export abstract class Tool<T extends ShapeType, V extends ShapeType = T> {
@@ -10,11 +11,10 @@ export abstract class Tool<T extends ShapeType, V extends ShapeType = T> {
   currentShape?: V;
   allShapes: T[] = [];
   shallWait: boolean = false;
-  drawContext?: CanvasRenderingContext2D;
-  previewContext?: CanvasRenderingContext2D;
-  pen = Pen;
+  drawContext: CanvasRenderingContext2D | null;
+  previewContext: CanvasRenderingContext2D | null;
   previewPenConfig?: SVGParamsBase;
-  drawPenConfig?: SVGParamsBase;
+  drawPenConfig: SVGParamsBase;
   toolName?: Tools_List;
   offset: Coordinates;
   isDrawing: boolean = false;
@@ -27,64 +27,33 @@ export abstract class Tool<T extends ShapeType, V extends ShapeType = T> {
     onUpdateEditor: (shape: ShapeType | null) => void,
     offset: Coordinates = [0, 0],
     previewLayer?: HTMLCanvasElement,
-    drawPenConfig?: SVGParamsBase,
+    drawPenConfig: SVGParamsBase = { text: textPlaceHolder },
     previewPenConfig?: SVGParamsBase
   ) {
     this.drawLayer = drawLayer;
     this.onUpdateEditor = onUpdateEditor;
     this.self = self;
     this.offset = offset ?? [drawLayer.offsetLeft, drawLayer.offsetTop];
-    console.log(this.offset);
     this.previewLayer = previewLayer;
-    this.previewPenConfig = previewPenConfig;
+    this.previewPenConfig = previewPenConfig ?? highlightStyle;
     this.drawPenConfig = drawPenConfig;
-    const renderingContext = this.drawLayer.getContext('2d');
-    if (renderingContext) {
-      this.drawContext = renderingContext;
-      this.setContextConfig('draw');
-    }
-    const previewContext = this.previewLayer?.getContext('2d');
-    if (previewContext) {
-      this.previewContext = previewContext;
-      this.setContextConfig('preview');
-    }
+    this.previewContext = this.previewLayer?.getContext('2d') ?? null;
+    this.drawContext = this.drawLayer.getContext('2d');
   }
 
-  setStyles = (drawPenConfig: SVGParamsBase) => {
+  setSVGParams = (drawPenConfig: SVGParamsBase) => {
     this.drawPenConfig = drawPenConfig;
-  };
-
-  setContextConfig = (contextType: 'preview' | 'draw') => {
-    const context = this[`${contextType}Context`];
-    if (context) {
-      const config = this[`${contextType}PenConfig`];
-      if (config) {
-        const { stroke, fill, strokeWidth, lineDash } = config;
-        if (stroke) context.strokeStyle = stroke;
-        if (fill) context.fillStyle = fill;
-        if (strokeWidth) context.lineWidth = parseInt(strokeWidth);
-        if (lineDash) context.setLineDash(lineDash);
-        // TODO: To be implemented
-        // if (scaling) context.scale(scaling.x, scaling.y);
-        // if (rotation) context.rotate(rotation);
-      } else {
-        context.strokeStyle = '#000000';
-        context.lineWidth = 1;
-        context.fillStyle = '#000000';
-      }
-    }
   };
 
   resetPreview = () => {
     if (this.previewLayer && this.previewContext) {
-      this.unHighlightpreview();
-      this.pen.clearCanvas(this.previewLayer, this.previewContext);
+      Pen.clearCanvas(this.previewLayer, this.previewContext);
     }
   };
 
   resetView = () => {
     if (this.drawLayer && this.drawContext) {
-      this.pen.clearCanvas(this.drawLayer, this.drawContext);
+      Pen.clearCanvas(this.drawLayer, this.drawContext);
     }
   };
 
@@ -112,7 +81,7 @@ export abstract class Tool<T extends ShapeType, V extends ShapeType = T> {
   };
 
   getCoords = (e: MouseEvent): [number, number] => {
-    return [e.clientX - this.offset[0], e.clientY - this.offset[1]];
+    return [e.pageX - this.offset[0], e.pageY - this.offset[1]];
   };
 
   #draw = (): void => {

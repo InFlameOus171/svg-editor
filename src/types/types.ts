@@ -24,6 +24,7 @@ export type SVGParamsBase = {
   fontFamily?: string;
   fontSize?: number;
   transformMatrix?: DOMMatrix;
+  text?: string;
   bBox?: SVGRect;
 };
 

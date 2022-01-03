@@ -1,7 +1,7 @@
 import { EditorLayout } from '../../components/organisms/EditorLayout';
 import { Coordinates, Matrix, SVGParamsBase } from '../../types/types';
 import { FlattenedElement, Partition } from '../../types/util.types';
-import { acceptedTags } from './constants';
+import { acceptedTags, textPlaceHolder } from './constants';
 import { hexColorCodeRegExp } from './regularExpressions';
 
 export const partition = <T>(
@@ -243,8 +243,6 @@ export const updateStyleInputFields = (
   footerFields
     ?.querySelector('#stroke-color-input')
     ?.setAttribute('value', strokeColor.colorCode);
-
-  console.log(fillColor.colorCode, strokeColor.opacity);
   footerFields
     ?.querySelector('#fill-color-input')
     ?.setAttribute('value', fillColor.colorCode);
@@ -261,12 +259,14 @@ export const updateStyleInputFields = (
   const strokeOpacityInput = footerFields?.querySelector(
     '#stroke-opacity-input'
   );
+  footerFields
+    ?.querySelector('#text-input')
+    ?.setAttribute('value', params.text ?? textPlaceHolder);
 
   strokeOpacityInput?.setAttribute('value', strokeColor.opacity);
   strokeOpacityInput?.dispatchEvent(new Event('change'));
   fillOpacityInput?.setAttribute('value', fillColor.opacity);
   fillOpacityInput?.dispatchEvent(new Event('change'));
-  console.log(strokeColor.colorCode, strokeColor.opacity);
 };
 
 export const setIsTextInputSectionVisible = (

@@ -1,13 +1,16 @@
 import { EditorLayout } from '../../components/organisms/EditorLayout';
 import { ShapeType } from '../../types/shapes';
 import { SVGParamsBase, Coordinates } from '../../types/types';
+import { textPlaceHolder } from '../helper/constants';
 import { setIsTextInputSectionVisible } from '../helper/util';
 import { TextShape } from '../Shapes/Text';
+import {
+  getTextFromSource,
+  setTextParamsSourceVisibility,
+} from './TextTool.util';
 import { Tool } from './Tool';
 
 export class TextTool extends Tool<TextShape> {
-  #textSource?: HTMLElement | null;
-  #text: string;
   constructor(
     drawLayer: HTMLCanvasElement,
     previewLayer: HTMLCanvasElement,
@@ -17,35 +20,27 @@ export class TextTool extends Tool<TextShape> {
     offset?: Coordinates
   ) {
     super(drawLayer, self, onCreate, offset, previewLayer, currentStyles);
-    this.#textSource = self.shadowRoot?.getElementById('right-input-section');
-    this.#text = 'Input text...';
-    if (this.#textSource) {
-      this.#textSource.style.visibility = 'visible';
-      this.#textSource.removeAttribute('disabled');
-      this.#text =
-        this.#textSource.querySelector('#text-input')?.getAttribute('value') ??
-        this.#text;
-      this.#textSource
-        .querySelector('#text-input')
-        ?.setAttribute('value', this.#text);
-    }
+    setTextParamsSourceVisibility(self, true);
   }
 
   #onClick = (event: MouseEvent) => {
     const position = this.getCoords(event);
     let size;
-    if (this.previewContext) {
+    if (this.previewContext && this.drawPenConfig?.text) {
       this.previewContext.fillStyle = 'black';
-      this.previewContext.font = '30px Arial';
-      this.previewContext.fillText(this.#text, ...position);
-      size = this.previewContext.measureText(this.#text);
+      this.previewContext.strokeStyle = 'black';
+      this.previewContext.font = `${this.drawPenConfig.fontSize}px ${this.drawPenConfig.fontFamily}`;
+      this.previewContext.fillText(this.drawPenConfig.text, ...position);
+      size = this.previewContext.measureText(this.drawPenConfig.text);
       this.resetPreview();
+      console.debug(this.drawPenConfig);
       if (this.drawContext) {
         const width = size.width;
         const height = size.fontBoundingBoxAscent + size.fontBoundingBoxDescent;
-        const shape = new TextShape(this.#text, width, height, position, {
-          fontFamily: 'Arial',
-          fontSize: 12,
+        const shape = new TextShape(width, height, position, {
+          fontFamily: this.drawPenConfig.fontFamily,
+          fontSize: this.drawPenConfig.fontSize,
+          text: this.drawPenConfig.text,
           ...this.drawPenConfig,
         });
         this.onUpdateEditor(shape);
@@ -53,10 +48,8 @@ export class TextTool extends Tool<TextShape> {
     }
   };
 
-  updateText = () => {
-    this.#text =
-      this.#textSource?.querySelector('#text-input')?.getAttribute('value') ??
-      this.#text;
+  updateText = (text: string) => {
+    this.drawPenConfig.text = text;
   };
 
   executeAction = () => {

@@ -13,17 +13,24 @@ import {
   layoutHeaderStyle,
   layoutStyle,
 } from './EditorLayout.styles';
-import { getToolboxButtonsProps } from './EditorLayout.util.js';
+import {
+  getToolboxButtonsProps,
+  handleUpdateSVGParameters,
+} from './EditorLayout.util.js';
 
 @customElement('editor-layout')
 export class EditorLayout extends LitElement {
+  @state()
+  width: number = 0;
+  @state()
+  height: number = 0;
+  @state()
+  editor: Editor | null = null;
+  @state()
+  selectedElement: string | null = null;
+
   async firstUpdated() {
     this.updateResize();
-    updateStyleInputFields(this, {
-      strokeWidth: '1',
-      stroke: 'rgba(0,0,0,1)',
-      fill: 'rgba(0,0,0,0)',
-    });
     const canvas = this.shadowRoot?.getElementById(
       'drawzone'
     ) as HTMLCanvasElement;
@@ -53,15 +60,6 @@ export class EditorLayout extends LitElement {
 
   static styles = [layoutStyle, layoutHeaderStyle, layoutContentStyle];
 
-  @state()
-  width: number = 0;
-  @state()
-  height: number = 0;
-  @state()
-  editor: Editor | null = null;
-  @state()
-  selectedElement: string | null = null;
-
   handleSelectTool = (tool: Tools_List | null) => {
     if (tool === null) {
       this.editor?.onUnselectTool();
@@ -75,64 +73,6 @@ export class EditorLayout extends LitElement {
   updateResize = () => {
     this.width = parseInt(getComputedStyle(this).getPropertyValue('width'));
     this.height = parseInt(getComputedStyle(this).getPropertyValue('height'));
-  };
-
-  handleApplyStyles = () => {
-    const strokeWidth = (
-      this.shadowRoot?.getElementById('stroke-width-input') as HTMLInputElement
-    )?.value;
-    const stroke = (
-      this.shadowRoot?.getElementById('stroke-color-input') as HTMLInputElement
-    )?.value;
-    const fill = (
-      this.shadowRoot?.getElementById('fill-color-input') as HTMLInputElement
-    )?.value;
-    const fillOpacity = (
-      this.shadowRoot?.getElementById('fill-opacity-input') as HTMLInputElement
-    )?.value;
-    const lineDash = (
-      this.shadowRoot?.getElementById('line-dash-input') as HTMLInputElement
-    )?.value
-      .split(',')
-      .map(value => parseInt(value.trim()));
-    const lineCap = (
-      this.shadowRoot?.getElementById('line-cap-input') as HTMLInputElement
-    )?.value as CanvasLineCap;
-    const fontSize = (
-      this.shadowRoot?.getElementById(
-        'text-font-size-input'
-      ) as HTMLInputElement
-    )?.valueAsNumber;
-    const fontFamily = (
-      this.shadowRoot?.getElementById(
-        'text-font-family-input'
-      ) as HTMLInputElement
-    )?.value;
-    const text = (
-      this.shadowRoot?.getElementById('text-input') as HTMLInputElement
-    )?.value;
-    const strokeOpacity = (
-      this.shadowRoot?.getElementById(
-        'stroke-opacity-input'
-      ) as HTMLInputElement
-    )?.value;
-    console.log(stroke, fill, strokeOpacity, lineDash, lineCap, strokeWidth);
-    this.editor?.setStyles(
-      strokeWidth,
-      stroke,
-      fill,
-      fillOpacity,
-      strokeOpacity,
-      lineCap,
-      lineDash,
-      fontFamily,
-      fontSize
-    );
-    this.editor?.applyStyles();
-  };
-
-  handleChangeText = (event: InputEvent) => {
-    this.editor?.handleUpdateText();
   };
 
   render() {
@@ -158,7 +98,7 @@ export class EditorLayout extends LitElement {
                   <input
                     type="number"
                     id="stroke-width-input"
-                    @input="${this.handleApplyStyles}"
+                    @input="${() => handleUpdateSVGParameters(this)}"
                   />
                 </label>
                 <label>
@@ -167,13 +107,13 @@ export class EditorLayout extends LitElement {
                     type="text"
                     id="line-dash-input"
                     placeholder="3,3,3,12..."
-                    @input=${this.handleApplyStyles}
+                    @input=${() => handleUpdateSVGParameters(this)}
                   />
                 </label>
                 <label>
                   Linecap:
                   <select
-                    @input="${this.handleApplyStyles}"
+                    @input="${() => handleUpdateSVGParameters(this)}"
                     id="line-cap-input"
                   >
                     <option value="round">Round edge</option>
@@ -188,7 +128,7 @@ export class EditorLayout extends LitElement {
                     <input
                       type="color"
                       id="stroke-color-input"
-                      @change="${this.handleApplyStyles}"
+                      @change="${() => handleUpdateSVGParameters(this)}"
                     />
                   </label>
                   <label>
@@ -200,7 +140,7 @@ export class EditorLayout extends LitElement {
                       max="1"
                       @input=${(event: InputEvent) => {
                         updateNextSiblingValue(event);
-                        this.handleApplyStyles();
+                        handleUpdateSVGParameters(this);
                       }}
                     />
                     <input
@@ -208,7 +148,7 @@ export class EditorLayout extends LitElement {
                       type="number"
                       @change=${(event: InputEvent) => {
                         updatePreviousSiblingValue(event);
-                        this.handleApplyStyles();
+                        handleUpdateSVGParameters(this);
                       }}
                     />
                   </label>
@@ -219,7 +159,7 @@ export class EditorLayout extends LitElement {
                     <input
                       type="color"
                       id="fill-color-input"
-                      @input="${this.handleApplyStyles}"
+                      @input="${() => handleUpdateSVGParameters(this)}"
                     />
                   </label>
                   <label>
@@ -231,7 +171,7 @@ export class EditorLayout extends LitElement {
                       step="0.01"
                       @input=${(event: InputEvent) => {
                         updateNextSiblingValue(event);
-                        this.handleApplyStyles();
+                        handleUpdateSVGParameters(this);
                       }}
                     />
                     <input
@@ -239,7 +179,7 @@ export class EditorLayout extends LitElement {
                       type="number"
                       @change=${(event: InputEvent) => {
                         updatePreviousSiblingValue(event);
-                        this.handleApplyStyles();
+                        handleUpdateSVGParameters(this);
                       }}
                     />
                   </label>
@@ -251,13 +191,13 @@ export class EditorLayout extends LitElement {
                 >Font size:<input
                   type="number"
                   id="text-font-size-input"
-                  @input=${this.handleApplyStyles}
+                  @input=${() => handleUpdateSVGParameters(this)}
               /></label>
               <label>
                 Font family:
                 <select
                   id="text-font-family-input"
-                  @input=${this.handleApplyStyles}
+                  @input=${() => handleUpdateSVGParameters(this)}
                 >
                   ${Array.from(fonts).map(
                     font => html`<option value=${font}>${font}</option>`
@@ -269,14 +209,11 @@ export class EditorLayout extends LitElement {
                 <input
                   type="text"
                   id="text-input"
-                  @input=${this.handleChangeText}
+                  @input=${() => handleUpdateSVGParameters(this)}
                 />
               </label>
             </fieldset>
           </div>
-          <!-- <div id="footer-submit-button">
-            <button @click=${this.handleApplyStyles}>Apply styles</button>
-          </div> -->
         </fieldset>
         <div id="position"></div>
       </div>

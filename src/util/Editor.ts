@@ -1,6 +1,7 @@
 import { EditorLayout } from '../components/organisms/EditorLayout';
 import { ShapeType, Tools_List } from '../types/shapes';
 import { Coordinates, SVGParamsBase } from '../types/types';
+import { textPlaceHolder } from './helper/constants';
 import { getMinMaxValuesOfCoordinates } from './helper/coordinates';
 import {
   appendAsSVGShapeGeneratorFunction,
@@ -22,6 +23,7 @@ import { MoveTool } from './Tools/MoveTool';
 import { RectangleTool } from './Tools/RectangleTool';
 import { SelectTool } from './Tools/SelectTool';
 import { TextTool } from './Tools/TextTool';
+import { getTextFromSource } from './Tools/TextTool.util';
 import { Tool } from './Tools/Tool';
 
 export class Editor {
@@ -31,12 +33,13 @@ export class Editor {
   #self: EditorLayout;
   #offset: Coordinates;
   #shapes: ShapeType[] = [];
-  #currentStyles: SVGParamsBase = {
+  #currentParams: SVGParamsBase = {
     strokeWidth: '1',
     stroke: 'rgba(0,0,0,1)',
     fill: 'rgba(0,0,0,0)',
     lineCap: 'butt',
     lineDash: [0],
+    text: textPlaceHolder,
   };
   #selectedShape?: ShapeType | null = null;
   #pen?: {
@@ -55,12 +58,12 @@ export class Editor {
     this.#previewLayer = previewLayer;
     this.#self = self;
     this.#offset = offset;
-    this.#currentStyles = {
+    this.#currentParams = {
       strokeWidth: '1',
       stroke: 'rgba(0,0,0,1)',
       fill: 'rgba(0,0,0,0)',
     };
-    updateStyleInputFields(this.#self, this.#currentStyles);
+    updateStyleInputFields(this.#self, this.#currentParams);
     const context = canvas.getContext('2d');
     if (context) {
       this.#pen = Pen.generatePen(context);
@@ -101,13 +104,7 @@ export class Editor {
   };
 
   onUpdateStyleInputFields = () => {
-    updateStyleInputFields(this.#self, this.#currentStyles);
-  };
-
-  handleUpdateText = () => {
-    if (isTextTool(this.#selectedTool)) {
-      this.#selectedTool.updateText();
-    }
+    updateStyleInputFields(this.#self, this.#currentParams);
   };
 
   onSave = () => {
@@ -129,7 +126,7 @@ export class Editor {
       this.#shapes.push(shape);
     }
     console.log(shape.getSvgParams());
-    this.#currentStyles = shape.getSvgParams();
+    this.#currentParams = shape.getSvgParams();
     this.onUpdateStyleInputFields();
     this.redrawShapes();
   };
@@ -166,7 +163,7 @@ export class Editor {
   #onHandleSelectShape = (selectedShape: ShapeType | null) => {
     this.#selectedShape = selectedShape;
     if (this.#selectedShape) {
-      this.#currentStyles = this.#selectedShape.getSvgParams();
+      this.#currentParams = this.#selectedShape.getSvgParams();
       this.onUpdateStyleInputFields();
       this.applyStyles();
 
@@ -197,7 +194,7 @@ export class Editor {
             this.#canvas,
             this.#self,
             this.#appendToShapes,
-            this.#currentStyles,
+            this.#currentParams,
             this.#offset
           );
           break;
@@ -209,6 +206,7 @@ export class Editor {
             this.#previewLayer,
             this.#self,
             this.#appendToShapes,
+            this.#currentParams,
             this.#offset
           );
           break;
@@ -220,7 +218,7 @@ export class Editor {
             this.#previewLayer,
             this.#self,
             this.#appendToShapes,
-            this.#currentStyles,
+            this.#currentParams,
             this.#offset
           );
           break;
@@ -232,6 +230,7 @@ export class Editor {
             this.#previewLayer,
             this.#self,
             this.#appendToShapes,
+            this.#currentParams,
             this.#offset
           );
           break;
@@ -253,7 +252,7 @@ export class Editor {
             this.#previewLayer,
             this.#self,
             this.#appendToShapes,
-            this.#currentStyles
+            this.#currentParams
           );
           break;
         }
@@ -294,7 +293,7 @@ export class Editor {
     }
   };
 
-  setStyles = (
+  setShapeParams = (
     strokeWidth?: string,
     stroke: string = '#000000',
     fill: string = '#000000',
@@ -303,7 +302,8 @@ export class Editor {
     lineCap: CanvasLineCap = 'butt',
     lineDash: number[] = [],
     fontFamily: string = 'Arial',
-    fontSize: number = 12
+    fontSize: number = 12,
+    text?: string
     // @TODO: Optional -> To be implemented
     // rotation?: string,
     // scaling?: [string, string]
@@ -318,7 +318,7 @@ export class Editor {
     // const parsedRotation = rotation ? parseFloat(rotation) : undefined;
     const normalizedFill = hexToRGBA(fill, fillOpacity);
     const normalizedStroke = hexToRGBA(stroke, strokeOpacity);
-    this.#currentStyles = {
+    this.#currentParams = {
       fill: normalizedFill,
       stroke: normalizedStroke,
       strokeWidth,
@@ -326,15 +326,16 @@ export class Editor {
       lineDash,
       fontFamily,
       fontSize,
+      text,
       // rotation: parsedRotation,
       // scaling: parsedScaling,
     };
-    this.#selectedTool?.setStyles(this.#currentStyles);
+    this.#selectedTool?.setSVGParams(this.#currentParams);
   };
 
   applyStyles = () => {
     if (this.#selectedShape && this.#canvas) {
-      this.#selectedShape?.applyStyles(this.#currentStyles);
+      this.#selectedShape?.updateSVGParams(this.#currentParams);
       const changedShapeIndex = this.#shapes.findIndex(
         shape => shape.getId() === this.#selectedShape?.getId()
       );

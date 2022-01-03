@@ -211,11 +211,11 @@ export const getTextBoundaries = (
   console.log(width, height, position);
   const x = parseInt(position[0].toString());
   const y = parseInt(position[0].toString());
-  const pos1: Coordinates = [x, position[1]];
+  const pos1: Coordinates = [x, position[1] + height / 4];
   const pos2: Coordinates = [x, position[1] - height];
   const pos3: Coordinates = [position[0] + width, position[1]];
   const pos4: Coordinates = [position[0] + width, position[1] - height];
-  console.log(pos1, pos2, pos3, pos4);
+  console.debug(pos1, pos2, pos3, pos4);
   return [pos1, pos2, pos3, pos4];
 };
 

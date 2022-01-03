@@ -1,6 +1,7 @@
 import { EditorLayout } from '../../components/organisms/EditorLayout';
 import { ShapeType, Tools_List } from '../../types/shapes';
 import { Coordinates, SVGParamsBase } from '../../types/types';
+import { Pen } from '../Pen';
 import { Freehand } from '../Shapes/Freehand';
 import { Line } from '../Shapes/Line';
 import { Tool } from './Tool';
@@ -28,7 +29,7 @@ export class DrawTool extends Tool<Freehand, Line> {
   };
 
   #draw = () => {
-    this.currentShape && this.pen.drawLine(this.currentShape, this.drawContext);
+    this.currentShape && Pen.drawLine(this.currentShape, this.drawContext);
   };
 
   #updateShapeData = (newCoordinates: Coordinates) => {

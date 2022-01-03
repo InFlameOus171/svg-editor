@@ -4,6 +4,7 @@ import {
   Coordinates,
   SVGParamsBase,
 } from '../../types/types';
+import { textPlaceHolder } from '../helper/constants';
 import { getMinMaxValuesOfCoordinates } from '../helper/coordinates';
 import { rotate } from '../helper/util';
 
@@ -18,6 +19,7 @@ export abstract class Shape {
   #lineDash?: number[];
   #fontSize?: number;
   #fontFamily?: string;
+  text: string = textPlaceHolder;
   transformMatrix?: DOMMatrix;
   boundaries: BoundaryCoordinates;
   index: number = 0;
@@ -44,6 +46,7 @@ export abstract class Shape {
     this.#lineDash = svgParams.lineDash;
     this.#fontSize = svgParams.fontSize;
     this.#fontFamily = svgParams.fontFamily;
+    this.text = svgParams.text ?? this.text;
     this.transformMatrix = svgParams.transformMatrix;
     this.boundaries = boundaries;
     this.index = Shape.#counter;
@@ -81,14 +84,14 @@ export abstract class Shape {
     }) as BoundaryCoordinates;
   };
 
-  applyStyles = (config: SVGParamsBase) => {
-    this.#fill = config.fill;
-    this.#stroke = config.stroke;
-    this.#strokeWidth = config.strokeWidth;
-    this.#lineCap = config.lineCap;
-    this.#lineDash = config.lineDash;
-    this.#fontFamily = config.fontFamily;
-    this.#fontSize = config.fontSize;
+  updateSVGParams = (newParams: SVGParamsBase) => {
+    this.#fill = newParams.fill;
+    this.#stroke = newParams.stroke;
+    this.#strokeWidth = newParams.strokeWidth;
+    this.#lineCap = newParams.lineCap;
+    this.#lineDash = newParams.lineDash;
+    this.#fontFamily = newParams.fontFamily;
+    this.#fontSize = newParams.fontSize;
     // @TODO: To be implemented
     // if (config.scaling || config.rotation) {
     //   const { x: scaleX, y: scaleY } = config.scaling || { x: 1, y: 1 };
@@ -120,6 +123,7 @@ export abstract class Shape {
       lineDash: this.#lineDash,
       fontSize: this.#fontSize,
       fontFamily: this.#fontFamily,
+      text: this.text,
     };
   };
 
@@ -131,10 +135,7 @@ export abstract class Shape {
     throw new Error('not implemented');
   };
 
-  moveTo = (
-    coodinates: Coordinates,
-    context?: CanvasRenderingContext2D
-  ): void => {
+  moveTo = (coodinates: Coordinates): void => {
     throw new Error('not implemented');
   };
 

@@ -6,6 +6,7 @@ import {
   getCanvasRectangleValuesFromPoints,
   getFormattedRectangleValuesFromPoints,
 } from '../helper/coordinates';
+import { Pen } from '../Pen';
 import { Rectangle } from '../Shapes/Rectangle';
 import { Tool } from './Tool';
 
@@ -82,7 +83,7 @@ export class RectangleTool extends Tool<Rectangle> {
       startingCorner,
       width,
       height,
-      this.drawPenConfig,
+      this.previewPenConfig,
       false
     );
   };
@@ -93,10 +94,10 @@ export class RectangleTool extends Tool<Rectangle> {
       this.createRectanglePreview();
       if (this.currentShape) {
         this.resetPreview();
-        this.pen.drawRectangle(
+        Pen.drawRectangle(
           this.currentShape,
           this.previewContext,
-          highlightStyle
+          this.previewPenConfig
         );
       }
     }

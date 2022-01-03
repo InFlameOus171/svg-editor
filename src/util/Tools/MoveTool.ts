@@ -1,12 +1,14 @@
 import { EditorLayout } from '../../components/organisms/EditorLayout';
 import { ShapeType, Tools_List } from '../../types/shapes';
-import { Coordinates } from '../../types/types';
+import { Coordinates, SVGParamsBase } from '../../types/types';
 import { highlightStyle } from '../helper/constants';
 import {
   isPointInsideAnotherShape,
   rectangleParamsFromBoundaries,
 } from '../helper/coordinates';
+import { Pen } from '../Pen';
 import { Rectangle } from '../Shapes/Rectangle';
+import { TextShape } from '../Shapes/Text';
 import { Tool } from './Tool';
 
 export class MoveTool extends Tool<ShapeType> {
@@ -25,10 +27,10 @@ export class MoveTool extends Tool<ShapeType> {
     }
     this.currentShape = selectedShape;
     this.toolName = Tools_List.MOVE;
-    this.#drawOnPreview = this.pen.generatePen(this.previewContext).draw;
+    this.#drawOnPreview = Pen.generatePen(this.previewContext).draw;
   }
   #dCenter?: Coordinates;
-  #drawOnPreview: (shape: ShapeType) => void;
+  #drawOnPreview: (shape: ShapeType, svgParams?: SVGParamsBase) => void;
 
   #onDown = (event: MouseEvent) => {
     this.previousCoordinates = this.currentCoordinates;
@@ -59,6 +61,7 @@ export class MoveTool extends Tool<ShapeType> {
       this.#drawOnPreview(
         new Rectangle(startingCorner, width, height, highlightStyle)
       );
+      this.#drawOnPreview(this.currentShape, highlightStyle);
     }
   };
 
@@ -71,6 +74,7 @@ export class MoveTool extends Tool<ShapeType> {
       this.currentCoordinates[0] - (this.#dCenter?.[0] ?? 0),
       this.currentCoordinates[1] - (this.#dCenter?.[1] ?? 0),
     ]);
+    console.debug((this.currentShape as TextShape).toPathParams().position);
     this.#updatePreview();
   };
 
