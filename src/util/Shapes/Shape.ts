@@ -5,8 +5,13 @@ import {
   SVGParamsBase,
 } from '../../types/types';
 import { textPlaceHolder } from '../helper/constants';
-import { getMinMaxValuesOfCoordinates } from '../helper/coordinates';
+import {
+  getMinMaxValuesOfCoordinates,
+  getTextBoundaries,
+} from '../helper/coordinates';
+import { isText } from '../helper/typeguards';
 import { rotate } from '../helper/util';
+import { Pen } from '../Pen';
 
 export abstract class Shape {
   static #counter: number = 0;
@@ -92,6 +97,17 @@ export abstract class Shape {
     this.#lineDash = newParams.lineDash;
     this.#fontFamily = newParams.fontFamily;
     this.#fontSize = newParams.fontSize;
+    if (isText(this)) {
+      this.text = newParams.text ?? this.text;
+      const measures = Pen.measureText(this.text, this.getSvgParams());
+      if (measures) {
+        this.boundaries = getTextBoundaries(
+          this.getCenter(),
+          measures?.width,
+          measures?.height
+        );
+      }
+    }
     // @TODO: To be implemented
     // if (config.scaling || config.rotation) {
     //   const { x: scaleX, y: scaleY } = config.scaling || { x: 1, y: 1 };

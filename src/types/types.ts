@@ -53,6 +53,10 @@ export type LineSVGParams = SVGParamsBase & {
   y2: string;
 };
 
+export type TextSVGParams = SVGParamsBase & {
+  position: Coordinates;
+};
+
 export type PathSVGParams = SVGParamsBase & {
   d: string;
 };

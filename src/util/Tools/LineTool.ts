@@ -1,6 +1,7 @@
 import { EditorLayout } from '../../components/organisms/EditorLayout';
-import { ShapeType, Tools_List } from '../../types/shapes';
+import { ShapeType } from '../../types/shapes';
 import { Coordinates, SVGParamsBase } from '../../types/types';
+import { Tools_List } from '../helper/constants';
 import { Pen } from '../Pen';
 import { Line } from '../Shapes/Line';
 import { Tool } from './Tool';
@@ -10,7 +11,7 @@ export class LineTool extends Tool<Line> {
     drawLayer: HTMLCanvasElement,
     previewLayer: HTMLCanvasElement,
     self: EditorLayout,
-    onCreate: (shape: ShapeType | null) => void,
+    onCreate: (shape: ShapeType | ShapeType[] | null) => void,
     drawPenConfig?: SVGParamsBase,
     offset?: Coordinates
   ) {

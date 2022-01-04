@@ -6,16 +6,13 @@ import { Pen } from '../Pen';
 import { Tool } from './Tool';
 
 export class ImportTool extends Tool<ShapeType> {
-  #draw: (shape: ShapeType) => void;
-
   constructor(
     drawLayer: HTMLCanvasElement,
     self: EditorLayout,
-    onCreate: (shape: ShapeType | null) => void,
+    onImport: (shape: ShapeType | ShapeType[] | null) => void,
     offset: Coordinates
   ) {
-    super(drawLayer, self, onCreate, offset);
-    this.#draw = Pen.generatePen(this.drawContext).draw;
+    super(drawLayer, self, onImport, offset);
   }
 
   drawSvg = (svg: Document) => {
@@ -31,8 +28,7 @@ export class ImportTool extends Tool<ShapeType> {
       const appendedSvg = document.body.appendChild(createdSVG);
       const shapes = convertSVGDocumentToShapes(elementId);
       document.body.removeChild(appendedSvg);
-      this.allShapes.push(...shapes);
-      shapes.forEach(this.#draw);
+      this.onUpdateEditor(shapes);
     }
   };
 

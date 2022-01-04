@@ -1,4 +1,4 @@
-import { Coordinates, SVGParamsBase } from '../../types/types';
+import { Coordinates, SVGParamsBase, TextSVGParams } from '../../types/types';
 import { getTextBoundaries } from '../helper/coordinates';
 import { Shape } from './Shape';
 
@@ -27,6 +27,14 @@ export class TextShape extends Shape {
     return this.text;
   };
 
+  getHeight = () => {
+    return this.#height;
+  };
+
+  getWidth = () => {
+    return this.#width;
+  };
+
   moveTo = (coordinates: Coordinates) => {
     const [dx, dy] = [
       coordinates[0] - this.#position[0],
@@ -42,7 +50,7 @@ export class TextShape extends Shape {
 
   getCenter = (): Coordinates => this.#position;
 
-  toSVGTextParams = () => {
+  toSVGTextParams = (): TextSVGParams => {
     return {
       position: this.#position,
       ...this.getSvgParams(),

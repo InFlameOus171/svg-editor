@@ -1,7 +1,7 @@
 import { EditorLayout } from '../../components/organisms/EditorLayout';
-import { ShapeType, Tools_List } from '../../types/shapes';
+import { ShapeType } from '../../types/shapes';
 import { Coordinates, SVGParamsBase } from '../../types/types';
-import { highlightStyle } from '../helper/constants';
+import { highlightStyle, Tools_List } from '../helper/constants';
 import {
   getCanvasRectangleValuesFromPoints,
   getFormattedRectangleValuesFromPoints,
@@ -15,7 +15,7 @@ export class RectangleTool extends Tool<Rectangle> {
     drawLayer: HTMLCanvasElement,
     previewLayer: HTMLCanvasElement,
     self: EditorLayout,
-    onCreate: (shape: ShapeType | null) => void,
+    onCreate: (shape: ShapeType | ShapeType[] | null) => void,
     styles: SVGParamsBase,
     offset: Coordinates
   ) {

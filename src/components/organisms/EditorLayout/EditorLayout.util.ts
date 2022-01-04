@@ -1,5 +1,5 @@
 import { EditorLayout } from '.';
-import { Tools_List } from '../../../types/shapes';
+import { SVGParamFieldID, Tools_List } from '../../../util/helper/constants';
 import { IToolboxButtonProps } from '../../atoms/ToolboxButton/ToolboxButton.types';
 
 export const getToolboxButtonsProps = (
@@ -7,103 +7,94 @@ export const getToolboxButtonsProps = (
 ): IToolboxButtonProps[] => [
   {
     toolName: 'Draw Tool',
+    class: 'draw-ool',
     onClick: () => selectToolFunction(Tools_List.DRAW),
-    id: '1',
+    icon: 'public/images/draw.svg',
+    id: Tools_List.DRAW,
     isSelected: false,
   },
   {
     toolName: 'Line Tool',
     onClick: () => selectToolFunction(Tools_List.LINE),
-    icon: 'public/images/line.png',
-    id: '2',
+    icon: 'public/images/line.svg',
+    id: Tools_List.LINE,
     isSelected: false,
   },
   {
     toolName: 'Rect Tool',
-    icon: 'public/images/rectangle.png',
+    icon: 'public/images/rectangle.svg',
     onClick: () => selectToolFunction(Tools_List.RECT),
-    id: '3',
+    id: Tools_List.RECT,
     isSelected: false,
   },
   {
-    toolName: 'Ellipse Tool',
+    toolName: 'Ellipse Tool - Hold CTRL for circle mode',
     onClick: () => selectToolFunction(Tools_List.ELLIPSE),
-    id: '4',
+    icon: 'public/images/ellipse.svg',
+    id: Tools_List.ELLIPSE,
     isSelected: false,
   },
   {
     toolName: 'Text Tool',
     onClick: () => selectToolFunction(Tools_List.TEXT),
-    id: '5',
+    icon: 'public/images/text.svg',
+    id: Tools_List.TEXT,
     isSelected: false,
   },
   {
     toolName: 'Select Tool',
     onClick: () => selectToolFunction(Tools_List.SELECT),
-    id: '6',
+    icon: 'public/images/select.svg',
+    id: Tools_List.SELECT,
     isSelected: false,
   },
   {
     toolName: 'Move Tool',
     onClick: () => selectToolFunction(Tools_List.MOVE),
-    id: '7',
+    icon: 'public/images/move.svg',
+    id: Tools_List.MOVE,
     isSelected: false,
   },
   {
     toolName: 'Delete',
     onClick: () => selectToolFunction(Tools_List.DELETE),
-    id: '8',
+    icon: 'public/images/delete.svg',
+    id: Tools_List.DELETE,
     isSelected: false,
   },
   {
     toolName: 'Unselect',
     onClick: () => selectToolFunction(null),
-    id: '0',
+    icon: 'public/images/unselect.svg',
+    id: -1,
     isSelected: false,
   },
 ];
 
+export const getElementValueByIdGenerator =
+  (shadowRoot?: ShadowRoot | null) => (id: SVGParamFieldID) => {
+    return (shadowRoot?.getElementById(id) as HTMLInputElement | undefined)
+      ?.value;
+  };
+
 export const handleUpdateSVGParameters = (target: EditorLayout) => {
-  const strokeWidth = (
-    target.shadowRoot?.getElementById('stroke-width-input') as HTMLInputElement
-  )?.value;
-  const stroke = (
-    target.shadowRoot?.getElementById('stroke-color-input') as HTMLInputElement
-  )?.value;
-  const fill = (
-    target.shadowRoot?.getElementById('fill-color-input') as HTMLInputElement
-  )?.value;
-  const fillOpacity = (
-    target.shadowRoot?.getElementById('fill-opacity-input') as HTMLInputElement
-  )?.value;
-  const lineDash = (
-    target.shadowRoot?.getElementById('line-dash-input') as HTMLInputElement
-  )?.value
+  const getValueById = getElementValueByIdGenerator(target.shadowRoot);
+  const fill = getValueById(SVGParamFieldID.FILL_COLOR);
+  const fillOpacity = getValueById(SVGParamFieldID.FILL_OPACITY);
+  const fontFamily = getValueById(SVGParamFieldID.TEXT_FONT_FAMILY);
+  const fontSize = parseInt(
+    getValueById(SVGParamFieldID.TEXT_FONT_SIZE) ?? '18'
+  );
+  const lineCap = getValueById(SVGParamFieldID.LINE_CAP) as CanvasLineCap;
+  const lineDash = (getValueById(SVGParamFieldID.LINE_DASH) ?? '0')
     .split(',')
     .map(value => parseInt(value.trim()));
-  const lineCap = (
-    target.shadowRoot?.getElementById('line-cap-input') as HTMLInputElement
-  )?.value as CanvasLineCap;
-  const fontSize = (
-    target.shadowRoot?.getElementById(
-      'text-font-size-input'
-    ) as HTMLInputElement
-  )?.valueAsNumber;
-  const fontFamily = (
-    target.shadowRoot?.getElementById(
-      'text-font-family-input'
-    ) as HTMLInputElement
-  )?.value;
-  const text = (
-    target.shadowRoot?.getElementById('text-input') as HTMLInputElement
-  )?.value;
-  const strokeOpacity = (
-    target.shadowRoot?.getElementById(
-      'stroke-opacity-input'
-    ) as HTMLInputElement
-  )?.value;
-  console.log(stroke, fill, strokeOpacity, lineDash, lineCap, strokeWidth);
+  const stroke = getValueById(SVGParamFieldID.STROKE_COLOR);
+  const strokeOpacity = getValueById(SVGParamFieldID.STROKE_OPACITY);
+  const strokeWidth = getValueById(SVGParamFieldID.STROKE_WIDTH);
+  const text = getValueById(SVGParamFieldID.TEXT);
   target.editor?.setShapeParams(
+    true,
     strokeWidth,
     stroke,
     fill,

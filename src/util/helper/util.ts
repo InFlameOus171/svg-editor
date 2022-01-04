@@ -1,7 +1,7 @@
 import { EditorLayout } from '../../components/organisms/EditorLayout';
 import { Coordinates, Matrix, SVGParamsBase } from '../../types/types';
 import { FlattenedElement, Partition } from '../../types/util.types';
-import { acceptedTags, textPlaceHolder } from './constants';
+import { acceptedTags, SVGParamFieldID, textPlaceHolder } from './constants';
 import { hexColorCodeRegExp } from './regularExpressions';
 
 export const partition = <T>(
@@ -118,7 +118,6 @@ export const normalizeColorCode = (
       return { colorCode: '#'.concat(rgbColors.join('')), opacity };
     } else {
       const rgbColors = parsedColorCodes.map(parseToFixed2HexString);
-      console.log(parsedColorCodes);
       return { colorCode: '#'.concat(rgbColors.join('')), opacity: '1' };
     }
   }
@@ -222,12 +221,19 @@ export const pathCommandValues = [
   ...singleDirectionCommands,
 ];
 
+export const inputFieldGetterGenerator =
+  (fieldRoot?: HTMLElement | null) => (id: SVGParamFieldID) => {
+    return fieldRoot?.querySelector('#' + id) as HTMLInputElement | null;
+  };
+
 export const updateStyleInputFields = (
   self: EditorLayout,
   params: SVGParamsBase
 ) => {
+  const getFieldByParamId = inputFieldGetterGenerator(
+    self.shadowRoot?.getElementById('footer-input')
+  );
   const defaultColor = { colorCode: '#000000', opacity: '1' };
-  console.log(params);
   const strokeColor = params.stroke
     ? normalizeColorCode(params.stroke)
     : defaultColor;
@@ -235,54 +241,48 @@ export const updateStyleInputFields = (
     ? normalizeColorCode(params.fill)
     : defaultColor;
 
-  const footerFields = self.shadowRoot?.getElementById('footer-fields');
-
-  footerFields
-    ?.querySelector('#stroke-width-input')
-    ?.setAttribute('value', params.strokeWidth ?? '0');
-  footerFields
-    ?.querySelector('#stroke-color-input')
-    ?.setAttribute('value', strokeColor.colorCode);
-  footerFields
-    ?.querySelector('#fill-color-input')
-    ?.setAttribute('value', fillColor.colorCode);
-  footerFields
-    ?.querySelector('#line-dash-input')
-    ?.setAttribute('value', params.lineDash?.join(', ') ?? '0');
-  footerFields
-    ?.querySelector('#text-font-family-input')
-    ?.setAttribute('value', params.fontFamily ?? 'Arial');
-  footerFields
-    ?.querySelector('#text-font-size-input')
-    ?.setAttribute('value', params.fontSize?.toString() ?? '12');
-  const fillOpacityInput = footerFields?.querySelector('#fill-opacity-input');
-  const strokeOpacityInput = footerFields?.querySelector(
-    '#stroke-opacity-input'
+  const fillColorInput = getFieldByParamId(SVGParamFieldID.FILL_COLOR);
+  const fillOpacityInput = getFieldByParamId(SVGParamFieldID.FILL_OPACITY);
+  const lineCapInput = getFieldByParamId(SVGParamFieldID.LINE_CAP);
+  const lineDashInput = getFieldByParamId(SVGParamFieldID.LINE_DASH);
+  const strokeColorInput = getFieldByParamId(SVGParamFieldID.STROKE_COLOR);
+  const strokeOpacityInput = getFieldByParamId(SVGParamFieldID.STROKE_OPACITY);
+  const strokeWidthInput = getFieldByParamId(SVGParamFieldID.STROKE_WIDTH);
+  const textFontFamilyInput = getFieldByParamId(
+    SVGParamFieldID.TEXT_FONT_FAMILY
   );
-  footerFields
-    ?.querySelector('#text-input')
-    ?.setAttribute('value', params.text ?? textPlaceHolder);
-
-  strokeOpacityInput?.setAttribute('value', strokeColor.opacity);
-  strokeOpacityInput?.dispatchEvent(new Event('change'));
-  fillOpacityInput?.setAttribute('value', fillColor.opacity);
-  fillOpacityInput?.dispatchEvent(new Event('change'));
-};
-
-export const setIsTextInputSectionVisible = (
-  self: EditorLayout,
-  value: boolean
-) => {
-  const rightInputSection = self.shadowRoot?.getElementById(
-    'right-input-section'
-  );
-  if (rightInputSection) {
-    if (value) {
-      rightInputSection.style.visibility = 'hidden';
-      rightInputSection.setAttribute('disabled', '');
-    } else {
-      rightInputSection.style.visibility = 'visible';
-      rightInputSection.removeAttribute('disabled');
-    }
+  const textFontSizeInput = getFieldByParamId(SVGParamFieldID.TEXT_FONT_SIZE);
+  const textInput = getFieldByParamId(SVGParamFieldID.TEXT);
+  if (fillColorInput) {
+    fillColorInput.value = fillColor.colorCode;
+  }
+  if (fillOpacityInput) {
+    fillOpacityInput.value = fillColor.opacity;
+    fillOpacityInput.dispatchEvent(new Event('change'));
+  }
+  if (lineCapInput) {
+    lineCapInput.value = params.lineCap ?? 'butt';
+  }
+  if (lineDashInput) {
+    lineDashInput.value = params.lineDash?.join(',') ?? '0';
+  }
+  if (strokeColorInput) {
+    strokeColorInput.value = strokeColor.colorCode;
+  }
+  if (strokeOpacityInput) {
+    strokeOpacityInput.value = strokeColor.opacity;
+    strokeOpacityInput.dispatchEvent(new Event('change'));
+  }
+  if (strokeWidthInput) {
+    strokeWidthInput.value = params.strokeWidth ?? '0';
+  }
+  if (textFontFamilyInput) {
+    textFontFamilyInput.value = params.fontFamily ?? 'Arial';
+  }
+  if (textFontSizeInput) {
+    textFontSizeInput.value = params.fontSize?.toString() ?? '18';
+  }
+  if (textInput) {
+    textInput.value = params.text ?? textPlaceHolder;
   }
 };

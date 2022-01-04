@@ -1,7 +1,7 @@
 import { EditorLayout } from '../../components/organisms/EditorLayout';
-import { Shapes, ShapeType, Tools_List } from '../../types/shapes';
+import { Shapes, ShapeType } from '../../types/shapes';
 import { Coordinates, SVGParamsBase } from '../../types/types';
-import { highlightStyle } from '../helper/constants';
+import { highlightStyle, Tools_List } from '../helper/constants';
 import {
   getCanvasRectangleValuesFromPoints,
   isPointInsideAnotherShape,
@@ -9,9 +9,9 @@ import {
   rectangleParamsFromBoundaries,
 } from '../helper/coordinates';
 import { isText, typeOfShape } from '../helper/typeguards';
-import { setIsTextInputSectionVisible } from '../helper/util';
 import { Pen } from '../Pen';
 import { Rectangle } from '../Shapes/Rectangle';
+import { setTextParamsSourceVisibility } from './TextTool.util';
 import { Tool } from './Tool';
 
 export class SelectTool extends Tool<ShapeType> {
@@ -19,12 +19,11 @@ export class SelectTool extends Tool<ShapeType> {
     drawLayer: HTMLCanvasElement,
     previewLayer: HTMLCanvasElement,
     self: EditorLayout,
-    onSelect: (shape: ShapeType | null) => void,
+    onSelect: (shape: ShapeType | ShapeType[] | null) => void,
     shapes: ShapeType[],
     offset?: Coordinates
   ) {
     super(drawLayer, self, onSelect, offset, previewLayer);
-
     this.toolName = Tools_List.SELECT;
     this.allShapes = shapes;
     this.previewContext && this.previewContext.setLineDash([10, 10]);
@@ -43,7 +42,7 @@ export class SelectTool extends Tool<ShapeType> {
 
     if (!selectableShapes.length) {
       this.currentShape = undefined;
-      this.#updatePreview();
+      this.updatePreview();
       return;
     }
 
@@ -51,7 +50,7 @@ export class SelectTool extends Tool<ShapeType> {
       shape.index > acc?.index ? acc : shape
     );
     this.currentShape = selectedShape;
-    this.#updatePreview();
+    this.updatePreview();
   };
 
   #onDown = (event: MouseEvent) => {
@@ -62,42 +61,32 @@ export class SelectTool extends Tool<ShapeType> {
     this.isDrawing = true;
   };
 
-  #updatePreview = () => {
+  updatePreview = () => {
     if (this.currentShape) {
-      console.debug('CURRENT SHAPE', this.currentShape);
       this.resetPreview();
       const { startingCorner, width, height } = rectangleParamsFromBoundaries(
         this.currentShape.boundaries
       );
-      // this.#drawOnPreview(this.currentShape);
-      // this.#drawOnPreview(
-      //   new Rectangle(startingCorner, width, height, highlightStyle)
-      // );
+
       if (isText(this.currentShape)) {
-        setIsTextInputSectionVisible(this.self, true);
-        console.debug('IS TEXT', {
-          ...this.currentShape.getSvgParams(),
-          ...highlightStyle,
-          lineDash: [0],
-        });
+        setTextParamsSourceVisibility(this.self, true);
         this.#drawOnPreview(this.currentShape, {
           ...this.currentShape.getSvgParams(),
           ...highlightStyle,
           lineDash: [0],
         });
       } else {
-        console.debug('IS NOT TEXT');
-
         this.#drawOnPreview(this.currentShape, highlightStyle);
+        this.#drawOnPreview(
+          new Rectangle(startingCorner, width, height, highlightStyle, false)
+        );
       }
     } else {
       this.resetPreview();
     }
   };
-
   #onZoneSelection = (selectedZone?: Rectangle) => {
     const compareFunction = isShapeInsideAnotherShape(selectedZone);
-    console.log(this.allShapes);
     const shapesInsideSelectedZone = this.allShapes.filter(compareFunction);
     const highestIndex = Math.max(
       ...shapesInsideSelectedZone.map(shape => shape.index)
@@ -105,11 +94,12 @@ export class SelectTool extends Tool<ShapeType> {
     const highestShape = shapesInsideSelectedZone.find(
       shape => shape.index === highestIndex
     );
-    console.log(highestShape);
     const shapeType = highestShape && typeOfShape(highestShape);
     if (shapeType && this.previewContext) {
       this.currentShape = highestShape;
-      this.#updatePreview();
+      this.updatePreview();
+    } else {
+      this.currentShape = undefined;
     }
   };
 
@@ -122,7 +112,6 @@ export class SelectTool extends Tool<ShapeType> {
       this.#onClick(event);
     }
     this.onUpdateEditor(this.currentShape ?? null);
-    this.currentShape = undefined;
   };
 
   #onMove = (event: MouseEvent) => {
@@ -151,7 +140,7 @@ export class SelectTool extends Tool<ShapeType> {
     if (this.currentShape) {
       this.currentShape.updateSVGParams(config);
       this.resetPreview();
-      Pen.draw(this.currentShape, undefined, this.previewContext);
+      this.updatePreview();
     }
   };
 

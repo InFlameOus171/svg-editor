@@ -3,6 +3,7 @@ import { Freehand } from '../util/Shapes/Freehand';
 import { Line } from '../util/Shapes/Line';
 import { Path } from '../util/Shapes/Path';
 import { Rectangle } from '../util/Shapes/Rectangle';
+import { Shape } from '../util/Shapes/Shape';
 import { TextShape } from '../util/Shapes/Text';
 import { DrawTool } from '../util/Tools/DrawTool';
 import { EllipseTool } from '../util/Tools/EllipseTool';
@@ -20,6 +21,7 @@ export type Shapes =
   | 'Path'
   | 'TextShape';
 export type ShapeType =
+  | Shape
   | Ellipse
   | Rectangle
   | Line
@@ -35,14 +37,3 @@ export type ToolType =
   | SelectTool
   | MoveTool
   | TextTool;
-
-export enum Tools_List {
-  DRAW,
-  LINE,
-  RECT,
-  ELLIPSE,
-  SELECT,
-  TEXT,
-  MOVE,
-  DELETE,
-}

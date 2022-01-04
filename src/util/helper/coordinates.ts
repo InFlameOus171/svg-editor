@@ -208,7 +208,6 @@ export const getTextBoundaries = (
   width: number,
   height: number
 ): BoundaryCoordinates => {
-  console.log(width, height, position);
   const x = parseInt(position[0].toString());
   const y = parseInt(position[0].toString());
   const pos1: Coordinates = [x, position[1] + height / 4];

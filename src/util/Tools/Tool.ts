@@ -1,7 +1,11 @@
 import { EditorLayout } from '../../components/organisms/EditorLayout';
-import { ShapeType, Tools_List } from '../../types/shapes';
+import { ShapeType } from '../../types/shapes';
 import { Coordinates, SVGParamsBase } from '../../types/types';
-import { highlightStyle, textPlaceHolder } from '../helper/constants';
+import {
+  highlightStyle,
+  textPlaceHolder,
+  Tools_List,
+} from '../helper/constants';
 import { Pen } from '../Pen';
 
 export abstract class Tool<T extends ShapeType, V extends ShapeType = T> {
@@ -20,11 +24,11 @@ export abstract class Tool<T extends ShapeType, V extends ShapeType = T> {
   isDrawing: boolean = false;
   previousCoordinates: [number, number] = [0, 0];
   currentCoordinates: [number, number] = [0, 0];
-  onUpdateEditor: (shape: ShapeType | null) => void;
+  onUpdateEditor: (shape: ShapeType | ShapeType[] | null) => void;
   constructor(
     drawLayer: HTMLCanvasElement,
     self: EditorLayout,
-    onUpdateEditor: (shape: ShapeType | null) => void,
+    onUpdateEditor: (shape: ShapeType | ShapeType[] | null) => void,
     offset: Coordinates = [0, 0],
     previewLayer?: HTMLCanvasElement,
     drawPenConfig: SVGParamsBase = { text: textPlaceHolder },

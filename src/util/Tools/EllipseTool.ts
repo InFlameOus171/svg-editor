@@ -1,7 +1,7 @@
 import { EditorLayout } from '../../components/organisms/EditorLayout';
-import { ShapeType, Tools_List } from '../../types/shapes';
+import { ShapeType } from '../../types/shapes';
 import { Coordinates, SVGParamsBase } from '../../types/types';
-import { highlightStyle } from '../helper/constants';
+import { highlightStyle, Tools_List } from '../helper/constants';
 import { Pen } from '../Pen';
 import { Ellipse } from '../Shapes/Ellipse';
 import { generateCircle, generateEllipse } from './EllipseTool.util';
@@ -14,7 +14,7 @@ export class EllipseTool extends Tool<Ellipse> {
     drawLayer: HTMLCanvasElement,
     previewLayer: HTMLCanvasElement,
     self: EditorLayout,
-    onCreate: (shape: ShapeType | null) => void,
+    onCreate: (shape: ShapeType | ShapeType[] | null) => void,
     drawPenConfig: SVGParamsBase,
     offset: Coordinates
   ) {
@@ -27,7 +27,6 @@ export class EllipseTool extends Tool<Ellipse> {
       drawPenConfig,
       highlightStyle
     );
-    console.log(this.drawPenConfig, this.previewPenConfig);
     this.resetPreview();
     this.toolName = Tools_List.ELLIPSE;
     const renderingContext = this.drawLayer.getContext('2d');

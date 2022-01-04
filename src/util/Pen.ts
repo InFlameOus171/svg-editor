@@ -14,26 +14,7 @@ const Pen = {
   generatePen: (context?: CanvasRenderingContext2D | null) => {
     return {
       draw: (shape: ShapeType, svgParams?: Partial<SVGParamsBase>) => {
-        const shapeType = typeOfShape(shape);
-        switch (shapeType) {
-          case 'Ellipse':
-            Pen.drawEllipse(shape as Ellipse, context, svgParams);
-            break;
-          case 'Rectangle':
-            Pen.drawRectangle(shape as Rectangle, context, svgParams);
-            break;
-          case 'Line':
-            Pen.drawLine(shape as Line, context, svgParams);
-            break;
-          case 'Freehand':
-            Pen.drawFreehand(shape as Freehand, context, svgParams);
-            break;
-          case 'TextShape':
-            Pen.drawText(shape as TextShape, context, svgParams);
-            break;
-          case 'Path':
-            Pen.drawPath(shape as Path, context, svgParams);
-        }
+        Pen.draw(shape, svgParams, context);
       },
     };
   },
@@ -154,12 +135,41 @@ const Pen = {
     }
   },
 
+  measureText: (
+    text: string,
+    params: SVGParamsBase,
+    layer?: HTMLCanvasElement | null,
+    measureContext?: CanvasRenderingContext2D | null
+  ) => {
+    const canvas = document.createElement('canvas');
+    document.body.appendChild(canvas);
+    let context =
+      layer?.getContext('2d') ?? measureContext ?? canvas.getContext('2d');
+    if (!context) {
+      return;
+    }
+    context.font = `${params.fontSize}px ${params.fontFamily}`;
+    if (params.stroke) {
+      context.strokeStyle = params.stroke;
+    }
+    if (params.lineDash) {
+      context.setLineDash(params.lineDash);
+    }
+    if (params.lineCap) {
+      context.lineCap = params.lineCap;
+    }
+    const size = context.measureText(text);
+    const width = size.width;
+    const height = size.fontBoundingBoxAscent + size.fontBoundingBoxDescent;
+    document.body.removeChild(canvas);
+    return { width, height };
+  },
+
   drawText: (
     textShape: TextShape,
     context?: CanvasRenderingContext2D | null,
     svgParams?: SVGParamsBase
   ) => {
-    console.debug('SVGPARAMS', svgParams);
     const { position } = textShape.toPathParams();
     const params = svgParams ?? textShape.getSvgParams();
     const { text, fontSize, fontFamily, ...rest } = params;
@@ -175,14 +185,12 @@ const Pen = {
         context.lineCap = params.lineCap;
       }
       context.fillStyle = rest.fill ?? '#000000';
-      context.lineWidth = parseInt(rest.strokeWidth ?? '1');
       context.font = (fontSize?.toString() ?? '12').concat(
         'px ',
         (fontFamily ?? 'Arial').toLowerCase()
       );
       context.fillText(text, ...position);
       context.strokeText(text, ...position);
-      console.log(context.font, context.fillStyle, position);
       context?.closePath();
     }
   },

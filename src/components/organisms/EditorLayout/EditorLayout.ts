@@ -1,13 +1,15 @@
 import { html, LitElement } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
-import { ShapeType, Tools_List } from '../../../types/shapes.js';
+import { ShapeType } from '../../../types/shapes.js';
 import { Editor } from '../../../util/Editor';
 import { fonts } from '../../../util/helper/availableFonts.js';
+import { Tools_List } from '../../../util/helper/constants.js';
 import {
   updateNextSiblingValue,
   updatePreviousSiblingValue,
   updateStyleInputFields,
 } from '../../../util/helper/util.js';
+import { IToolboxButtonProps } from '../../atoms/ToolboxButton/ToolboxButton.types.js';
 import {
   layoutContentStyle,
   layoutHeaderStyle,
@@ -65,24 +67,45 @@ export class EditorLayout extends LitElement {
       this.editor?.onUnselectTool();
     } else {
       this.editor?.onSelectTool(tool);
+      const index = this.tools?.findIndex(
+        currentTool => currentTool.id === tool
+      );
+      if (!!index && index > 0) {
+        const currentTools = this.tools;
+        this.tools = undefined;
+        if (currentTools) {
+          currentTools[index] = { ...currentTools[index], isSelected: true };
+          this.tools = currentTools;
+        }
+      }
     }
   };
 
-  tools = getToolboxButtonsProps(this.handleSelectTool);
-
+  @state({
+    hasChanged: (
+      value: IToolboxButtonProps[],
+      oldValue: IToolboxButtonProps[]
+    ) => {
+      console.log(JSON.stringify(value) !== JSON.stringify(oldValue));
+      return JSON.stringify(value) !== JSON.stringify(oldValue);
+    },
+  })
   updateResize = () => {
     this.width = parseInt(getComputedStyle(this).getPropertyValue('width'));
     this.height = parseInt(getComputedStyle(this).getPropertyValue('height'));
   };
 
   render() {
+    const tools: IToolboxButtonProps[] = getToolboxButtonsProps(
+      this.handleSelectTool
+    );
     return html`
       <div id="content">
         <div id="draw-container">
           <canvas id="drawzone" height="1000px" width="1000px"></canvas>
           <canvas id="preview-layer" height="1000px" width="1000px"></canvas>
         </div>
-        <tool-box .tools=${this.tools}></tool-box>
+        <tool-box .tools=${tools}></tool-box>
       </div>
       <editor-header
         .onSave=${this.editor?.onSave}

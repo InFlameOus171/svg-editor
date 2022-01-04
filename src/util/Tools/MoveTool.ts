@@ -1,14 +1,16 @@
 import { EditorLayout } from '../../components/organisms/EditorLayout';
-import { ShapeType, Tools_List } from '../../types/shapes';
+import { ShapeType } from '../../types/shapes';
 import { Coordinates, SVGParamsBase } from '../../types/types';
-import { highlightStyle } from '../helper/constants';
+import { highlightStyle, Tools_List } from '../helper/constants';
 import {
   isPointInsideAnotherShape,
   rectangleParamsFromBoundaries,
 } from '../helper/coordinates';
+import { isText } from '../helper/typeguards';
 import { Pen } from '../Pen';
 import { Rectangle } from '../Shapes/Rectangle';
 import { TextShape } from '../Shapes/Text';
+import { setTextParamsSourceVisibility } from './TextTool.util';
 import { Tool } from './Tool';
 
 export class MoveTool extends Tool<ShapeType> {
@@ -16,7 +18,7 @@ export class MoveTool extends Tool<ShapeType> {
     drawLayer: HTMLCanvasElement,
     previewLayer: HTMLCanvasElement,
     self: EditorLayout,
-    onMove: (shape: ShapeType | null) => void,
+    onMove: (shape: ShapeType | ShapeType[] | null) => void,
     offset: Coordinates,
     selectedShape: ShapeType
   ) {
@@ -28,6 +30,7 @@ export class MoveTool extends Tool<ShapeType> {
     this.currentShape = selectedShape;
     this.toolName = Tools_List.MOVE;
     this.#drawOnPreview = Pen.generatePen(this.previewContext).draw;
+    this.updatePreview();
   }
   #dCenter?: Coordinates;
   #drawOnPreview: (shape: ShapeType, svgParams?: SVGParamsBase) => void;
@@ -51,20 +54,30 @@ export class MoveTool extends Tool<ShapeType> {
     this.isDrawing = true;
   };
 
-  #updatePreview = () => {
+  updatePreview = () => {
     if (this.currentShape) {
       this.resetPreview();
       const { startingCorner, width, height } = rectangleParamsFromBoundaries(
         this.currentShape.boundaries
       );
-      // this.#drawOnPreview(this.currentShape);
-      this.#drawOnPreview(
-        new Rectangle(startingCorner, width, height, highlightStyle)
-      );
-      this.#drawOnPreview(this.currentShape, highlightStyle);
+
+      if (isText(this.currentShape)) {
+        setTextParamsSourceVisibility(this.self, true);
+        this.#drawOnPreview(this.currentShape, {
+          ...this.currentShape.getSvgParams(),
+          ...highlightStyle,
+          lineDash: [0],
+        });
+      } else {
+        this.#drawOnPreview(this.currentShape, highlightStyle);
+        this.#drawOnPreview(
+          new Rectangle(startingCorner, width, height, highlightStyle)
+        );
+      }
+    } else {
+      this.resetPreview();
     }
   };
-
   #onMove = (event: MouseEvent) => {
     if (!this.isDrawing) return;
     this.previousCoordinates = this.currentCoordinates;
@@ -74,15 +87,22 @@ export class MoveTool extends Tool<ShapeType> {
       this.currentCoordinates[0] - (this.#dCenter?.[0] ?? 0),
       this.currentCoordinates[1] - (this.#dCenter?.[1] ?? 0),
     ]);
-    console.debug((this.currentShape as TextShape).toPathParams().position);
-    this.#updatePreview();
+    this.updatePreview();
   };
 
   #onUp = () => {
     this.isDrawing = false;
     if (this.currentShape) {
       this.onUpdateEditor(this.currentShape);
-      this.#updatePreview();
+      this.updatePreview();
+    }
+  };
+
+  changeStyle = (config: SVGParamsBase) => {
+    if (this.currentShape) {
+      this.currentShape.updateSVGParams(config);
+      this.resetPreview();
+      this.updatePreview();
     }
   };
 

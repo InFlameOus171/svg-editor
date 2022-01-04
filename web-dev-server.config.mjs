@@ -23,7 +23,11 @@ export default /** @type {import('@web/dev-server').DevServerConfig} */ ({
   // appIndex: 'demo/index.html',
 
   plugins: [
-    replace({ include: ['src/**/*.js'], __environment__: '"development"' }),
+    replace({
+      include: ['src/**/*.js'],
+      __environment__: '"development"',
+      preventAssignment: true,
+    }),
     esbuildPlugin({ ts: true, target: 'auto' }),
   ],
 
