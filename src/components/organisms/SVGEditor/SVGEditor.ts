@@ -3,6 +3,7 @@ import { customElement, state } from 'lit/decorators.js';
 import { Editor } from '../../../util/Editor';
 import { fonts } from '../../../util/helper/availableFonts.js';
 import { Tools_List } from '../../../util/helper/constants.js';
+import { handleUpdateSVGParameters } from '../../../util/helper/domUtil';
 import {
   updateNextSiblingValue,
   updatePreviousSiblingValue,
@@ -12,14 +13,11 @@ import {
   layoutContentStyle,
   layoutHeaderStyle,
   layoutStyle,
-} from './EditorLayout.styles';
-import {
-  getToolboxButtonsProps,
-  handleUpdateSVGParameters,
-} from './EditorLayout.util';
+} from './SVGEditor.styles';
+import { getToolboxButtonsProps } from './SVGEditor.util';
 
 @customElement('svg-editor')
-export class EditorLayout extends LitElement {
+export class SVGEditor extends LitElement {
   @state()
   width: number = 0;
   @state()
@@ -66,11 +64,7 @@ export class EditorLayout extends LitElement {
   }
 
   handleSelectTool = (tool: Tools_List | null) => {
-    if (tool === null) {
-      this.editor?.onUnselectTool();
-    } else {
-      this.editor?.onSelectTool(tool);
-    }
+    this.editor?.onSelectTool(tool);
   };
 
   updateResize = () => {
@@ -88,7 +82,7 @@ export class EditorLayout extends LitElement {
           <canvas id="drawzone" height="760px" width="1000px"></canvas>
           <canvas id="preview-layer" height="760px" width="1000px"></canvas>
         </div>
-        <tool-box .tools=${tools}></tool-box>
+        <tool-box id="tool-box" .tools=${tools}></tool-box>
       </div>
       <dialog-section
         .onSave=${this.editor?.onSave}

@@ -31,6 +31,11 @@ export const toolBoxButtonStyles = css`
     background-color: cyan;
   }
 
+  button[disabled] {
+    border: 1px solid grey;
+    background-color: grey;
+  }
+
   .tooltip {
     text-decoration: none;
     position: relative;

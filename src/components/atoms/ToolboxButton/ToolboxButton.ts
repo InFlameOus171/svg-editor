@@ -17,6 +17,9 @@ export class ToolboxButton extends LitElement {
   @property({ type: String })
   buttonId?: Tools_List;
 
+  @property({ type: Boolean })
+  disabled?: boolean;
+
   @property()
   onClick?: (id: Tools_List) => void;
 
@@ -50,7 +53,11 @@ export class ToolboxButton extends LitElement {
 
   render() {
     return html` <div class="tooltip" id="button-tooltip">
-      <button id=${this.id} @click=${this.#handleClick}>
+      <button
+        id=${this.buttonId ?? this.toolName + Date.now().toString()}
+        @click=${this.#handleClick}
+        .disabled=${this.disabled ?? false}
+      >
         ${this.icon
           ? html`
           <img 

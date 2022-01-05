@@ -1,4 +1,4 @@
-import { EditorLayout } from '../../components/organisms/EditorLayout';
+import { SVGEditor } from '../../components/organisms/SVGEditor';
 import { ShapeType } from '../../types/shapes';
 import { Coordinates, SVGParamsBase } from '../../types/types';
 import { highlightStyle, Tools_List } from '../helper/constants';
@@ -9,6 +9,7 @@ import {
 import { isText } from '../helper/typeguards';
 import { Pen } from '../Pen';
 import { Rectangle } from '../Shapes/Rectangle';
+import { SelectTool } from './SelectTool';
 import { setTextParamsSourceVisibility } from './TextTool.util';
 import { Tool } from './Tool';
 
@@ -16,7 +17,7 @@ export class MoveTool extends Tool<ShapeType> {
   constructor(
     drawLayer: HTMLCanvasElement,
     previewLayer: HTMLCanvasElement,
-    self: EditorLayout,
+    self: SVGEditor,
     onMove: (shape: ShapeType | ShapeType[] | null) => void,
     offset: Coordinates,
     selectedShape: ShapeType
@@ -47,7 +48,6 @@ export class MoveTool extends Tool<ShapeType> {
       !isPointInsideAnotherShape(this.currentCoordinates)(this.currentShape)
     ) {
       this.isDrawing = false;
-      this.onUpdateEditor(null);
       return;
     }
     this.isDrawing = true;

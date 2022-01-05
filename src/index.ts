@@ -1,4 +1,4 @@
 import './components/atoms/ToolboxButton';
 import './components/molecules/ToolBox';
 import './components/molecules/DialogSection';
-import './components/organisms/EditorLayout';
+import './components/organisms/SVGEditor';

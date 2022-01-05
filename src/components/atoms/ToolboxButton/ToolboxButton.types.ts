@@ -6,4 +6,5 @@ export interface IToolboxButtonProps {
   icon?: string;
   id: Tools_List;
   class?: string;
+  disabled?: boolean;
 }

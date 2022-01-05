@@ -1,4 +1,4 @@
-import { EditorLayout } from '../components/organisms/EditorLayout';
+import { SVGEditor } from '../components/organisms/SVGEditor';
 import { ShapeType } from '../types/shapes';
 import { Coordinates, SVGParamsBase } from '../types/types';
 import {
@@ -6,9 +6,14 @@ import {
   textPlaceHolder,
   Tools_List,
 } from './helper/constants';
+import {
+  setIsButtonDisabled,
+  setIsButtonActive,
+  updateStyleInputFields,
+} from './helper/domUtil';
 import { generateSVGURLFromShapes } from './helper/shapes';
 import { isMoveTool, isSelectTool, isText } from './helper/typeguards';
-import { hexToRGBA, updateStyleInputFields } from './helper/util';
+import { hexToRGBA } from './helper/util';
 import { Pen } from './Pen';
 import { DrawTool } from './Tools/DrawTool';
 import { EllipseTool } from './Tools/EllipseTool';
@@ -28,7 +33,7 @@ export class Editor {
   #selectedTool: Tool<ShapeType> | null = null;
   #drawLayer: HTMLCanvasElement | null = null;
   #previewLayer: HTMLCanvasElement | null = null;
-  #self: EditorLayout;
+  #self: SVGEditor;
   #offset: Coordinates;
   #shapes: ShapeType[] = [];
   #currentParams: SVGParamsBase = {
@@ -50,7 +55,7 @@ export class Editor {
     drawLayer: HTMLCanvasElement,
     previewLayer: HTMLCanvasElement,
     offset: Coordinates,
-    self: EditorLayout
+    self: SVGEditor
   ) {
     this.#drawLayer = drawLayer;
     this.#previewLayer = previewLayer;
@@ -91,6 +96,7 @@ export class Editor {
   };
 
   #onHandleSelectShape = (selectedShape: ShapeType | ShapeType[] | null) => {
+    setIsButtonDisabled(this.#self, Tools_List.MOVE, !selectedShape);
     this.#isShapeOnlyBeingSelected = true;
     if (!selectedShape) {
       this.#selectedShape = null;
@@ -184,7 +190,10 @@ export class Editor {
     }
   };
 
-  onSelectTool = (tool: Tools_List) => {
+  onSelectTool = (tool: Tools_List | null) => {
+    if (this.#selectedTool?.toolName) {
+      setIsButtonActive(this.#self, this.#selectedTool?.toolName, false);
+    }
     if (this.#selectedTool) {
       if (
         ![Tools_List.SELECT, Tools_List.MOVE, undefined].includes(
@@ -286,14 +295,7 @@ export class Editor {
               this.#selectedShape
             );
           } else {
-            this.#selectedTool = new SelectTool(
-              this.#drawLayer,
-              this.#previewLayer,
-              this.#self,
-              this.#onHandleSelectShape,
-              this.#shapes,
-              this.#offset
-            );
+            return;
           }
           break;
         }
@@ -303,6 +305,16 @@ export class Editor {
           this.#selectedTool = null;
           break;
         }
+        case null: {
+          if (this.#selectedTool?.toolName) {
+            setIsButtonActive(this.#self, this.#selectedTool.toolName, false);
+          }
+          this.onUnselectTool();
+          this.#selectedTool = null;
+        }
+      }
+      if (tool) {
+        setIsButtonActive(this.#self, tool, true);
       }
       if (
         !(isSelectTool(this.#selectedTool) || isMoveTool(this.#selectedTool))
@@ -366,6 +378,11 @@ export class Editor {
   };
 
   onUnselectTool = () => {
+    if (!this.#selectedShape) {
+      setIsButtonDisabled(this.#self, Tools_List.MOVE, true);
+    } else {
+      setIsButtonDisabled(this.#self, Tools_List.MOVE, false);
+    }
     this.#selectedTool?.destroy();
     this.#setAreFieldsEnabled(Object.values(SVGParamFieldID), false);
     setTextParamsSourceVisibility(this.#self, false);

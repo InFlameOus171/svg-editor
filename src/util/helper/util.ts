@@ -1,7 +1,5 @@
-import { EditorLayout } from '../../components/organisms/EditorLayout';
-import { Coordinates, Matrix, SVGParamsBase } from '../../types/types';
-import { FlattenedElement, Partition } from '../../types/util.types';
-import { acceptedTags, SVGParamFieldID, textPlaceHolder } from './constants';
+import { Coordinates, Matrix } from '../../types/types';
+import { Partition } from '../../types/util.types';
 import { hexColorCodeRegExp } from './regularExpressions';
 
 export const partition = <T>(
@@ -60,10 +58,6 @@ export const elementArrayToObject = (elements: Element[]) =>
   elements.reduce((acc: Record<string, Element[]>, elem) => {
     return { ...acc, [elem.tagName]: [...(acc[elem.tagName] ?? []), elem] };
   }, {});
-
-const isShapeElement = (flattenedElement: FlattenedElement) => {
-  return acceptedTags.includes(flattenedElement.element.tagName);
-};
 
 // ref: https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/transform
 export const transformCoordinatesByMatrix =
@@ -198,69 +192,3 @@ export const pathCommandValues = [
   ...absoluteCoordinatesCommands,
   ...singleDirectionCommands,
 ];
-
-export const inputFieldGetterGenerator =
-  (fieldRoot?: HTMLElement | null) => (id: SVGParamFieldID) => {
-    return fieldRoot?.querySelector('#' + id) as HTMLInputElement | null;
-  };
-
-export const updateStyleInputFields = (
-  self: EditorLayout,
-  params: SVGParamsBase
-) => {
-  const getFieldByParamId = inputFieldGetterGenerator(
-    self.shadowRoot?.getElementById('footer-input')
-  );
-  const defaultColor = { colorCode: '#000000', opacity: '1' };
-  const strokeColor = params.stroke
-    ? normalizeColorCode(params.stroke)
-    : defaultColor;
-  const fillColor = params.fill
-    ? normalizeColorCode(params.fill)
-    : defaultColor;
-
-  const fillColorInput = getFieldByParamId(SVGParamFieldID.FILL_COLOR);
-  const fillOpacityInput = getFieldByParamId(SVGParamFieldID.FILL_OPACITY);
-  const lineCapInput = getFieldByParamId(SVGParamFieldID.LINE_CAP);
-  const lineDashInput = getFieldByParamId(SVGParamFieldID.LINE_DASH);
-  const strokeColorInput = getFieldByParamId(SVGParamFieldID.STROKE_COLOR);
-  const strokeOpacityInput = getFieldByParamId(SVGParamFieldID.STROKE_OPACITY);
-  const strokeWidthInput = getFieldByParamId(SVGParamFieldID.STROKE_WIDTH);
-  const textFontFamilyInput = getFieldByParamId(
-    SVGParamFieldID.TEXT_FONT_FAMILY
-  );
-  const textFontSizeInput = getFieldByParamId(SVGParamFieldID.TEXT_FONT_SIZE);
-  const textInput = getFieldByParamId(SVGParamFieldID.TEXT);
-  if (fillColorInput) {
-    fillColorInput.value = fillColor.colorCode;
-  }
-  if (fillOpacityInput) {
-    fillOpacityInput.value = fillColor.opacity;
-    fillOpacityInput.dispatchEvent(new Event('change'));
-  }
-  if (lineCapInput) {
-    lineCapInput.value = params.lineCap ?? 'butt';
-  }
-  if (lineDashInput) {
-    lineDashInput.value = params.lineDash?.join(',') ?? '0';
-  }
-  if (strokeColorInput) {
-    strokeColorInput.value = strokeColor.colorCode;
-  }
-  if (strokeOpacityInput) {
-    strokeOpacityInput.value = strokeColor.opacity;
-    strokeOpacityInput.dispatchEvent(new Event('change'));
-  }
-  if (strokeWidthInput) {
-    strokeWidthInput.value = params.strokeWidth ?? '0';
-  }
-  if (textFontFamilyInput) {
-    textFontFamilyInput.value = params.fontFamily ?? 'Arial';
-  }
-  if (textFontSizeInput) {
-    textFontSizeInput.value = params.fontSize?.toString() ?? '18';
-  }
-  if (textInput) {
-    textInput.value = params.text ?? textPlaceHolder;
-  }
-};

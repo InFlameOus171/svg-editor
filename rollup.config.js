@@ -21,7 +21,7 @@ export default {
     commonjs(),
     // Optional: copy any static assets to build directory
     copy({
-      patterns: ['.src/public/images/**/*'],
+      patterns: ['./public/images/*'],
     }),
   ],
   output: {

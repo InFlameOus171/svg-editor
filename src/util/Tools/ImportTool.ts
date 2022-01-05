@@ -1,4 +1,4 @@
-import { EditorLayout } from '../../components/organisms/EditorLayout';
+import { SVGEditor } from '../../components/organisms/SVGEditor';
 import { ShapeType } from '../../types/shapes';
 import { Coordinates } from '../../types/types';
 import { convertSVGDocumentToShapes } from '../helper/shapes';
@@ -7,7 +7,7 @@ import { Tool } from './Tool';
 export class ImportTool extends Tool<ShapeType> {
   constructor(
     drawLayer: HTMLCanvasElement,
-    self: EditorLayout,
+    self: SVGEditor,
     onImport: (shape: ShapeType | ShapeType[] | null) => void,
     offset: Coordinates
   ) {

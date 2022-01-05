@@ -10,10 +10,12 @@ export const getButtonColumn = (
       html`
         <span class="row-${index}">
           <toolbox-button
+            id=${'tool-box-button-' + tool.id}
             .onClick=${tool.onClick}
             .buttonId=${tool.id}
             .toolName=${tool.toolName}
             .icon=${tool.icon}
+            .disabled=${tool.disabled}
           >
           </toolbox-button>
         </span>

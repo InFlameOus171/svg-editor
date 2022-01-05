@@ -1,4 +1,4 @@
-import { EditorLayout } from '../../components/organisms/EditorLayout';
+import { SVGEditor } from '../../components/organisms/SVGEditor';
 import { ShapeType } from '../../types/shapes';
 import { Coordinates, SVGParamsBase } from '../../types/types';
 import { highlightStyle, Tools_List } from '../helper/constants';
@@ -13,7 +13,7 @@ export class EllipseTool extends Tool<Ellipse> {
   constructor(
     drawLayer: HTMLCanvasElement,
     previewLayer: HTMLCanvasElement,
-    self: EditorLayout,
+    self: SVGEditor,
     onCreate: (shape: ShapeType | ShapeType[] | null) => void,
     drawPenConfig: SVGParamsBase,
     offset: Coordinates

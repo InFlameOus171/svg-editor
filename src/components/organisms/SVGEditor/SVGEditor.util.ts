@@ -1,4 +1,4 @@
-import { EditorLayout } from '.';
+import { SVGEditor } from '.';
 import { SVGParamFieldID, Tools_List } from '../../../util/helper/constants';
 import { IToolboxButtonProps } from '../../atoms/ToolboxButton/ToolboxButton.types';
 
@@ -47,6 +47,7 @@ export const getToolboxButtonsProps = (
     onClick: () => selectToolFunction(Tools_List.MOVE),
     icon: 'public/images/move.svg',
     id: Tools_List.MOVE,
+    disabled: true,
   },
   {
     toolName: 'Delete',
@@ -61,41 +62,3 @@ export const getToolboxButtonsProps = (
     id: Tools_List.UNSELECT,
   },
 ];
-
-export const getElementValueByIdGenerator =
-  (shadowRoot?: ShadowRoot | null) => (id: SVGParamFieldID) => {
-    return (shadowRoot?.getElementById(id) as HTMLInputElement | undefined)
-      ?.value;
-  };
-
-export const handleUpdateSVGParameters = (target: EditorLayout) => {
-  const getValueById = getElementValueByIdGenerator(target.shadowRoot);
-  const fill = getValueById(SVGParamFieldID.FILL_COLOR);
-  const fillOpacity = getValueById(SVGParamFieldID.FILL_OPACITY);
-  const fontFamily = getValueById(SVGParamFieldID.TEXT_FONT_FAMILY);
-  const fontSize = parseInt(
-    getValueById(SVGParamFieldID.TEXT_FONT_SIZE) ?? '18'
-  );
-  const lineCap = getValueById(SVGParamFieldID.LINE_CAP) as CanvasLineCap;
-  const lineDash = (getValueById(SVGParamFieldID.LINE_DASH) ?? '0')
-    .split(',')
-    .map(value => parseInt(value.trim()));
-  const stroke = getValueById(SVGParamFieldID.STROKE_COLOR);
-  const strokeOpacity = getValueById(SVGParamFieldID.STROKE_OPACITY);
-  const strokeWidth = getValueById(SVGParamFieldID.STROKE_WIDTH);
-  const text = getValueById(SVGParamFieldID.TEXT);
-  target.editor?.setShapeParams(
-    true,
-    strokeWidth,
-    stroke,
-    fill,
-    fillOpacity,
-    strokeOpacity,
-    lineCap,
-    lineDash,
-    fontFamily,
-    fontSize,
-    text
-  );
-  target.editor?.applyStyles();
-};
