@@ -8,7 +8,7 @@ require('fs').stat(process.argv[2], (err, stats) => {
     const green = '\x1b[32m%s\x1b[0m';
     const color = size > 150 ? red : size > 100 ? yellow : green;
     console.log('Size of bundle:');
-    console.log(color, `${size}kb`);
+    console.log(color, `${size}kB`);
     console.log();
   }
 });
