@@ -1,4 +1,4 @@
-import { EditorLayout } from '../../components/organisms/EditorLayout';
+import { SVGEditor } from '../../components/organisms/SVGEditor';
 import { Coordinates, Matrix, SVGParamsBase } from '../../types/types';
 import { FlattenedElement, Partition } from '../../types/util.types';
 import { acceptedTags, SVGParamFieldID, textPlaceHolder } from './constants';
@@ -138,28 +138,6 @@ export const normalizeColorCode = (
   return { colorCode, opacity: '1' };
 };
 
-// https://stackoverflow.com/questions/17410809/how-to-calculate-rotation-in-2d-in-javascript
-/*
-The first two parameters are the X and Y coordinates of the central point 
-(the origin around which the second point will be rotated). The next two parameters are the 
-coordinates of the point that we'll be rotating. The last parameter is the angle, in degrees.
-- theftprevention, https://stackoverflow.com/users/2038227/theftprevention
-*/
-export const rotate = (
-  cx: number,
-  cy: number,
-  x: number,
-  y: number,
-  angle: number
-): Coordinates => {
-  var radians = (Math.PI / 180) * angle,
-    cos = Math.cos(radians),
-    sin = Math.sin(radians),
-    nx = cos * (x - cx) + sin * (y - cy) + cx,
-    ny = cos * (y - cy) - sin * (x - cx) + cy;
-  return [nx, ny];
-};
-
 export const updateNextSiblingValue = (event: InputEvent) => {
   if ((event.target as HTMLInputElement)?.nextElementSibling)
     (
@@ -227,7 +205,7 @@ export const inputFieldGetterGenerator =
   };
 
 export const updateStyleInputFields = (
-  self: EditorLayout,
+  self: SVGEditor,
   params: SVGParamsBase
 ) => {
   const getFieldByParamId = inputFieldGetterGenerator(

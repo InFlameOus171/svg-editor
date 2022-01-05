@@ -14,8 +14,6 @@ export class ToolBox extends LitElement {
       value: IToolboxButtonProps[],
       oldValue: IToolboxButtonProps[]
     ) => {
-      console.log(value, oldValue);
-      console.log(JSON.stringify(value) !== JSON.stringify(oldValue));
       return JSON.stringify(value) !== JSON.stringify(oldValue);
     },
   })
@@ -42,7 +40,7 @@ export class ToolBox extends LitElement {
       (toolCount + (toolCount % 2)) / 2,
       toolCount,
     ];
-    console.log(getButtonColumn(leftColumnInterval, this.tools));
+
     return html`
       <div class="col-0">
         ${getButtonColumn(leftColumnInterval, this.tools)}

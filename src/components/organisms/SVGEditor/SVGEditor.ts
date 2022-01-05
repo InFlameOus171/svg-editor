@@ -1,35 +1,36 @@
 import { html, LitElement } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
-import { ShapeType } from '../../../types/shapes.js';
 import { Editor } from '../../../util/Editor';
 import { fonts } from '../../../util/helper/availableFonts.js';
 import { Tools_List } from '../../../util/helper/constants.js';
 import {
   updateNextSiblingValue,
   updatePreviousSiblingValue,
-  updateStyleInputFields,
 } from '../../../util/helper/util.js';
 import { IToolboxButtonProps } from '../../atoms/ToolboxButton/ToolboxButton.types.js';
 import {
   layoutContentStyle,
   layoutHeaderStyle,
   layoutStyle,
-} from './EditorLayout.styles';
+} from './SVGEditor.styles';
 import {
   getToolboxButtonsProps,
   handleUpdateSVGParameters,
-} from './EditorLayout.util.js';
+} from './SVGEditor.util.js';
+import '../../atoms/ToolboxButton';
+import '../../molecules/ToolBox';
+import '../../molecules/DialogSection';
 
-@customElement('editor-layout')
-export class EditorLayout extends LitElement {
+@customElement('svg-editor')
+export class SVGEditor extends LitElement {
   @state()
   width: number = 0;
   @state()
   height: number = 0;
   @state()
   editor: Editor | null = null;
-  @state()
-  selectedElement: string | null = null;
+
+  static styles = [layoutStyle, layoutHeaderStyle, layoutContentStyle];
 
   async firstUpdated() {
     this.updateResize();
@@ -37,14 +38,21 @@ export class EditorLayout extends LitElement {
       'drawzone'
     ) as HTMLCanvasElement;
     canvas.addEventListener('mousemove', (event: MouseEvent) => {
-      var rect = canvas.getBoundingClientRect();
-      const posV = this.shadowRoot?.getElementById('position');
-      if (posV) {
-        posV.innerHTML = `${event.clientX - rect.left} - ${
+      const rect = canvas.getBoundingClientRect();
+      const position = this.shadowRoot?.getElementById('position');
+      if (position) {
+        position.innerHTML = `x:${event.clientX - rect.left} - y:${
           event.clientY - rect.top
         }`;
       }
     });
+    canvas.addEventListener('mouseout', (event: MouseEvent) => {
+      const position = this.shadowRoot?.getElementById('position');
+      if (position) {
+        position.innerHTML = '- - -';
+      }
+    });
+
     const previewLayer = this.shadowRoot?.getElementById(
       'preview-layer'
     ) as HTMLCanvasElement;
@@ -60,36 +68,14 @@ export class EditorLayout extends LitElement {
     }
   }
 
-  static styles = [layoutStyle, layoutHeaderStyle, layoutContentStyle];
-
   handleSelectTool = (tool: Tools_List | null) => {
     if (tool === null) {
       this.editor?.onUnselectTool();
     } else {
       this.editor?.onSelectTool(tool);
-      const index = this.tools?.findIndex(
-        currentTool => currentTool.id === tool
-      );
-      if (!!index && index > 0) {
-        const currentTools = this.tools;
-        this.tools = undefined;
-        if (currentTools) {
-          currentTools[index] = { ...currentTools[index], isSelected: true };
-          this.tools = currentTools;
-        }
-      }
     }
   };
 
-  @state({
-    hasChanged: (
-      value: IToolboxButtonProps[],
-      oldValue: IToolboxButtonProps[]
-    ) => {
-      console.log(JSON.stringify(value) !== JSON.stringify(oldValue));
-      return JSON.stringify(value) !== JSON.stringify(oldValue);
-    },
-  })
   updateResize = () => {
     this.width = parseInt(getComputedStyle(this).getPropertyValue('width'));
     this.height = parseInt(getComputedStyle(this).getPropertyValue('height'));
@@ -102,15 +88,15 @@ export class EditorLayout extends LitElement {
     return html`
       <div id="content">
         <div id="draw-container">
-          <canvas id="drawzone" height="1000px" width="1000px"></canvas>
-          <canvas id="preview-layer" height="1000px" width="1000px"></canvas>
+          <canvas id="drawzone" height="760px" width="1000px"></canvas>
+          <canvas id="preview-layer" height="760px" width="1000px"></canvas>
         </div>
         <tool-box .tools=${tools}></tool-box>
       </div>
-      <editor-header
+      <dialog-section
         .onSave=${this.editor?.onSave}
         .onSelectSvgFile=${this.editor?.importSVG}
-      ></editor-header>
+      ></dialog-section>
       <div id="footer">
         <fieldset id="footer-fields">
           <div id="footer-input">
@@ -238,7 +224,9 @@ export class EditorLayout extends LitElement {
             </fieldset>
           </div>
         </fieldset>
-        <div id="position"></div>
+        <div id="position-container">
+        <span id="position">- - -</div>
+        </div>
       </div>
     `;
   }

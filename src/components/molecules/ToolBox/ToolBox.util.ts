@@ -14,7 +14,6 @@ export const getButtonColumn = (
             .buttonId=${tool.id}
             .toolName=${tool.toolName}
             .icon=${tool.icon}
-            .isSelected=${tool.isSelected}
           >
           </toolbox-button>
         </span>

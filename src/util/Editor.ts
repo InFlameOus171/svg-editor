@@ -1,4 +1,4 @@
-import { EditorLayout } from '../components/organisms/EditorLayout';
+import { SVGEditor } from '../components/organisms/SVGEditor';
 import { ShapeType } from '../types/shapes';
 import { Coordinates, SVGParamsBase } from '../types/types';
 import {
@@ -6,20 +6,10 @@ import {
   textPlaceHolder,
   Tools_List,
 } from './helper/constants';
-import { getMinMaxValuesOfCoordinates } from './helper/coordinates';
-import {
-  appendAsSVGShapeGeneratorFunction,
-  generateSVGURLFromShapes,
-} from './helper/shapes';
-import {
-  isMoveTool,
-  isSelectTool,
-  isText,
-  isTextTool,
-} from './helper/typeguards';
+import { generateSVGURLFromShapes } from './helper/shapes';
+import { isMoveTool, isSelectTool, isText } from './helper/typeguards';
 import { hexToRGBA, updateStyleInputFields } from './helper/util';
 import { Pen } from './Pen';
-import { TextShape } from './Shapes/Text';
 import { DrawTool } from './Tools/DrawTool';
 import { EllipseTool } from './Tools/EllipseTool';
 import { ImportTool } from './Tools/ImportTool';
@@ -29,7 +19,6 @@ import { RectangleTool } from './Tools/RectangleTool';
 import { SelectTool } from './Tools/SelectTool';
 import { TextTool } from './Tools/TextTool';
 import {
-  getTextFromSource,
   paramFieldStateHandler,
   setTextParamsSourceVisibility,
 } from './Tools/TextTool.util';
@@ -37,9 +26,9 @@ import { Tool } from './Tools/Tool';
 
 export class Editor {
   #selectedTool: Tool<ShapeType> | null = null;
-  #canvas: HTMLCanvasElement | null = null;
+  #drawLayer: HTMLCanvasElement | null = null;
   #previewLayer: HTMLCanvasElement | null = null;
-  #self: EditorLayout;
+  #self: SVGEditor;
   #offset: Coordinates;
   #shapes: ShapeType[] = [];
   #currentParams: SVGParamsBase = {
@@ -58,12 +47,12 @@ export class Editor {
   #selectedShape?: ShapeType | null = null;
   #drawContext: CanvasRenderingContext2D | null;
   constructor(
-    canvas: HTMLCanvasElement,
+    drawLayer: HTMLCanvasElement,
     previewLayer: HTMLCanvasElement,
     offset: Coordinates,
-    self: EditorLayout
+    self: SVGEditor
   ) {
-    this.#canvas = canvas;
+    this.#drawLayer = drawLayer;
     this.#previewLayer = previewLayer;
     this.#self = self;
     this.#offset = offset;
@@ -72,47 +61,13 @@ export class Editor {
       stroke: 'rgba(0,0,0,1)',
       fill: 'rgba(0,0,0,0)',
     };
-    this.#drawContext = this.#canvas?.getContext('2d');
+    this.#drawContext = this.#drawLayer?.getContext('2d');
     this.#setAreFieldsEnabled = paramFieldStateHandler(
       this.#self
     ).setAreFieldsEnabled;
     this.#setAreFieldsEnabled(Object.values(SVGParamFieldID), false);
     updateStyleInputFields(this.#self, this.#currentParams);
   }
-
-  #openDownloadDialog = (url: string) => {
-    const downloadLink = document.createElement('a');
-    downloadLink.download = 'svg-element.svg';
-    downloadLink.href = url;
-    document.body.appendChild(downloadLink);
-    downloadLink.click();
-    document.body.removeChild(downloadLink);
-  };
-
-  resetPreview = () => {
-    const renderingContext = this.#previewLayer?.getContext('2d');
-    if (this.#previewLayer && renderingContext) {
-      Pen.clearCanvas(this.#previewLayer, renderingContext);
-    }
-  };
-
-  redrawShapes = () => {
-    if (this.#drawContext && this.#canvas) {
-      Pen.clearCanvas(this.#canvas, this.#drawContext);
-      this.#shapes.forEach(shape => {
-        Pen.draw(shape, undefined, this.#drawContext);
-      });
-    }
-  };
-
-  onUpdateStyleInputFields = () => {
-    updateStyleInputFields(this.#self, this.#currentParams);
-  };
-
-  onSave = () => {
-    this.onUnselectTool();
-    this.#openDownloadDialog(generateSVGURLFromShapes(this.#shapes));
-  };
 
   #appendToShapes = (toBeAppended: ShapeType | ShapeType[] | null) => {
     if (toBeAppended === null) {
@@ -135,36 +90,6 @@ export class Editor {
     this.redrawShapes();
   };
 
-  #onMove = (movedShape: ShapeType | ShapeType[] | null) => {
-    if (movedShape === null) {
-      this.onUnselectTool();
-      return;
-    }
-    const shape = Array.isArray(movedShape) ? movedShape[0] : movedShape;
-    const index = this.#shapes.findIndex(
-      innerShape => innerShape.getId() === shape.getId()
-    );
-    if (index >= 0) {
-      this.#shapes[index] = shape;
-    } else {
-      this.#shapes.push(shape);
-    }
-    this.redrawShapes();
-  };
-
-  importSVG = (data: Document) => {
-    if (this.#canvas) {
-      const importTool = new ImportTool(
-        this.#canvas,
-        this.#self,
-        this.#appendToShapes,
-        this.#offset
-      );
-      importTool.drawSvg(data);
-      importTool.destroy();
-    }
-  };
-
   #onHandleSelectShape = (selectedShape: ShapeType | ShapeType[] | null) => {
     this.#isShapeOnlyBeingSelected = true;
     if (!selectedShape) {
@@ -183,6 +108,70 @@ export class Editor {
       }
     }
     this.#isShapeOnlyBeingSelected = false;
+  };
+
+  #onMove = (movedShape: ShapeType | ShapeType[] | null) => {
+    if (movedShape === null) {
+      this.onUnselectTool();
+      return;
+    }
+    const shape = Array.isArray(movedShape) ? movedShape[0] : movedShape;
+    const index = this.#shapes.findIndex(
+      innerShape => innerShape.getId() === shape.getId()
+    );
+    if (index >= 0) {
+      this.#shapes[index] = shape;
+    } else {
+      this.#shapes.push(shape);
+    }
+    this.redrawShapes();
+  };
+
+  #openDownloadDialog = (url: string) => {
+    const downloadLink = document.createElement('a');
+    downloadLink.download = 'svg-element.svg';
+    downloadLink.href = url;
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+  };
+
+  resetPreview = () => {
+    const renderingContext = this.#previewLayer?.getContext('2d');
+    if (this.#previewLayer && renderingContext) {
+      Pen.clearCanvas(this.#previewLayer, renderingContext);
+    }
+  };
+
+  redrawShapes = () => {
+    if (this.#drawContext && this.#drawLayer) {
+      Pen.clearCanvas(this.#drawLayer, this.#drawContext);
+      this.#shapes.forEach(shape => {
+        Pen.draw(shape, undefined, this.#drawContext);
+      });
+    }
+  };
+
+  onUpdateStyleInputFields = () => {
+    updateStyleInputFields(this.#self, this.#currentParams);
+  };
+
+  onSave = () => {
+    this.onUnselectTool();
+    this.#openDownloadDialog(generateSVGURLFromShapes(this.#shapes));
+  };
+
+  importSVG = (data: Document) => {
+    if (this.#drawLayer) {
+      const importTool = new ImportTool(
+        this.#drawLayer,
+        this.#self,
+        this.#appendToShapes,
+        this.#offset
+      );
+      importTool.drawSvg(data);
+      importTool.destroy();
+    }
   };
 
   onDeleteSelectedShape = () => {
@@ -207,7 +196,7 @@ export class Editor {
         this.onUnselectTool();
       }
     }
-    if (this.#canvas && this.#previewLayer) {
+    if (this.#drawLayer && this.#previewLayer) {
       this.onUpdateStyleInputFields();
       this.#setAreFieldsEnabled(Object.values(SVGParamFieldID), true);
       switch (tool) {
@@ -217,10 +206,8 @@ export class Editor {
             SVGParamFieldID.FILL_OPACITY,
           ];
           this.#setAreFieldsEnabled(fieldsToDisable, false);
-          this.#self.selectedElement = null;
-          console.log('drawtool selected');
           this.#selectedTool = new DrawTool(
-            this.#canvas,
+            this.#drawLayer,
             this.#previewLayer,
             this.#self,
             this.#appendToShapes,
@@ -235,9 +222,8 @@ export class Editor {
             SVGParamFieldID.FILL_OPACITY,
           ];
           this.#setAreFieldsEnabled(fieldsToDisable, false);
-          this.#self.selectedElement = null;
           this.#selectedTool = new LineTool(
-            this.#canvas,
+            this.#drawLayer,
             this.#previewLayer,
             this.#self,
             this.#appendToShapes,
@@ -247,9 +233,8 @@ export class Editor {
           break;
         }
         case Tools_List.RECT: {
-          this.#self.selectedElement = null;
           this.#selectedTool = new RectangleTool(
-            this.#canvas,
+            this.#drawLayer,
             this.#previewLayer,
             this.#self,
             this.#appendToShapes,
@@ -259,9 +244,8 @@ export class Editor {
           break;
         }
         case Tools_List.ELLIPSE: {
-          this.#self.selectedElement = null;
           this.#selectedTool = new EllipseTool(
-            this.#canvas,
+            this.#drawLayer,
             this.#previewLayer,
             this.#self,
             this.#appendToShapes,
@@ -272,7 +256,7 @@ export class Editor {
         }
         case Tools_List.SELECT: {
           this.#selectedTool = new SelectTool(
-            this.#canvas,
+            this.#drawLayer,
             this.#previewLayer,
             this.#self,
             this.#onHandleSelectShape,
@@ -283,7 +267,7 @@ export class Editor {
         }
         case Tools_List.TEXT: {
           this.#selectedTool = new TextTool(
-            this.#canvas,
+            this.#drawLayer,
             this.#previewLayer,
             this.#self,
             this.#appendToShapes,
@@ -294,7 +278,7 @@ export class Editor {
         case Tools_List.MOVE: {
           if (this.#selectedShape) {
             this.#selectedTool = new MoveTool(
-              this.#canvas,
+              this.#drawLayer,
               this.#previewLayer,
               this.#self,
               this.#onMove,
@@ -303,7 +287,7 @@ export class Editor {
             );
           } else {
             this.#selectedTool = new SelectTool(
-              this.#canvas,
+              this.#drawLayer,
               this.#previewLayer,
               this.#self,
               this.#onHandleSelectShape,
@@ -343,18 +327,7 @@ export class Editor {
     fontFamily: string = 'Arial',
     fontSize: number = 12,
     text?: string
-    // @TODO: Optional -> To be implemented
-    // rotation?: string,
-    // scaling?: [string, string]
   ) => {
-    // @TODO: Optional -> To be implemented
-    // const parsedScaling = scaling
-    //   ? {
-    //       x: parseFloat(scaling[0]),
-    //       y: parseFloat(scaling[1]),
-    //     }
-    //   : undefined;
-    // const parsedRotation = rotation ? parseFloat(rotation) : undefined;
     if (fieldsUpdated && this.#isShapeOnlyBeingSelected) {
       return;
     }
@@ -369,14 +342,12 @@ export class Editor {
       fontFamily,
       fontSize,
       text,
-      // rotation: parsedRotation,
-      // scaling: parsedScaling,
     };
     this.#selectedTool?.setSVGParams(this.#currentParams);
   };
 
   applyStyles = () => {
-    if (this.#selectedShape && this.#canvas) {
+    if (this.#selectedShape && this.#drawLayer) {
       if (isText(this.#selectedShape)) {
       }
       this.#selectedShape?.updateSVGParams(this.#currentParams);
@@ -384,7 +355,7 @@ export class Editor {
         shape => shape.getId() === this.#selectedShape?.getId()
       );
       this.#shapes[changedShapeIndex] = this.#selectedShape;
-      Pen.clearCanvas(this.#canvas);
+      Pen.clearCanvas(this.#drawLayer);
       this.#shapes.forEach(shape => {
         Pen.draw(shape, undefined, this.#drawContext);
       });
@@ -395,7 +366,6 @@ export class Editor {
   };
 
   onUnselectTool = () => {
-    this.#self.selectedElement = null;
     this.#selectedTool?.destroy();
     this.#setAreFieldsEnabled(Object.values(SVGParamFieldID), false);
     setTextParamsSourceVisibility(this.#self, false);

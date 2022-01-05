@@ -1,26 +1,24 @@
-import { EditorLayout } from '../../components/organisms/EditorLayout';
+import { SVGEditor } from '../../components/organisms/SVGEditor';
 import { ShapeType } from '../../types/shapes';
-import { SVGParamsBase, Coordinates } from '../../types/types';
-import { textPlaceHolder } from '../helper/constants';
+import { Coordinates, SVGParamsBase } from '../../types/types';
+import { Tools_List } from '../helper/constants';
 import { Pen } from '../Pen';
 import { TextShape } from '../Shapes/Text';
-import {
-  getTextFromSource,
-  setTextParamsSourceVisibility,
-} from './TextTool.util';
+import { setTextParamsSourceVisibility } from './TextTool.util';
 import { Tool } from './Tool';
 
 export class TextTool extends Tool<TextShape> {
   constructor(
     drawLayer: HTMLCanvasElement,
     previewLayer: HTMLCanvasElement,
-    self: EditorLayout,
+    self: SVGEditor,
     onCreate: (shape: ShapeType | ShapeType[] | null) => void,
     currentStyles: SVGParamsBase,
     offset?: Coordinates
   ) {
     super(drawLayer, self, onCreate, offset, previewLayer, currentStyles);
     setTextParamsSourceVisibility(self, true);
+    this.toolName = Tools_List.TEXT;
   }
 
   #onClick = (event: MouseEvent) => {
@@ -59,7 +57,7 @@ export class TextTool extends Tool<TextShape> {
   };
 
   destroy = () => {
-    setTextParamsSourceVisibility(this.self, true);
+    setTextParamsSourceVisibility(this.self, false);
     this.drawLayer.removeEventListener('click', this.#onClick);
   };
 }

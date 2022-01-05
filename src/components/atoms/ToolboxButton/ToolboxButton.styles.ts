@@ -8,6 +8,7 @@ export const toolBoxButtonStyles = css`
   button {
     aspect-ratio: 1;
     border-radius: 0;
+    border: 1px solid black;
     padding: 5px;
     display: flex;
     justify-content: center;
@@ -19,55 +20,36 @@ export const toolBoxButtonStyles = css`
     transform: scale(0.8);
   }
 
-  button:not(.isSelected) {
+  button[isActive='false'] {
     border: 1px solid grey;
     background-color: white;
   }
 
-  button.isSelected {
+  button[isActive='true'],
+  button:hover {
     border: 1px solid blue;
     background-color: cyan;
   }
 
-  /*
-    https://www.w3schools.com/howto/tryit.asp?filename=tryhow_css_tooltip
-  */
   .tooltip {
+    text-decoration: none;
     position: relative;
-    display: inline-block;
   }
-
-  .tooltip .tooltiptext {
-    visibility: hidden;
-    width: 120px;
-    background-color: #555;
+  .tooltip span {
     color: #fff;
-    text-align: center;
-    border-radius: 6px;
-    padding: 5px 0;
-    position: absolute;
-    z-index: 1;
-    bottom: 100%;
-    left: 50%;
-    margin-left: -60px;
+    position: fixed;
+    visibility: hidden;
     opacity: 0;
     transition: opacity 0.3s;
   }
-
-  .tooltip .tooltiptext::after {
-    content: '';
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    margin-left: -5px;
-    border-width: 5px;
-    border-style: solid;
-    border-color: #555 transparent transparent transparent;
-  }
-
-  .tooltip:hover .tooltiptext {
+  .tooltip:hover span {
+    border-radius: 5px;
+    padding: 10px;
+    background-color: #555;
     visibility: visible;
+    overflow: hidden;
     opacity: 1;
+    z-index: 100;
   }
 `;
 

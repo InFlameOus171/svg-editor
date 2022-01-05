@@ -1,4 +1,4 @@
-import { EditorLayout } from '../../components/organisms/EditorLayout';
+import { SVGEditor } from '../../components/organisms/SVGEditor';
 import { ShapeType } from '../../types/shapes';
 import { Coordinates, SVGParamsBase } from '../../types/types';
 import { highlightStyle, Tools_List } from '../helper/constants';
@@ -9,7 +9,6 @@ import {
 import { isText } from '../helper/typeguards';
 import { Pen } from '../Pen';
 import { Rectangle } from '../Shapes/Rectangle';
-import { TextShape } from '../Shapes/Text';
 import { setTextParamsSourceVisibility } from './TextTool.util';
 import { Tool } from './Tool';
 
@@ -17,7 +16,7 @@ export class MoveTool extends Tool<ShapeType> {
   constructor(
     drawLayer: HTMLCanvasElement,
     previewLayer: HTMLCanvasElement,
-    self: EditorLayout,
+    self: SVGEditor,
     onMove: (shape: ShapeType | ShapeType[] | null) => void,
     offset: Coordinates,
     selectedShape: ShapeType
@@ -28,9 +27,9 @@ export class MoveTool extends Tool<ShapeType> {
       this.drawContext = renderingContext;
     }
     this.currentShape = selectedShape;
-    this.toolName = Tools_List.MOVE;
     this.#drawOnPreview = Pen.generatePen(this.previewContext).draw;
     this.updatePreview();
+    this.toolName = Tools_List.MOVE;
   }
   #dCenter?: Coordinates;
   #drawOnPreview: (shape: ShapeType, svgParams?: SVGParamsBase) => void;

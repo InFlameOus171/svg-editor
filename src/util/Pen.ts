@@ -1,8 +1,6 @@
 import { ShapeType } from '../types/shapes';
 import { SVGParamsBase } from '../types/types';
-import { decimalNumberRegExpGlobal } from './helper/regularExpressions';
 import { typeOfShape } from './helper/typeguards';
-import { normalizeColorCode } from './helper/util';
 import { Ellipse } from './Shapes/Ellipse';
 import { Freehand } from './Shapes/Freehand';
 import { Line } from './Shapes/Line';
@@ -183,6 +181,9 @@ const Pen = {
       }
       if (params.lineCap) {
         context.lineCap = params.lineCap;
+      }
+      if (params.strokeWidth) {
+        context.lineWidth = parseInt(params.strokeWidth);
       }
       context.fillStyle = rest.fill ?? '#000000';
       context.font = (fontSize?.toString() ?? '12').concat(

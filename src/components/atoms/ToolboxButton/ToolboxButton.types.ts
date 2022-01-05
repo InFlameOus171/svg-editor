@@ -5,6 +5,5 @@ export interface IToolboxButtonProps {
   toolName: string;
   icon?: string;
   id: Tools_List;
-  isSelected?: boolean;
   class?: string;
 }

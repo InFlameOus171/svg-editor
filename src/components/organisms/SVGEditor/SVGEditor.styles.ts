@@ -95,4 +95,11 @@ export const layoutContentStyle = css`
   #connection-info {
     background-color: rgba(255, 255, 255, 0.8);
   }
+
+  #position-container {
+    border-top: 1px solid rgba(0, 0, 0, 0.4);
+    display: flex;
+    justify-content: flex-end;
+    padding: 10px 10px 0 0;
+  }
 `;

@@ -1,7 +1,7 @@
-import { EditorLayout } from '../../components/organisms/EditorLayout';
+import { SVGEditor } from '../../components/organisms/SVGEditor';
 import { SVGParamFieldID, textPlaceHolder } from '../helper/constants';
 
-export const paramFieldStateHandler = (editorLayout: EditorLayout) => ({
+export const paramFieldStateHandler = (svgEditor: SVGEditor) => ({
   setAreFieldsEnabled: (
     fieldNames: SVGParamFieldID[],
     isEnabled: boolean = true
@@ -11,7 +11,7 @@ export const paramFieldStateHandler = (editorLayout: EditorLayout) => ({
         SVGParamFieldID.STROKE_OPACITY,
         SVGParamFieldID.FILL_OPACITY,
       ].includes(fieldName);
-      const paramField = editorLayout?.shadowRoot
+      const paramField = svgEditor?.shadowRoot
         ?.getElementById('footer-input')
         ?.querySelector('#' + fieldName);
       if (isEnabled) {
@@ -30,12 +30,10 @@ export const paramFieldStateHandler = (editorLayout: EditorLayout) => ({
 });
 
 export const setTextParamsSourceVisibility = (
-  editorLayout?: EditorLayout,
+  svgEditor?: SVGEditor,
   isVisible?: boolean
 ) => {
-  const source = editorLayout?.shadowRoot?.getElementById(
-    'right-input-section'
-  );
+  const source = svgEditor?.shadowRoot?.getElementById('right-input-section');
   if (source) {
     source.style.visibility = isVisible ? 'visible' : 'hidden';
     isVisible
@@ -44,10 +42,8 @@ export const setTextParamsSourceVisibility = (
   }
 };
 
-export const getTextFromSource = (editorLayout?: EditorLayout) => {
-  const source = editorLayout?.shadowRoot?.getElementById(
-    'right-input-section'
-  );
+export const getTextFromSource = (svgEditor?: SVGEditor) => {
+  const source = svgEditor?.shadowRoot?.getElementById('right-input-section');
   const text =
     source?.querySelector('#text-input')?.getAttribute('value') ??
     textPlaceHolder;

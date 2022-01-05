@@ -1,5 +1,5 @@
-import { EditorLayout } from '../../components/organisms/EditorLayout';
-import { Shapes, ShapeType } from '../../types/shapes';
+import { SVGEditor } from '../../components/organisms/SVGEditor';
+import { ShapeType } from '../../types/shapes';
 import { Coordinates, SVGParamsBase } from '../../types/types';
 import { highlightStyle, Tools_List } from '../helper/constants';
 import {
@@ -18,16 +18,16 @@ export class SelectTool extends Tool<ShapeType> {
   constructor(
     drawLayer: HTMLCanvasElement,
     previewLayer: HTMLCanvasElement,
-    self: EditorLayout,
+    self: SVGEditor,
     onSelect: (shape: ShapeType | ShapeType[] | null) => void,
     shapes: ShapeType[],
     offset?: Coordinates
   ) {
     super(drawLayer, self, onSelect, offset, previewLayer);
-    this.toolName = Tools_List.SELECT;
     this.allShapes = shapes;
     this.previewContext && this.previewContext.setLineDash([10, 10]);
     this.#drawOnPreview = Pen.generatePen(this.previewContext).draw;
+    this.toolName = Tools_List.SELECT;
   }
   #drawOnPreview: (shape: ShapeType, svgParams?: SVGParamsBase) => void;
 

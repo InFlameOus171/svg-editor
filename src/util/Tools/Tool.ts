@@ -1,4 +1,4 @@
-import { EditorLayout } from '../../components/organisms/EditorLayout';
+import { SVGEditor } from '../../components/organisms/SVGEditor';
 import { ShapeType } from '../../types/shapes';
 import { Coordinates, SVGParamsBase } from '../../types/types';
 import {
@@ -11,7 +11,7 @@ import { Pen } from '../Pen';
 export abstract class Tool<T extends ShapeType, V extends ShapeType = T> {
   drawLayer: HTMLCanvasElement;
   previewLayer?: HTMLCanvasElement;
-  self: EditorLayout;
+  self: SVGEditor;
   currentShape?: V;
   allShapes: T[] = [];
   shallWait: boolean = false;
@@ -27,7 +27,7 @@ export abstract class Tool<T extends ShapeType, V extends ShapeType = T> {
   onUpdateEditor: (shape: ShapeType | ShapeType[] | null) => void;
   constructor(
     drawLayer: HTMLCanvasElement,
-    self: EditorLayout,
+    self: SVGEditor,
     onUpdateEditor: (shape: ShapeType | ShapeType[] | null) => void,
     offset: Coordinates = [0, 0],
     previewLayer?: HTMLCanvasElement,

@@ -18,14 +18,15 @@ export const highlightStyle: SVGParamsBase = {
 export const textPlaceHolder: string = 'Input text...';
 
 export enum Tools_List {
-  DRAW,
-  LINE,
-  RECT,
-  ELLIPSE,
-  SELECT,
-  TEXT,
-  MOVE,
-  DELETE,
+  DRAW = 'draw-tool',
+  LINE = 'line-tool',
+  RECT = 'rect-tool',
+  ELLIPSE = 'ellipse-tool',
+  SELECT = 'select-tool',
+  TEXT = 'text-tool',
+  MOVE = 'move-tool',
+  DELETE = 'delete-tool',
+  UNSELECT = 'unselect-tool',
 }
 
 export enum SVGParamFieldID {

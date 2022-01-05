@@ -5,12 +5,8 @@ import {
   SVGParamsBase,
 } from '../../types/types';
 import { textPlaceHolder } from '../helper/constants';
-import {
-  getMinMaxValuesOfCoordinates,
-  getTextBoundaries,
-} from '../helper/coordinates';
+import { getTextBoundaries } from '../helper/coordinates';
 import { isText } from '../helper/typeguards';
-import { rotate } from '../helper/util';
 import { Pen } from '../Pen';
 
 export abstract class Shape {
@@ -62,33 +58,6 @@ export abstract class Shape {
     this.transformMatrix = new DOMMatrix([a, b, c, d, e + x, f + y]);
   };
 
-  scaleBoundaries = (x: number, y: number) => {
-    const { xMin, xMax, yMin, yMax } = getMinMaxValuesOfCoordinates(
-      this.boundaries
-    );
-    const point = new DOMPoint(xMax, yMax).matrixTransform(
-      new DOMMatrix().scale(x, y)
-    );
-    const [newXMax, newYMax] = [point.x, point.y];
-
-    this.boundaries = [
-      [xMin, yMin],
-      [xMin, newYMax],
-      [newXMax, yMin],
-      [newXMax, newYMax],
-    ];
-  };
-
-  rotateBoundaries = (rotation: number) => {
-    const { xMin, xMax, yMin, yMax } = getMinMaxValuesOfCoordinates(
-      this.boundaries
-    );
-    this.boundaries = this.boundaries.map(boundary => {
-      const [x, y] = boundary;
-      return rotate(xMin, yMin, x, y, rotation);
-    }) as BoundaryCoordinates;
-  };
-
   updateSVGParams = (newParams: SVGParamsBase) => {
     this.#fill = newParams.fill;
     this.#stroke = newParams.stroke;
@@ -108,17 +77,6 @@ export abstract class Shape {
         );
       }
     }
-    // @TODO: To be implemented
-    // if (config.scaling || config.rotation) {
-    //   const { x: scaleX, y: scaleY } = config.scaling || { x: 1, y: 1 };
-    //   const rotation = config.rotation ?? 0;
-    //   this.transformMatrix = this.transformMatrix
-    //     ?.rotate(rotation)
-    //     .scale(scaleX, scaleY);
-    //   this.scaleBoundaries(scaleX, scaleY);
-    //   this.rotateBoundaries(rotation);
-    //   const { a, b, c, d, e, f } = this.transformMatrix || {};
-    // }
   };
 
   moveBoundaries = (difference: Coordinates) => {

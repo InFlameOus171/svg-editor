@@ -1,10 +1,10 @@
-import { LitElement, html, css } from 'lit';
+import { html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { editorHeaderStyles } from './EditorHeader.styles';
+import { dialogSectionStyles } from './DialogSection.styles';
 
-@customElement('editor-header')
-export class EditorHeader extends LitElement {
-  static styles = [editorHeaderStyles];
+@customElement('dialog-section')
+export class DialogSection extends LitElement {
+  static styles = [dialogSectionStyles];
 
   @property()
   onSelectSvgFile?: (data: Document) => void;
@@ -44,7 +44,10 @@ export class EditorHeader extends LitElement {
           accept="image/svg+xml"
         />
       </label>
-      <button id="save" @click=${this.onSave}>Save</button>
+      <label id="on-save-button">
+        Save
+        <input type="button" id="save" @click=${this.onSave}></div>
+      </label>
     `;
   }
 }
