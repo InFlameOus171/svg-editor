@@ -225,7 +225,7 @@ export class SVGEditor extends LitElement {
           </div>
         </fieldset>
         <div id="position-container">
-        <span id="position">- - -</div>
+          <span id="position">- - -</span>
         </div>
       </div>
     `;
