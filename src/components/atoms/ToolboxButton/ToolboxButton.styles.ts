@@ -2,7 +2,7 @@ import { css } from 'lit';
 
 export const toolBoxButtonStyles = css`
   :host {
-    display: block;
+    display: flex;
   }
 
   button {
@@ -11,6 +11,7 @@ export const toolBoxButtonStyles = css`
     border: 1px solid black;
     padding: 5px;
     display: flex;
+    flex-shrink: 2;
     justify-content: center;
     align-items: center;
   }

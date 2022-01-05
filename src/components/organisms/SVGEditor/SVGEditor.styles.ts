@@ -68,6 +68,7 @@ export const layoutHeaderStyle = css`
 
 export const layoutContentStyle = css`
   #content {
+    height: 90%;
     display: flex;
     flex-wrap: nowrap;
   }
@@ -78,8 +79,8 @@ export const layoutContentStyle = css`
     top: 0;
     left: 0;
     background-color: rgba(255, 255, 255, 1);
-    height: 760px;
-    width: 1000px;
+    height: 100%;
+    width: 100%;
     overflow: auto;
     display: flex;
     position: relative;

@@ -120,7 +120,7 @@ export class Editor {
     this.#isShapeOnlyBeingSelected = false;
   };
 
-  #onMove = (movedShape: ShapeType | ShapeType[] | null) => {
+  #onMoveShape = (movedShape: ShapeType | ShapeType[] | null) => {
     if (movedShape === null) {
       this.onUnselectTool();
       return;
@@ -294,7 +294,7 @@ export class Editor {
               this.#drawLayer,
               this.#previewLayer,
               this.#self,
-              this.#onMove,
+              this.#onMoveShape,
               this.#offset,
               this.#selectedShape
             );

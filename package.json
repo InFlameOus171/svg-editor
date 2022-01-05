@@ -11,10 +11,11 @@
     "./svg-editor.js": "./dist/src/svg-editor.js"
   },
   "scripts": {
+    "get_size_of_bundle": "node getSizeOfFile ./build/index.js",
     "rename_to_old": "node rename.js ./build/index.js ./build/index.old.js",
     "minify_bundle": "minify ./build/index.old.js > ./build/index.js && node removeOldIndex.js ./build/index.old.js",
     "start": "tsc && concurrently -k -r \"tsc --watch --preserveWatchOutput\" \"wds\"",
-    "build": "tsc && rollup -c && npm run rename_to_old && npm run minify_bundle",
+    "build": "tsc && rollup -c && npm run rename_to_old && npm run minify_bundle && npm run get_size_of_bundle",
     "test": "jest"
   },
   "dependencies": {

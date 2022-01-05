@@ -19,7 +19,6 @@ export class DrawTool extends Tool<Freehand, Line> {
     offset: Coordinates
   ) {
     super(drawLayer, self, onCreate, offset, previewLayer, currentStyles);
-    console.log('drawtool selected');
     this.resetPreview();
     this.toolName = Tools_List.DRAW;
   }
@@ -41,7 +40,6 @@ export class DrawTool extends Tool<Freehand, Line> {
     this.currentShapeComponents = [];
     this.previousCoordinates = this.currentCoordinates;
     this.currentCoordinates = this.getCoords(event);
-    console.log(this.isDrawing);
   };
 
   #onUp = () => {

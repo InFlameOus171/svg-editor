@@ -30,6 +30,7 @@ export class LineTool extends Tool<Line> {
 
   #onDown = (event: MouseEvent) => {
     if (event.button !== 0) return;
+    this.isDrawing = true;
     this.highlightPreview();
     this.previousCoordinates = this.getCoords(event);
   };
