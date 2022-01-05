@@ -41,6 +41,7 @@ export class RectangleTool extends Tool<Rectangle> {
   };
 
   onDown = (event: MouseEvent) => {
+    if (event.button !== 0) return;
     this.highlightPreview();
     this.currentCoordinates = this.getCoords(event);
     this.previousCoordinates = this.currentCoordinates;

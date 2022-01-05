@@ -78,7 +78,11 @@ export const layoutContentStyle = css`
     top: 0;
     left: 0;
     background-color: rgba(255, 255, 255, 1);
+    height: 760px;
+    width: 1000px;
+    overflow: auto;
     display: flex;
+    position: relative;
   }
 
   #drawzone {
@@ -88,6 +92,9 @@ export const layoutContentStyle = css`
   }
 
   #preview-layer {
+    top: 0;
+    left: 0;
+    position: absolute;
     z-index: 1;
     pointer-events: none;
   }

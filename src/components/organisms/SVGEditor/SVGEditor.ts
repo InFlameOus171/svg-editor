@@ -68,8 +68,8 @@ export class SVGEditor extends LitElement {
   };
 
   updateResize = () => {
-    this.width = parseInt(getComputedStyle(this).getPropertyValue('width'));
-    this.height = parseInt(getComputedStyle(this).getPropertyValue('height'));
+    this.width = window.innerWidth;
+    this.height = window.innerHeight;
   };
 
   render() {
@@ -79,8 +79,16 @@ export class SVGEditor extends LitElement {
     return html`
       <div id="content">
         <div id="draw-container">
-          <canvas id="drawzone" height="760px" width="1000px"></canvas>
-          <canvas id="preview-layer" height="760px" width="1000px"></canvas>
+          <canvas
+            id="drawzone"
+            height=${this.height}
+            width=${this.width}
+          ></canvas>
+          <canvas
+            id="preview-layer"
+            height=${this.height}
+            width=${this.width}
+          ></canvas>
         </div>
         <tool-box id="tool-box" .tools=${tools}></tool-box>
       </div>

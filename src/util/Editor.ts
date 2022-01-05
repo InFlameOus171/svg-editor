@@ -72,6 +72,10 @@ export class Editor {
     ).setAreFieldsEnabled;
     this.#setAreFieldsEnabled(Object.values(SVGParamFieldID), false);
     updateStyleInputFields(this.#self, this.#currentParams);
+
+    window.addEventListener('resize', () => {
+      setTimeout(() => this.redrawShapes(), 50);
+    });
   }
 
   #appendToShapes = (toBeAppended: ShapeType | ShapeType[] | null) => {

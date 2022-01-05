@@ -52,8 +52,9 @@ export class EllipseTool extends Tool<Ellipse> {
   };
 
   #onDown = (event: MouseEvent) => {
-    this.previousCoordinates = this.getCoords(event);
+    if (event.button !== 0) return;
     this.isDrawing = true;
+    this.previousCoordinates = this.getCoords(event);
   };
 
   #onUp = (event: MouseEvent) => {

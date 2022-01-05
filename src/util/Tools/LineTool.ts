@@ -29,9 +29,9 @@ export class LineTool extends Tool<Line> {
   };
 
   #onDown = (event: MouseEvent) => {
+    if (event.button !== 0) return;
     this.highlightPreview();
     this.previousCoordinates = this.getCoords(event);
-    this.isDrawing = true;
   };
 
   #onUp = (event: MouseEvent) => {

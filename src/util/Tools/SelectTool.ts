@@ -54,6 +54,7 @@ export class SelectTool extends Tool<ShapeType> {
   };
 
   #onDown = (event: MouseEvent) => {
+    if (event.button !== 0) return;
     this.unHighlightpreview();
     this.currentShape = undefined;
     this.currentCoordinates = this.getCoords(event);

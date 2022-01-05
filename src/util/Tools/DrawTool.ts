@@ -35,11 +35,12 @@ export class DrawTool extends Tool<Freehand, Line> {
     this.currentShape && Pen.drawLine(this.currentShape, this.previewContext);
   };
 
-  #onDown = (e: MouseEvent) => {
+  #onDown = (event: MouseEvent) => {
+    if (event.button !== 0) return;
+    this.isDrawing = true;
     this.currentShapeComponents = [];
     this.previousCoordinates = this.currentCoordinates;
-    this.currentCoordinates = this.getCoords(e);
-    this.isDrawing = true;
+    this.currentCoordinates = this.getCoords(event);
     console.log(this.isDrawing);
   };
 

@@ -36,6 +36,7 @@ export class MoveTool extends Tool<ShapeType> {
   #drawOnPreview: (shape: ShapeType, svgParams?: SVGParamsBase) => void;
 
   #onDown = (event: MouseEvent) => {
+    if (event.button !== 0) return;
     this.previousCoordinates = this.currentCoordinates;
     this.currentCoordinates = this.getCoords(event);
     const currentShapeCenter = this.currentShape?.getCenter() ?? [0, 0];

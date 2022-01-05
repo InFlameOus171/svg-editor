@@ -85,7 +85,8 @@ export abstract class Tool<T extends ShapeType, V extends ShapeType = T> {
   };
 
   getCoords = (e: MouseEvent): [number, number] => {
-    return [e.pageX - this.offset[0], e.pageY - this.offset[1]];
+    console.log(e.pageX, e.clientX, e.offsetX);
+    return [e.offsetX - this.offset[0], e.offsetY - this.offset[1]];
   };
 
   #draw = (): void => {
