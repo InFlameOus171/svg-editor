@@ -6,23 +6,20 @@ import { Tools_List } from '../../../util/helper/constants.js';
 import {
   updateNextSiblingValue,
   updatePreviousSiblingValue,
-} from '../../../util/helper/util.js';
-import { IToolboxButtonProps } from '../../atoms/ToolboxButton/ToolboxButton.types.js';
+} from '../../../util/helper/util';
+import { IToolboxButtonProps } from '../../atoms/ToolboxButton/ToolboxButton.types';
 import {
   layoutContentStyle,
   layoutHeaderStyle,
   layoutStyle,
-} from './SVGEditor.styles';
+} from './EditorLayout.styles';
 import {
   getToolboxButtonsProps,
   handleUpdateSVGParameters,
-} from './SVGEditor.util.js';
-import '../../atoms/ToolboxButton';
-import '../../molecules/ToolBox';
-import '../../molecules/DialogSection';
+} from './EditorLayout.util';
 
 @customElement('svg-editor')
-export class SVGEditor extends LitElement {
+export class EditorLayout extends LitElement {
   @state()
   width: number = 0;
   @state()

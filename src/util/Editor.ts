@@ -1,4 +1,4 @@
-import { SVGEditor } from '../components/organisms/SVGEditor';
+import { EditorLayout } from '../components/organisms/EditorLayout';
 import { ShapeType } from '../types/shapes';
 import { Coordinates, SVGParamsBase } from '../types/types';
 import {
@@ -28,7 +28,7 @@ export class Editor {
   #selectedTool: Tool<ShapeType> | null = null;
   #drawLayer: HTMLCanvasElement | null = null;
   #previewLayer: HTMLCanvasElement | null = null;
-  #self: SVGEditor;
+  #self: EditorLayout;
   #offset: Coordinates;
   #shapes: ShapeType[] = [];
   #currentParams: SVGParamsBase = {
@@ -50,7 +50,7 @@ export class Editor {
     drawLayer: HTMLCanvasElement,
     previewLayer: HTMLCanvasElement,
     offset: Coordinates,
-    self: SVGEditor
+    self: EditorLayout
   ) {
     this.#drawLayer = drawLayer;
     this.#previewLayer = previewLayer;

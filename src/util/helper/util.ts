@@ -1,4 +1,4 @@
-import { SVGEditor } from '../../components/organisms/SVGEditor';
+import { EditorLayout } from '../../components/organisms/EditorLayout';
 import { Coordinates, Matrix, SVGParamsBase } from '../../types/types';
 import { FlattenedElement, Partition } from '../../types/util.types';
 import { acceptedTags, SVGParamFieldID, textPlaceHolder } from './constants';
@@ -205,7 +205,7 @@ export const inputFieldGetterGenerator =
   };
 
 export const updateStyleInputFields = (
-  self: SVGEditor,
+  self: EditorLayout,
   params: SVGParamsBase
 ) => {
   const getFieldByParamId = inputFieldGetterGenerator(

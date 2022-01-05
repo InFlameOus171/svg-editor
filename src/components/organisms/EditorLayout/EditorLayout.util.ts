@@ -1,4 +1,4 @@
-import { SVGEditor } from '.';
+import { EditorLayout } from '.';
 import { SVGParamFieldID, Tools_List } from '../../../util/helper/constants';
 import { IToolboxButtonProps } from '../../atoms/ToolboxButton/ToolboxButton.types';
 
@@ -68,7 +68,7 @@ export const getElementValueByIdGenerator =
       ?.value;
   };
 
-export const handleUpdateSVGParameters = (target: SVGEditor) => {
+export const handleUpdateSVGParameters = (target: EditorLayout) => {
   const getValueById = getElementValueByIdGenerator(target.shadowRoot);
   const fill = getValueById(SVGParamFieldID.FILL_COLOR);
   const fillOpacity = getValueById(SVGParamFieldID.FILL_OPACITY);

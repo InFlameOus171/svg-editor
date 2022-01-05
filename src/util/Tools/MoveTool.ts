@@ -1,4 +1,4 @@
-import { SVGEditor } from '../../components/organisms/SVGEditor';
+import { EditorLayout } from '../../components/organisms/EditorLayout';
 import { ShapeType } from '../../types/shapes';
 import { Coordinates, SVGParamsBase } from '../../types/types';
 import { highlightStyle, Tools_List } from '../helper/constants';
@@ -16,7 +16,7 @@ export class MoveTool extends Tool<ShapeType> {
   constructor(
     drawLayer: HTMLCanvasElement,
     previewLayer: HTMLCanvasElement,
-    self: SVGEditor,
+    self: EditorLayout,
     onMove: (shape: ShapeType | ShapeType[] | null) => void,
     offset: Coordinates,
     selectedShape: ShapeType

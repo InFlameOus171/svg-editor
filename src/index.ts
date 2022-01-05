@@ -1,1 +1,4 @@
-import './components/organisms/SVGEditor';
+import './components/atoms/ToolboxButton';
+import './components/molecules/ToolBox';
+import './components/molecules/DialogSection';
+import './components/organisms/EditorLayout';

@@ -1,4 +1,4 @@
-import { SVGEditor } from '../../components/organisms/SVGEditor';
+import { EditorLayout } from '../../components/organisms/EditorLayout';
 import { ShapeType } from '../../types/shapes';
 import { Coordinates, SVGParamsBase } from '../../types/types';
 import { Tools_List } from '../helper/constants';
@@ -10,7 +10,7 @@ export class LineTool extends Tool<Line> {
   constructor(
     drawLayer: HTMLCanvasElement,
     previewLayer: HTMLCanvasElement,
-    self: SVGEditor,
+    self: EditorLayout,
     onCreate: (shape: ShapeType | ShapeType[] | null) => void,
     drawPenConfig?: SVGParamsBase,
     offset?: Coordinates

@@ -11,12 +11,15 @@
     "./svg-editor.js": "./dist/src/svg-editor.js"
   },
   "scripts": {
+    "rename_to_old": "node rename.js ./build/index.js ./build/index.old.js",
+    "minify_bundle": "minify ./build/index.old.js > ./build/index.js && node removeOldIndex.js ./build/index.old.js",
     "start": "tsc && concurrently -k -r \"tsc --watch --preserveWatchOutput\" \"wds\"",
-    "build": "tsc && rollup -c",
+    "build": "tsc && rollup -c && npm run rename_to_old && npm run minify_bundle",
     "test": "jest"
   },
   "dependencies": {
     "lit": "^2.0.2",
+    "minify": "^8.0.3",
     "nanoid": "^3.1.30"
   },
   "devDependencies": {
@@ -44,11 +47,9 @@
     "prettier": "^2.4.1",
     "rollup": "^2.56.3",
     "rollup-plugin-minify-html-literals": "^1.2.6",
-    "rollup-plugin-summary": "^1.3.0",
-    "rollup-plugin-terser": "^7.0.2",
     "ts-jest": "^27.0.7",
     "tslib": "^2.3.1",
-    "typescript": "^4.4.3"
+    "typescript": "^4.5.4"
   },
   "customElements": "custom-elements.json",
   "eslintConfig": {

@@ -1,4 +1,4 @@
-import { SVGEditor } from '../../components/organisms/SVGEditor';
+import { EditorLayout } from '../../components/organisms/EditorLayout';
 import { ShapeType } from '../../types/shapes';
 import { Coordinates, SVGParamsBase } from '../../types/types';
 import { Tools_List } from '../helper/constants';
@@ -13,7 +13,7 @@ export class DrawTool extends Tool<Freehand, Line> {
   constructor(
     drawLayer: HTMLCanvasElement,
     previewLayer: HTMLCanvasElement,
-    self: SVGEditor,
+    self: EditorLayout,
     onCreate: (shape: ShapeType | ShapeType[] | null) => void,
     currentStyles: SVGParamsBase,
     offset: Coordinates
@@ -60,12 +60,12 @@ export class DrawTool extends Tool<Freehand, Line> {
     this.isDrawing = false;
   };
 
-  #onMove = (e: MouseEvent) => {
+  #onMove = (event: MouseEvent) => {
     if (!this.isDrawing || this.shallWait) {
       return;
     }
     this.previousCoordinates = this.currentCoordinates;
-    this.currentCoordinates = this.getCoords(e);
+    this.currentCoordinates = this.getCoords(event);
     this.currentShape = new Line(
       this.previousCoordinates,
       this.currentCoordinates,

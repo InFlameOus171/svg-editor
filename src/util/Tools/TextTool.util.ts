@@ -1,7 +1,7 @@
-import { SVGEditor } from '../../components/organisms/SVGEditor';
+import { EditorLayout } from '../../components/organisms/EditorLayout';
 import { SVGParamFieldID, textPlaceHolder } from '../helper/constants';
 
-export const paramFieldStateHandler = (svgEditor: SVGEditor) => ({
+export const paramFieldStateHandler = (svgEditor: EditorLayout) => ({
   setAreFieldsEnabled: (
     fieldNames: SVGParamFieldID[],
     isEnabled: boolean = true
@@ -30,7 +30,7 @@ export const paramFieldStateHandler = (svgEditor: SVGEditor) => ({
 });
 
 export const setTextParamsSourceVisibility = (
-  svgEditor?: SVGEditor,
+  svgEditor?: EditorLayout,
   isVisible?: boolean
 ) => {
   const source = svgEditor?.shadowRoot?.getElementById('right-input-section');
@@ -42,7 +42,7 @@ export const setTextParamsSourceVisibility = (
   }
 };
 
-export const getTextFromSource = (svgEditor?: SVGEditor) => {
+export const getTextFromSource = (svgEditor?: EditorLayout) => {
   const source = svgEditor?.shadowRoot?.getElementById('right-input-section');
   const text =
     source?.querySelector('#text-input')?.getAttribute('value') ??
