@@ -92,6 +92,13 @@ export const layoutContentStyle = css`
     position: absolute;
   }
 
+  #right-main-section {
+    display: flex;
+    flex-direction: column;
+    padding: 30px 15px 0;
+    background-color: rgba(255, 255, 255, 0.8);
+  }
+
   #preview-layer {
     top: 0;
     left: 0;
@@ -100,11 +107,74 @@ export const layoutContentStyle = css`
     pointer-events: none;
   }
 
-  #connection-info {
-    background-color: rgba(255, 255, 255, 0.8);
+  #chat {
+    border-top: 1px solid rgba(0, 0, 0, 0.4);
+    margin-top: 20px;
   }
 
-  #position-container {
+  #connection-info {
+    border-top: 1px solid rgba(0, 0, 0, 0.4);
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    min-height: 600px;
+    max-height: 100%;
+  }
+
+  #connection-info #connect-form > label {
+    display: flex;
+  }
+
+  #connection-info #connect-form > label > #connect-form-label {
+    display: flex;
+    min-width: fit-content;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+
+  #connection-info #connect-form {
+    display: flex;
+  }
+
+  #connection-info #chatbox {
+    min-height: 20em;
+    background-color: white;
+  }
+
+  #connection-info #chatbox .chat-entry {
+    display: flex;
+    padding: 5px;
+    flex-direction: column;
+    align-items: flex-end;
+  }
+
+  #connect-button-container {
+    display: flex;
+    align-items: flex-end;
+  }
+
+  #room-information {
+    flex-direction: column;
+  }
+
+  #connection-info #chatbox .chat-entry:nth-child(2n + 1) {
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+
+  #connection-info #chatbox .chat-entry :first-child {
+    align-self: flex-start;
+  }
+
+  #connection-info #chat-form {
+    display: flex;
+    padding-top: 10px;
+  }
+
+  #connection-info #chat-form #message-field {
+    width: 100%;
+  }
+
+  #connection-info #chat #position-container {
     border-top: 1px solid rgba(0, 0, 0, 0.4);
     display: flex;
     justify-content: flex-end;

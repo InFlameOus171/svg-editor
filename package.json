@@ -2,13 +2,12 @@
   "name": "svg-editor",
   "description": "Webcomponent svg-editor following open-wc recommendations",
   "license": "MIT",
-  "author": "svg-editor",
+  "author": "Yasin Calli",
   "version": "0.9.0",
   "main": "dist/src/index.js",
   "module": "dist/src/index.js",
   "exports": {
-    ".": "./dist/src/index.js",
-    "./svg-editor.js": "./dist/src/svg-editor.js"
+    ".": "./dist/src/index.js"
   },
   "scripts": {
     "get_size_of_bundle": "node getSizeOfFile ./build/index.js",

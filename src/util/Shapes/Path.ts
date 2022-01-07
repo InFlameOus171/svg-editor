@@ -10,6 +10,7 @@ import { Shape } from './Shape';
 
 export class Path extends Shape {
   drawPath: SVGDrawPath[];
+  #rawDrawPath: SVGDrawPath[];
   #center: Coordinates = [-1, -1];
 
   constructor(
@@ -18,6 +19,7 @@ export class Path extends Shape {
     dontCountUp?: boolean
   ) {
     super(undefined, svgParams, dontCountUp);
+    this.#rawDrawPath = drawPath;
     this.drawPath = drawPath.map(path => {
       if (singleDirectionCommands.includes(path.command)) {
         return { command: path.command, points: path.points };
@@ -59,57 +61,24 @@ export class Path extends Shape {
     ...this.getSvgParams(),
   });
 
+  getDeconstructedShapeData = () => ({
+    id: this.getId(),
+    type: 'Path',
+    drawPath: this.#rawDrawPath,
+    svgParams: this.getSvgParams(),
+  });
+
   moveTo = (coordinates: Coordinates) => {
-    // const pathCommands = getPathCommands(this.toString());
     const [dx, dy] = [
       coordinates[0] - this.#center[0],
       coordinates[1] - this.#center[1],
     ];
     this.moveTransformMatrix(dx, dy);
-    // const newPathCommands = pathCommands.map(pathCommand => {
-    //   if (
-    //     ['M', 'm', ...absoluteCoordinatesCommands].includes(pathCommand.command)
-    //   ) {
-    //     return {
-    //       command: pathCommand.command,
-    //       points: (pathCommand.points as Array<Coordinates>).map(
-    //         (point: Coordinates): Coordinates =>
-    //           sumOfCoordinates(point)([dx, dy])
-    //       ),
-    //     };
-    //   }
-    //   return pathCommand;
-    // });
-    // const newPath = new Path(
-    //   newPathCommands,
-    //   {
-    //     fill: this.getFill(),
-    //     stroke: this.getStroke(),
-    //     strokeWidth: this.getStrokeWidth(),
-    //   },
-    //   false
-    // );
     this.#center = [this.#center[0] + dx, this.#center[1] + dy];
     this.boundaries = this.boundaries.map(boundary => [
       boundary[0] + dx,
       boundary[1] + dy,
     ]) as BoundaryCoordinates;
-    // this.drawPath = newPath.drawPath;
-    // moveCommands.forEach(moveCommand => {
-    //   if (moveCommand) {
-    //     const changedCommands = [
-    //       {
-    //         command: moveCommand.command,
-    //         points: (moveCommand.points as Array<Coordinates>).map(
-    //           (point: Coordinates): Coordinates =>
-    //             sumOfCoordinates(point)([dx, dy])
-    //         ),
-    //       },
-    //       ...pathCommands,
-    //     ];
-
-    //   }
-    // });
   };
 
   toString = (): string => {

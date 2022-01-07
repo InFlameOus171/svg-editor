@@ -20,6 +20,7 @@ export type Shapes =
   | 'Freehand'
   | 'Path'
   | 'TextShape';
+
 export type ShapeType =
   | Shape
   | Ellipse

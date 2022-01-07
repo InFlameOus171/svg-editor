@@ -55,6 +55,13 @@ export class Freehand extends Shape {
     ...this.getSvgParams(),
   });
 
+  getDeconstructedShapeData = () => ({
+    id: this.getId(),
+    type: 'Freehand',
+    points: this.#points,
+    svgParams: this.getSvgParams(),
+  });
+
   toString = () => {
     return this.#points
       .reduce((acc, point) => {

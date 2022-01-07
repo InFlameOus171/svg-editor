@@ -52,6 +52,14 @@ export class Line extends Shape {
     ...this.getSvgParams(),
   });
 
+  getDeconstructedShapeData = () => ({
+    id: this.getId(),
+    type: 'Line',
+    startPoint: this.points[0],
+    endPoint: this.points[1],
+    svgParams: this.getSvgParams(),
+  });
+
   toString = () => {
     return JSON.stringify({
       start: { x: this.points[0][0], y: this.points[0][1] },

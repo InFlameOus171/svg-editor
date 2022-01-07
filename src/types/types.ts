@@ -1,9 +1,3 @@
-declare global {
-  interface Element {
-    getFloatAttribute: (value: string) => number;
-  }
-}
-
 export type NullableString = null | string;
 export type NullableNumber = null | number;
 export type Coordinates = [number, number];

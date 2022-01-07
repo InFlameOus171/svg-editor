@@ -63,6 +63,15 @@ export class Rectangle extends Shape {
     ...this.getSvgParams(),
   });
 
+  getDeconstructedShapeData = () => ({
+    id: this.getId(),
+    type: 'Rectangle',
+    startingCorner: this.#startingCorner,
+    width: this.#width,
+    height: this.#height,
+    svgParams: this.getSvgParams(),
+  });
+
   toString = () => {
     return JSON.stringify(this.boundaries);
   };

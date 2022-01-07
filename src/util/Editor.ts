@@ -14,6 +14,7 @@ import {
 import { generateSVGURLFromShapes } from './helper/shapes';
 import { isMoveTool, isSelectTool, isText } from './helper/typeguards';
 import { hexToRGBA } from './helper/util';
+import { Connection } from './network';
 import { Pen } from './Pen';
 import { DrawTool } from './Tools/DrawTool';
 import { EllipseTool } from './Tools/EllipseTool';
@@ -33,6 +34,7 @@ export class Editor {
   #selectedTool: Tool<ShapeType> | null = null;
   #drawLayer: HTMLCanvasElement | null = null;
   #previewLayer: HTMLCanvasElement | null = null;
+  #connection?: Connection;
   #self: SVGEditor;
   #offset: Coordinates;
   #shapes: ShapeType[] = [];
@@ -78,12 +80,7 @@ export class Editor {
     });
   }
 
-  #appendToShapes = (toBeAppended: ShapeType | ShapeType[] | null) => {
-    if (toBeAppended === null) {
-      this.onUnselectTool();
-      return;
-    }
-    const shapes = Array.isArray(toBeAppended) ? toBeAppended : [toBeAppended];
+  #appendToShapes = (shapes: ShapeType[]) => {
     shapes.forEach(shape => {
       const index = this.#shapes.findIndex(
         innerShape => innerShape.getId() === shape.getId()
@@ -99,16 +96,30 @@ export class Editor {
     this.redrawShapes();
   };
 
+  #handleUpdateShapes = (toBeAppended: ShapeType | ShapeType[] | null) => {
+    if (toBeAppended === null) {
+      this.onUnselectTool();
+      return;
+    }
+    const shapes = Array.isArray(toBeAppended) ? toBeAppended : [toBeAppended];
+    console.log(shapes);
+    this.#appendToShapes(shapes);
+    this.#connection?.createShapes(shapes);
+  };
+
   #onHandleSelectShape = (selectedShape: ShapeType | ShapeType[] | null) => {
     setIsButtonDisabled(this.#self, Tools_List.MOVE, !selectedShape);
     this.#isShapeOnlyBeingSelected = true;
     if (!selectedShape) {
+      this.#connection?.unlockShapes();
       this.#selectedShape = null;
       return;
     }
     const shape = Array.isArray(selectedShape)
       ? selectedShape[0]
       : selectedShape;
+
+    this.#connection?.lockShape(shape);
     this.#selectedShape = shape;
     if (this.#selectedShape) {
       this.#currentParams = this.#selectedShape.getSvgParams();
@@ -176,7 +187,7 @@ export class Editor {
       const importTool = new ImportTool(
         this.#drawLayer,
         this.#self,
-        this.#appendToShapes,
+        this.#handleUpdateShapes,
         this.#offset
       );
       importTool.drawSvg(data);
@@ -223,7 +234,7 @@ export class Editor {
             this.#drawLayer,
             this.#previewLayer,
             this.#self,
-            this.#appendToShapes,
+            this.#handleUpdateShapes,
             this.#currentParams,
             this.#offset
           );
@@ -239,7 +250,7 @@ export class Editor {
             this.#drawLayer,
             this.#previewLayer,
             this.#self,
-            this.#appendToShapes,
+            this.#handleUpdateShapes,
             this.#currentParams,
             this.#offset
           );
@@ -250,7 +261,7 @@ export class Editor {
             this.#drawLayer,
             this.#previewLayer,
             this.#self,
-            this.#appendToShapes,
+            this.#handleUpdateShapes,
             this.#currentParams,
             this.#offset
           );
@@ -261,7 +272,7 @@ export class Editor {
             this.#drawLayer,
             this.#previewLayer,
             this.#self,
-            this.#appendToShapes,
+            this.#handleUpdateShapes,
             this.#currentParams,
             this.#offset
           );
@@ -283,7 +294,7 @@ export class Editor {
             this.#drawLayer,
             this.#previewLayer,
             this.#self,
-            this.#appendToShapes,
+            this.#handleUpdateShapes,
             this.#currentParams
           );
           break;
@@ -331,6 +342,25 @@ export class Editor {
     }
   };
 
+  applyStyles = () => {
+    if (this.#selectedShape && this.#drawLayer) {
+      if (isText(this.#selectedShape)) {
+      }
+      this.#selectedShape?.updateSVGParams(this.#currentParams);
+      const changedShapeIndex = this.#shapes.findIndex(
+        shape => shape.getId() === this.#selectedShape?.getId()
+      );
+      this.#shapes[changedShapeIndex] = this.#selectedShape;
+      Pen.clearCanvas(this.#drawLayer);
+      this.#shapes.forEach(shape => {
+        Pen.draw(shape, undefined, this.#drawContext);
+      });
+    }
+    if (isSelectTool(this.#selectedTool) || isMoveTool(this.#selectedTool)) {
+      this.#selectedTool.changeStyle(this.#currentParams);
+    }
+  };
+
   setShapeParams = (
     fieldsUpdated: boolean = false,
     strokeWidth?: string,
@@ -362,23 +392,8 @@ export class Editor {
     this.#selectedTool?.setSVGParams(this.#currentParams);
   };
 
-  applyStyles = () => {
-    if (this.#selectedShape && this.#drawLayer) {
-      if (isText(this.#selectedShape)) {
-      }
-      this.#selectedShape?.updateSVGParams(this.#currentParams);
-      const changedShapeIndex = this.#shapes.findIndex(
-        shape => shape.getId() === this.#selectedShape?.getId()
-      );
-      this.#shapes[changedShapeIndex] = this.#selectedShape;
-      Pen.clearCanvas(this.#drawLayer);
-      this.#shapes.forEach(shape => {
-        Pen.draw(shape, undefined, this.#drawContext);
-      });
-    }
-    if (isSelectTool(this.#selectedTool) || isMoveTool(this.#selectedTool)) {
-      this.#selectedTool.changeStyle(this.#currentParams);
-    }
+  setConnection = (newConnection: Connection) => {
+    this.#connection = newConnection;
   };
 
   onUnselectTool = () => {

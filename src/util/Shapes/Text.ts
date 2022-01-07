@@ -50,6 +50,15 @@ export class TextShape extends Shape {
 
   getCenter = (): Coordinates => this.#position;
 
+  getDeconstructedShapeData = () => ({
+    id: this.getId(),
+    type: 'TextShape',
+    width: this.#width,
+    height: this.#height,
+    position: this.#position,
+    svgParams: this.getSvgParams(),
+  });
+
   toSVGTextParams = (): TextSVGParams => {
     return {
       position: this.#position,

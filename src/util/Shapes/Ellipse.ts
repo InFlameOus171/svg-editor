@@ -53,9 +53,17 @@ export class Ellipse extends Shape {
     ...this.getSvgParams(),
   });
 
+  getDeconstructedShapeData = () => ({
+    type: 'Ellipse',
+    id: this.getId(),
+    center: this.#center,
+    radiusX: this.radiusX,
+    radiusY: this.radiusY,
+    svgParams: this.getSvgParams(),
+  });
+
   toString = () => {
     return JSON.stringify({
-      type: 'Ellipse',
       center: this.#center,
       radiusX: this.radiusX,
       radiusY: this.radiusY,

@@ -6,6 +6,7 @@ export const acceptedTags = [
   'rect',
   'polyline',
   'line',
+  'text',
   'path',
 ];
 

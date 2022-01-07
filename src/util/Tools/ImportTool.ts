@@ -27,6 +27,7 @@ export class ImportTool extends Tool<ShapeType> {
       const appendedSvg = document.body.appendChild(createdSVG);
       const shapes = convertSVGDocumentToShapes(elementId);
       document.body.removeChild(appendedSvg);
+      console.log(shapes);
       this.onUpdateEditor(shapes);
     }
   };

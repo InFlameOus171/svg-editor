@@ -1,6 +1,5 @@
 import { ShapeType } from '../../types/shapes';
 import {
-  BoundaryCoordinates,
   Coordinates,
   EllipseSVGParams,
   FreehandSVGParams,
@@ -8,7 +7,7 @@ import {
   PathSVGParams,
   RectSVGParams,
   SVGDrawPath,
-  TextSVGParams,
+  SVGParamsBase,
 } from '../../types/types';
 import { Ellipse } from '../Shapes/Ellipse';
 import { Freehand } from '../Shapes/Freehand';
@@ -16,7 +15,7 @@ import { Line } from '../Shapes/Line';
 import { Path } from '../Shapes/Path';
 import { Rectangle } from '../Shapes/Rectangle';
 import { TextShape } from '../Shapes/Text';
-import { acceptedTags, highlightStyle } from './constants';
+import { acceptedTags } from './constants';
 import { getMinMaxValuesOfCoordinates } from './coordinates';
 import { pathCommandsRegExp } from './regularExpressions';
 import { typeOfShape } from './typeguards';
@@ -166,7 +165,8 @@ export const setTextSVGParams = (svgShape: Element, textObject: TextShape) => {
     text,
   } = svgParams;
   if (text) {
-    transformMatrix.translateSelf(position[0], position[1]);
+    svgShape.setAttribute('x', position[0].toString());
+    svgShape.setAttribute('y', position[1].toString());
     svgShape.setAttribute(
       'style',
       'font-family:'.concat(
@@ -292,53 +292,80 @@ export const convertMatchesToSVGDrawPath = (
   return { command, points };
 };
 
-const getsvgParams = (element: SVGGraphicsElement) => {
+const getsvgParams = (element: SVGGraphicsElement): SVGParamsBase => {
   const fillValues = normalizeColorCode(element.getAttribute('fill'));
   const strokeValues = normalizeColorCode(element.getAttribute('stroke'));
   const fill = hexToRGBA(fillValues.colorCode, fillValues.opacity);
   const stroke = hexToRGBA(strokeValues.colorCode, strokeValues.opacity);
   const strokeWidth = element.getAttribute('stroke-width') ?? '';
   const transformMatrix = element.getCTM() ?? undefined;
+  const fontSize = element.style.fontSize;
+  const fontFamily = element.style.fontFamily;
+  const lineDash = element
+    .getAttribute('stroke-dasharray')
+    ?.split(' ')
+    .map(parseInt);
+  const lineCap = (element.getAttribute('line-cap') ?? 'butt') as CanvasLineCap;
+  const text = element.tagName === 'text' ? element.innerHTML : '';
   const bBox = element.getBBox();
   return {
     fill,
     stroke,
     strokeWidth,
+    text,
+    fontSize: fontSize ? parseInt(fontSize) : undefined,
+    fontFamily,
     transformMatrix,
+    lineDash,
+    lineCap,
     bBox,
+  };
+};
+const elementWrapper = (element: SVGGraphicsElement) => {
+  return {
+    getFloatAttribute: (value: string) => {
+      const attr = element.getAttribute(value);
+      if (attr) {
+        return parseFloat(attr);
+      } else return -1;
+    },
+    getAttribute: element.getAttribute,
   };
 };
 
 const convertToShapeType = (element: SVGGraphicsElement): ShapeType => {
+  console.log(element);
   const svgParams = getsvgParams(element);
+  console.log(svgParams);
+  const wrappedElement = elementWrapper(element);
   switch (element.tagName) {
     case acceptedTags[0]: {
-      const cx = element.getFloatAttribute('cx');
-      const cy = element.getFloatAttribute('cy');
-      const r = element.getFloatAttribute('r');
+      const cx = wrappedElement.getFloatAttribute('cx');
+      const cy = wrappedElement.getFloatAttribute('cy');
+      const r = wrappedElement.getFloatAttribute('r');
       return new Ellipse([cx, cy], r, r, svgParams);
     }
     case acceptedTags[1]: {
       {
-        const cx = element.getFloatAttribute('cx');
-        const cy = element.getFloatAttribute('cy');
-        const rx = element.getFloatAttribute('rx');
-        const ry = element.getFloatAttribute('ry');
+        const cx = wrappedElement.getFloatAttribute('cx');
+        const cy = wrappedElement.getFloatAttribute('cy');
+        const rx = wrappedElement.getFloatAttribute('rx');
+        const ry = wrappedElement.getFloatAttribute('ry');
         return new Ellipse([cx, cy], rx, ry, svgParams);
       }
     }
     case acceptedTags[2]: {
       {
-        const x = element.getFloatAttribute('x');
-        const y = element.getFloatAttribute('y');
-        const width = element.getFloatAttribute('width');
-        const height = element.getFloatAttribute('height');
+        const x = wrappedElement.getFloatAttribute('x');
+        const y = wrappedElement.getFloatAttribute('y');
+        const width = wrappedElement.getFloatAttribute('width');
+        const height = wrappedElement.getFloatAttribute('height');
         return new Rectangle([x, y], width, height, svgParams);
       }
     }
     case acceptedTags[3]: {
       {
-        const points = (element.getAttribute('points') ?? '')
+        const points = (wrappedElement.getAttribute('points') ?? '')
           .split(' ')
           .map((coordinate): [number, number] => {
             const [x, y] = coordinate.split(',');
@@ -349,23 +376,25 @@ const convertToShapeType = (element: SVGGraphicsElement): ShapeType => {
     }
     case acceptedTags[4]: {
       {
-        const x1 = element.getFloatAttribute('x1');
-        const x2 = element.getFloatAttribute('x2');
-        const y1 = element.getFloatAttribute('y1');
-        const y2 = element.getFloatAttribute('y2');
+        const x1 = wrappedElement.getFloatAttribute('x1');
+        const x2 = wrappedElement.getFloatAttribute('x2');
+        const y1 = wrappedElement.getFloatAttribute('y1');
+        const y2 = wrappedElement.getFloatAttribute('y2');
         return new Line([x1, y1], [x2, y2], svgParams);
       }
     }
+    case acceptedTags[5]: {
+      const x = wrappedElement.getFloatAttribute('x');
+      const y = wrappedElement.getFloatAttribute('y');
+      const { width, height } = element.getBBox();
+      return new TextShape(width, height, [x, y], svgParams);
+    }
     default: {
-      const pathDString = element.getAttribute('d') ?? '';
+      const pathDString = wrappedElement.getAttribute('d') ?? '';
       const pathCommands = getPathCommands(pathDString);
       return new Path(pathCommands, svgParams, true);
     }
   }
-};
-
-export const getAllSVGShapesFromElement = (element: Element) => {
-  element;
 };
 
 export const convertSVGDocumentToShapes = (id: string): ShapeType[] => {

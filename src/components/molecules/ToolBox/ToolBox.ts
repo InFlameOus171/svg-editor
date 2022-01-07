@@ -42,11 +42,13 @@ export class ToolBox extends LitElement {
     ];
 
     return html`
-      <div class="col-0">
-        ${getButtonColumn(leftColumnInterval, this.tools)}
-      </div>
-      <div class="col-1">
-        ${getButtonColumn(rightColumnInterval, this.tools)}
+      <div id="column-wrapper">
+        <div class="col-0">
+          ${getButtonColumn(leftColumnInterval, this.tools)}
+        </div>
+        <div class="col-1">
+          ${getButtonColumn(rightColumnInterval, this.tools)}
+        </div>
       </div>
     `;
   }

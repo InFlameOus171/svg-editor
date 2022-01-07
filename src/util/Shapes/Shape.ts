@@ -116,4 +116,8 @@ export abstract class Shape {
   toString = (): string => {
     throw new Error('not implemented');
   };
+
+  getDeconstructedShapeData = (): any => {
+    throw new Error('not implemented');
+  };
 }

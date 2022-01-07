@@ -8,6 +8,7 @@ import {
   updateNextSiblingValue,
   updatePreviousSiblingValue,
 } from '../../../util/helper/util';
+import { Connection } from '../../../util/network';
 import { IToolboxButtonProps } from '../../atoms/ToolboxButton/ToolboxButton.types';
 import {
   layoutContentStyle,
@@ -24,11 +25,19 @@ export class SVGEditor extends LitElement {
   height: number = 0;
   @state()
   editor: Editor | null = null;
+  @state()
+  connection?: Connection;
 
   static styles = [layoutStyle, layoutHeaderStyle, layoutContentStyle];
 
+  constructor() {
+    super();
+  }
+
   async firstUpdated() {
     this.updateResize();
+    this.hideRoomInformation();
+
     const canvas = this.shadowRoot?.getElementById(
       'drawzone'
     ) as HTMLCanvasElement;
@@ -67,6 +76,55 @@ export class SVGEditor extends LitElement {
     this.editor?.onSelectTool(tool);
   };
 
+  handleJoinRoom = () => {
+    const roomId = (this.shadowRoot?.getElementById('room') as HTMLInputElement)
+      .value;
+    const userName = (
+      this.shadowRoot?.getElementById('user') as HTMLInputElement
+    ).value;
+    this.connection = new Connection(roomId, userName);
+    this.connection.setChat(this.shadowRoot?.getElementById('chatbox'));
+    this.editor?.setConnection(this.connection);
+    this.hideConnectForm();
+  };
+
+  hideConnectForm = () => {
+    const connectForm = this.shadowRoot?.getElementById('connect-form');
+    if (connectForm) {
+      connectForm.style.display = 'none';
+    }
+    const connectionInfo = this.shadowRoot?.getElementById('room-information');
+    if (connectionInfo) {
+      connectionInfo.style.display = 'flex';
+    }
+  };
+
+  hideRoomInformation = () => {
+    const connectForm = this.shadowRoot?.getElementById('connect-form');
+    if (connectForm) {
+      connectForm.style.display = 'flex';
+    }
+    const connectionInfo = this.shadowRoot?.getElementById('room-information');
+    if (connectionInfo) {
+      connectionInfo.style.display = 'none';
+    }
+  };
+
+  handleLeaveRoom = () => {
+    this.connection?.disconnect();
+    this.shadowRoot?.getElementById('');
+    this.hideRoomInformation();
+  };
+
+  handleSendMessage = () => {
+    const chatValue = (
+      this.shadowRoot?.getElementById('message-field') as
+        | HTMLInputElement
+        | undefined
+    )?.value;
+    this.connection?.sendChatMessage(chatValue);
+  };
+
   updateResize = () => {
     this.width = window.innerWidth;
     this.height = window.innerHeight;
@@ -90,7 +148,49 @@ export class SVGEditor extends LitElement {
             width=${this.width}
           ></canvas>
         </div>
-        <tool-box id="tool-box" .tools=${tools}></tool-box>
+        <div id="right-main-section">
+          <tool-box .tools=${tools}></tool-box>
+          <div id="connection-info">
+            <h3>Connection</h3>
+            <div id="connect-form">
+              <div>
+                <label
+                  ><div id="username-form-label">Username:</div>
+                  <input
+                    id="user"
+                    type="text"
+                    placeholder=${Connection.userName ?? ''}
+                /></label>
+                <label
+                  ><div id="connect-form-label">Room ID:</div>
+                  <input id="room" type="text"
+                /></label>
+              </div>
+              <div id="connect-button-container">
+                <button @click=${this.handleJoinRoom}>Connect</button>
+              </div>
+            </div>
+            <div id="room-information">
+              <div>
+                Connected as ${Connection.userName} with room:
+                ${this.connection?.getRoom()}
+              </div>
+              <button @click=${this.handleLeaveRoom}>Disconnect</button>
+            </div>
+            <span id="chat">
+              <h3>Chat</h3>
+              <div id="chatbox"></div>
+              <div id="chat-form">
+                <input
+                  id="message-field"
+                  type="text"
+                  placeholder="Message..."
+                />
+                <button @click=${this.handleSendMessage}>Send</button>
+              </div>
+            </span>
+          </div>
+        </div>
       </div>
       <dialog-section
         .onSave=${this.editor?.onSave}

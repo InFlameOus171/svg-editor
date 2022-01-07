@@ -2,17 +2,19 @@ import { css } from 'lit';
 
 export const toolBoxStyles = css`
   :host {
-    min-width: 145px;
-    transition: width 1s, height 1s;
-    background-color: rgba(255, 255, 255, 0.8);
-    width: fit-content;
     display: flex;
-    gap: 5px;
-    padding: 5px;
+    justify-content: center;
   }
-  :host > .col-0,
-  :host > .col-1 {
-    flex: 0.5 1 15%;
+  :host > #column-wrapper {
+    padding: 30px;
+    background-color: rgba(255, 255, 255, 0.8);
+    transition: width 1s, height 1s;
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+  }
+  :host > #column-wrapper .col-0,
+  :host > #column-wrapper .col-1 {
     display: flex;
     flex-direction: column;
     gap: 5px;
