@@ -334,9 +334,7 @@ const elementWrapper = (element: SVGGraphicsElement) => {
 };
 
 const convertToShapeType = (element: SVGGraphicsElement): ShapeType => {
-  console.log(element);
   const svgParams = getsvgParams(element);
-  console.log(svgParams);
   const wrappedElement = elementWrapper(element);
   switch (element.tagName) {
     case acceptedTags[0]: {

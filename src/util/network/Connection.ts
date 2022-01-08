@@ -64,7 +64,6 @@ export class Connection {
 
     ws.addEventListener('message', event => {
       const data = JSON.parse(event.data);
-      console.log(data);
       if (data.event === 'message') {
         if (!data.value) {
           return;
@@ -122,7 +121,6 @@ export class Connection {
   };
 
   createShapes = (shapes: ShapeType[]) => {
-    console.log(shapes.map(shape => shape.getDeconstructedShapeData()));
     const payload = JSON.stringify({
       event: 'create-shapes',
       room: this.#room,

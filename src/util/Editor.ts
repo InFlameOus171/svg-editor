@@ -102,7 +102,6 @@ export class Editor {
       return;
     }
     const shapes = Array.isArray(toBeAppended) ? toBeAppended : [toBeAppended];
-    console.log(shapes);
     this.#appendToShapes(shapes);
     this.#connection?.createShapes(shapes);
   };

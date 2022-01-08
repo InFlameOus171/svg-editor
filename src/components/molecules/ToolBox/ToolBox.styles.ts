@@ -4,19 +4,27 @@ export const toolBoxStyles = css`
   :host {
     display: flex;
     justify-content: center;
+    padding-bottom: 20px;
+    flex: 2 1 30%;
   }
   :host > #column-wrapper {
-    padding: 30px;
     background-color: rgba(255, 255, 255, 0.8);
-    transition: width 1s, height 1s;
     display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
     justify-content: center;
-    gap: 5px;
+    padding: 10px;
+    transition: width 1s, height 1s;
+    width: 120px;
   }
-  :host > #column-wrapper .col-0,
-  :host > #column-wrapper .col-1 {
+  span[class^='row-'] {
+    width: 45%;
+  }
+  span[class^='row-'] > toolbox-button {
     display: flex;
-    flex-direction: column;
-    gap: 5px;
+    aspect-ratio: 1;
+    max-height: 50px;
+    justify-content: center;
+    align-items: center;
   }
 `;

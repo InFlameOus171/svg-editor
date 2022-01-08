@@ -30,26 +30,14 @@ export class ToolBox extends LitElement {
 
   static styles = toolBoxStyles;
 
-  render() {
-    const toolCount = this.tools?.length ?? 0;
-    const leftColumnInterval: [number, number] = [
-      0,
-      (toolCount + (toolCount % 2)) / 2,
-    ];
-    const rightColumnInterval: [number, number] = [
-      (toolCount + (toolCount % 2)) / 2,
-      toolCount,
-    ];
+  connectedCallback(): void {
+    super.connectedCallback();
+    this.requestUpdate();
+  }
 
+  render() {
     return html`
-      <div id="column-wrapper">
-        <div class="col-0">
-          ${getButtonColumn(leftColumnInterval, this.tools)}
-        </div>
-        <div class="col-1">
-          ${getButtonColumn(rightColumnInterval, this.tools)}
-        </div>
-      </div>
+      <div id="column-wrapper">${getButtonColumn(this.tools)}</div>
     `;
   }
 }

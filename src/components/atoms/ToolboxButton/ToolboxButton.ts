@@ -62,9 +62,7 @@ export class ToolboxButton extends LitElement {
           ? html`
           <img 
           alt=${this.toolName} 
-          class=${this.class ?? 'tool-icon'}
-          height="75px" 
-          width="75px" 
+          class=${(this.class ?? '') + 'tool-icon'}
           src=${this.icon}>
           </img>`
           : this.toolName}

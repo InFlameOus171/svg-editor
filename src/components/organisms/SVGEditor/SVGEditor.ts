@@ -82,9 +82,16 @@ export class SVGEditor extends LitElement {
     const userName = (
       this.shadowRoot?.getElementById('user') as HTMLInputElement
     ).value;
-    this.connection = new Connection(roomId, userName);
+    this.connection = new Connection(roomId, !!userName ? userName : undefined);
     this.connection.setChat(this.shadowRoot?.getElementById('chatbox'));
     this.editor?.setConnection(this.connection);
+    this.shadowRoot
+      ?.getElementById('message-field')
+      ?.removeAttribute('disabled');
+    this.shadowRoot
+      ?.getElementById('send-message-button')
+      ?.removeAttribute('disabled');
+    document.title = document.title + ' | Room:' + roomId;
     this.hideConnectForm();
   };
 
@@ -112,7 +119,13 @@ export class SVGEditor extends LitElement {
 
   handleLeaveRoom = () => {
     this.connection?.disconnect();
-    this.shadowRoot?.getElementById('');
+    this.shadowRoot
+      ?.getElementById('message-field')
+      ?.setAttribute('disabled', '');
+    this.shadowRoot
+      ?.getElementById('send-message-button')
+      ?.setAttribute('disabled', '');
+    document.title = 'SVG Editor';
     this.hideRoomInformation();
   };
 
@@ -159,6 +172,7 @@ export class SVGEditor extends LitElement {
                   <input
                     id="user"
                     type="text"
+                    maxlength="10"
                     placeholder=${Connection.userName ?? ''}
                 /></label>
                 <label
@@ -172,23 +186,32 @@ export class SVGEditor extends LitElement {
             </div>
             <div id="room-information">
               <div>
-                Connected as ${Connection.userName} with room:
-                ${this.connection?.getRoom()}
+                Connected as ${Connection.userName} <br />
+                Room ID: ${this.connection?.getRoom()}
               </div>
-              <button @click=${this.handleLeaveRoom}>Disconnect</button>
+              <div id="disconnect-button-container">
+                <button @click=${this.handleLeaveRoom}>Disconnect</button>
+              </div>
             </div>
-            <span id="chat">
-              <h3>Chat</h3>
-              <div id="chatbox"></div>
-              <div id="chat-form">
-                <input
-                  id="message-field"
-                  type="text"
-                  placeholder="Message..."
-                />
-                <button @click=${this.handleSendMessage}>Send</button>
-              </div>
-            </span>
+          </div>
+          <div id="chat">
+            <h3>Chat</h3>
+            <div id="chatbox"></div>
+            <div id="chat-form">
+              <input
+                disabled
+                id="message-field"
+                type="text"
+                placeholder="Message..."
+              />
+              <button
+                id="send-message-button"
+                disabled
+                @click=${this.handleSendMessage}
+              >
+                Send
+              </button>
+            </div>
           </div>
         </div>
       </div>

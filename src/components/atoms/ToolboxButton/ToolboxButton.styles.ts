@@ -17,8 +17,8 @@ export const toolBoxButtonStyles = css`
   }
 
   button > img {
-    max-height: 75px;
-    transform: scale(0.8);
+    aspect-ratio: 1;
+    max-height: 35px;
   }
 
   button[isActive='false'] {

@@ -3,6 +3,7 @@ import { css } from 'lit';
 export const layoutStyle = css`
   :host {
     height: 100%;
+    flex: 1 1 100%;
     transition: all 1s;
     display: flex;
     flex-direction: column;
@@ -10,6 +11,7 @@ export const layoutStyle = css`
   }
 
   #footer {
+    height: 100%;
     padding: 10px 0;
     border-top: 1px solid rgba(0, 0, 0, 0.3);
     border-bottom: 1px solid rgba(0, 0, 0, 0.3);
@@ -18,6 +20,7 @@ export const layoutStyle = css`
 
   #footer #footer-fields {
     border: none;
+    flex: 2 1 auto;
     display: flex;
     flex-direction: column;
   }
@@ -68,9 +71,8 @@ export const layoutHeaderStyle = css`
 
 export const layoutContentStyle = css`
   #content {
-    height: 90%;
+    flex: 2 0 80%;
     display: flex;
-    flex-wrap: nowrap;
   }
 
   #draw-container {
@@ -79,8 +81,9 @@ export const layoutContentStyle = css`
     top: 0;
     left: 0;
     background-color: rgba(255, 255, 255, 1);
-    height: 100%;
-    width: 100%;
+    flex: 1 1 auto;
+    /* max-height: 80vh; */
+    /* width: 100%; */
     overflow: auto;
     display: flex;
     position: relative;
@@ -94,9 +97,12 @@ export const layoutContentStyle = css`
 
   #right-main-section {
     display: flex;
+    flex: 1 2 220px;
+    max-width: 15%;
     flex-direction: column;
     padding: 30px 15px 0;
     background-color: rgba(255, 255, 255, 0.8);
+    overflow-y: auto;
   }
 
   #preview-layer {
@@ -108,17 +114,18 @@ export const layoutContentStyle = css`
   }
 
   #chat {
+    height: 30%;
+    display: flex;
+    flex-direction: column;
+    flex: 2 0 auto;
     border-top: 1px solid rgba(0, 0, 0, 0.4);
-    margin-top: 20px;
   }
 
   #connection-info {
     border-top: 1px solid rgba(0, 0, 0, 0.4);
-    margin-top: 20px;
     display: flex;
     flex-direction: column;
-    min-height: 600px;
-    max-height: 100%;
+    flex: 0 1 20%;
   }
 
   #connection-info #connect-form > label {
@@ -127,21 +134,37 @@ export const layoutContentStyle = css`
 
   #connection-info #connect-form > label > #connect-form-label {
     display: flex;
-    min-width: fit-content;
     flex-direction: column;
     justify-content: flex-end;
   }
 
   #connection-info #connect-form {
     display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-bottom: 20px;
   }
 
-  #connection-info #chatbox {
-    min-height: 20em;
+  #connection-info #connect-form > :first-child {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 10px;
+  }
+
+  #connection-info #connect-form > :first-child label {
+    flex: auto;
+    flex-direction: column;
+    display: flex;
+  }
+
+  #chat #chatbox {
+    flex: 1 0.5 auto;
+    overflow: auto;
     background-color: white;
   }
 
-  #connection-info #chatbox .chat-entry {
+  #chat #chatbox .chat-entry {
     display: flex;
     padding: 5px;
     flex-direction: column;
@@ -150,11 +173,19 @@ export const layoutContentStyle = css`
 
   #connect-button-container {
     display: flex;
-    align-items: flex-end;
+    padding-top: 20px;
+    justify-content: center;
   }
 
   #room-information {
+    display: flex;
     flex-direction: column;
+    padding-bottom: 20px;
+  }
+
+  #room-information > #disconnect-button-container {
+    padding-top: 10px;
+    align-self: flex-start;
   }
 
   #connection-info #chatbox .chat-entry:nth-child(2n + 1) {
@@ -165,16 +196,16 @@ export const layoutContentStyle = css`
     align-self: flex-start;
   }
 
-  #connection-info #chat-form {
+  #chat #chat-form {
     display: flex;
     padding-top: 10px;
   }
 
-  #connection-info #chat-form #message-field {
+  #chat #chat-form #message-field {
     width: 100%;
   }
 
-  #connection-info #chat #position-container {
+  #position-container {
     border-top: 1px solid rgba(0, 0, 0, 0.4);
     display: flex;
     justify-content: flex-end;
