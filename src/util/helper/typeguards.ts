@@ -32,6 +32,12 @@ export const isText = (shape: ShapeType): shape is TextShape => {
   return (shape as TextShape)['toSVGTextParams'] !== undefined;
 };
 
+export const isShapeType = (shape: unknown): shape is ShapeType => {
+  return (
+    !!shape && (shape as ShapeType)['getDeconstructedShapeData'] !== undefined
+  );
+};
+
 export const typeOfShape = (shape: ShapeType): Shapes => {
   if (isRectangle(shape)) {
     return 'Rectangle';

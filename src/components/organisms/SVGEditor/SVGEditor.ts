@@ -1,8 +1,9 @@
 import { html, LitElement } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { Editor } from '../../../util/Editor';
-import { fonts } from '../../../util/helper/availableFonts.js';
+import { getFonts } from '../../../util/helper/availableFonts.js';
 import { Tools_List } from '../../../util/helper/constants.js';
+import '../../atoms/MenuButton';
 import { handleUpdateSVGParameters } from '../../../util/helper/domUtil';
 import {
   updateNextSiblingValue,
@@ -27,11 +28,14 @@ export class SVGEditor extends LitElement {
   editor: Editor | null = null;
   @state()
   connection?: Connection;
+  @state()
+  availableFonts?: Set<string>;
 
   static styles = [layoutStyle, layoutHeaderStyle, layoutContentStyle];
 
   constructor() {
     super();
+    getFonts().then(fonts => (this.availableFonts = fonts));
   }
 
   async firstUpdated() {
@@ -77,22 +81,31 @@ export class SVGEditor extends LitElement {
   };
 
   handleJoinRoom = () => {
-    const roomId = (this.shadowRoot?.getElementById('room') as HTMLInputElement)
-      .value;
-    const userName = (
-      this.shadowRoot?.getElementById('user') as HTMLInputElement
-    ).value;
-    this.connection = new Connection(roomId, !!userName ? userName : undefined);
-    this.connection.setChat(this.shadowRoot?.getElementById('chatbox'));
-    this.editor?.setConnection(this.connection);
-    this.shadowRoot
-      ?.getElementById('message-field')
-      ?.removeAttribute('disabled');
-    this.shadowRoot
-      ?.getElementById('send-message-button')
-      ?.removeAttribute('disabled');
-    document.title = document.title + ' | Room:' + roomId;
-    this.hideConnectForm();
+    if (this.editor) {
+      const roomId = (
+        this.shadowRoot?.getElementById('room') as HTMLInputElement
+      ).value;
+      const userName = (
+        this.shadowRoot?.getElementById('user') as HTMLInputElement
+      ).value;
+      this.connection = new Connection(
+        roomId,
+        !!userName ? userName : undefined,
+        this.editor.deleteFromShapes,
+        this.editor.updateShapes,
+        this.editor.getAllShapes
+      );
+      this.connection.setChat(this.shadowRoot?.getElementById('chatbox'));
+      this.editor.setConnection(this.connection);
+      this.shadowRoot
+        ?.getElementById('message-field')
+        ?.removeAttribute('disabled');
+      this.shadowRoot
+        ?.getElementById('send-message-button')
+        ?.removeAttribute('disabled');
+      document.title = document.title + ' | Room:' + roomId;
+      this.hideConnectForm();
+    }
   };
 
   hideConnectForm = () => {
@@ -149,6 +162,8 @@ export class SVGEditor extends LitElement {
     );
     return html`
       <div id="content">
+        <!-- Mobile view to be implemented  -->
+        <!-- <menu-button></menu-button> -->
         <div id="draw-container">
           <canvas
             id="drawzone"
@@ -330,7 +345,8 @@ export class SVGEditor extends LitElement {
                   id="text-font-family-input"
                   @input=${() => handleUpdateSVGParameters(this)}
                 >
-                  ${Array.from(fonts).map(
+                  ${this.availableFonts &&
+                  Array.from(this.availableFonts).map(
                     font => html`<option value=${font}>${font}</option>`
                   )}
                 </select>

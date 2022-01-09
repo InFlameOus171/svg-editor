@@ -126,7 +126,7 @@ const fontCheck = new Set(
   ].sort()
 );
 
-export const fonts = await (async () => {
+export const getFonts = async () => {
   await document.fonts.ready;
   const fonts = new Set<string>();
   for (const font of fontCheck.values()) {
@@ -135,4 +135,4 @@ export const fonts = await (async () => {
     }
   }
   return fonts;
-})();
+};

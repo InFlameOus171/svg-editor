@@ -13,7 +13,7 @@ export abstract class Shape {
   static #counter: number = 0;
 
   #fill?: string;
-  #id?: string;
+  #id: string;
   #stroke?: string;
   #strokeWidth?: string;
   #lineCap?: CanvasLineCap;
@@ -32,15 +32,13 @@ export abstract class Shape {
       [-1, -1],
       [-1, -1],
     ],
-
     svgParams: Partial<SVGParamsBase> = {},
-
     countShapecountUp: boolean = true
   ) {
     if (countShapecountUp) {
       Shape.#counter++;
-      this.#id = nanoid();
     }
+    this.#id = nanoid();
     this.#fill = svgParams.fill;
     this.#stroke = svgParams.stroke;
     this.#strokeWidth = svgParams.strokeWidth;
@@ -77,6 +75,11 @@ export abstract class Shape {
         );
       }
     }
+  };
+
+  replaceID = (id: string) => {
+    this.#id = id;
+    return this;
   };
 
   moveBoundaries = (difference: Coordinates) => {

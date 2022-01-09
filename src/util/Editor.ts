@@ -1,5 +1,5 @@
 import { SVGEditor } from '../components/organisms/SVGEditor';
-import { ShapeType } from '../types/shapes';
+import { Shapes, ShapeType } from '../types/shapes';
 import { Coordinates, SVGParamsBase } from '../types/types';
 import {
   SVGParamFieldID,
@@ -12,10 +12,18 @@ import {
   updateStyleInputFields,
 } from './helper/domUtil';
 import { generateSVGURLFromShapes } from './helper/shapes';
-import { isMoveTool, isSelectTool, isText } from './helper/typeguards';
+import {
+  isMoveTool,
+  isSelectTool,
+  isShapeType,
+  isText,
+} from './helper/typeguards';
 import { hexToRGBA } from './helper/util';
 import { Connection } from './network';
 import { Pen } from './Pen';
+import { Ellipse } from './Shapes/Ellipse';
+import { Rectangle } from './Shapes/Rectangle';
+import { TextShape } from './Shapes/Text';
 import { DrawTool } from './Tools/DrawTool';
 import { EllipseTool } from './Tools/EllipseTool';
 import { ImportTool } from './Tools/ImportTool';
@@ -80,17 +88,55 @@ export class Editor {
     });
   }
 
-  #appendToShapes = (shapes: ShapeType[]) => {
-    shapes.forEach(shape => {
+  #createShape = (shapeRecord: Record<string, any>): ShapeType | undefined => {
+    switch (shapeRecord.type) {
+      case 'Ellipse': {
+        const { id, center, radiusX, radiusY, svgParams } = shapeRecord;
+        return new Ellipse(center, radiusX, radiusY, svgParams).replaceID(id);
+      }
+      case 'Rectangle':
+        const { width, height, id, startingCorner, svgParams } = shapeRecord;
+        return new Rectangle(
+          startingCorner,
+          width,
+          height,
+          svgParams
+        ).replaceID(id);
+      case 'TextShape': {
+        const { id, width, height, position, svgParams } = shapeRecord;
+        return new TextShape(width, height, position, svgParams).replaceID(id);
+      }
+      case 'Freehand':
+        break;
+      case 'Line':
+        break;
+      case 'Path':
+        break;
+    }
+  };
+
+  updateShapes = (shapes: Array<Record<string, any> | ShapeType>) => {
+    if (isShapeType(shapes[0])) {
+    }
+    console.log('shapes in update', shapes);
+    shapes.forEach((shape: Record<string, any>) => {
+      let shapeAsShapeType: ShapeType | undefined;
+      if (isShapeType(shape)) {
+        shapeAsShapeType = shape;
+      } else {
+        shapeAsShapeType = this.#createShape(shape);
+      }
+      if (!shapeAsShapeType) return;
+
       const index = this.#shapes.findIndex(
         innerShape => innerShape.getId() === shape.getId()
       );
       if (index >= 0) {
-        this.#shapes[index] = shape;
+        this.#shapes[index] = shapeAsShapeType;
       } else {
-        this.#shapes.push(shape);
+        this.#shapes.push(shapeAsShapeType);
       }
-      this.#currentParams = shape.getSvgParams();
+      this.#currentParams = shapeAsShapeType.getSvgParams();
     });
     this.onUpdateStyleInputFields();
     this.redrawShapes();
@@ -102,8 +148,8 @@ export class Editor {
       return;
     }
     const shapes = Array.isArray(toBeAppended) ? toBeAppended : [toBeAppended];
-    this.#appendToShapes(shapes);
-    this.#connection?.createShapes(shapes);
+    this.updateShapes(shapes);
+    this.#connection?.createShapes(this.#shapes);
   };
 
   #onHandleSelectShape = (selectedShape: ShapeType | ShapeType[] | null) => {
@@ -194,12 +240,24 @@ export class Editor {
     }
   };
 
+  getAllShapes = () => this.#shapes;
+
+  #deleteShapeById = (shapeId: string) => {
+    const index = this.#shapes.findIndex(shape => shape.getId() === shapeId);
+    this.#shapes.splice(index, 1);
+  };
+
+  deleteFromShapes = (shapeIdData: string | string[]) => {
+    if (Array.isArray(shapeIdData)) {
+      shapeIdData.forEach(this.#deleteShapeById);
+    } else {
+      this.#deleteShapeById(shapeIdData);
+    }
+  };
+
   onDeleteSelectedShape = () => {
     if (this.#selectedShape) {
-      const index = this.#shapes.findIndex(
-        shape => shape.getId() === this.#selectedShape?.getId()
-      );
-      this.#shapes.splice(index, 1);
+      this.deleteFromShapes(this.#selectedShape.getId());
       this.#selectedShape = null;
     }
   };

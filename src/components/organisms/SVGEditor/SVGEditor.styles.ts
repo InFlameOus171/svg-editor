@@ -3,7 +3,6 @@ import { css } from 'lit';
 export const layoutStyle = css`
   :host {
     height: 100%;
-    flex: 1 1 100%;
     transition: all 1s;
     display: flex;
     flex-direction: column;
@@ -11,7 +10,8 @@ export const layoutStyle = css`
   }
 
   #footer {
-    height: 100%;
+    display: flex;
+    flex-direction: column;
     padding: 10px 0;
     border-top: 1px solid rgba(0, 0, 0, 0.3);
     border-bottom: 1px solid rgba(0, 0, 0, 0.3);
@@ -71,7 +71,7 @@ export const layoutHeaderStyle = css`
 
 export const layoutContentStyle = css`
   #content {
-    flex: 2 0 80%;
+    flex: 1 1 auto;
     display: flex;
   }
 
@@ -211,4 +211,28 @@ export const layoutContentStyle = css`
     justify-content: flex-end;
     padding: 10px 10px 0 0;
   }
+
+  /* @media only screen and (max-width: 960px) {
+    #content {
+      flex-direction: column;
+    }
+    #draw-container {
+      height: 100vh;
+      width: 100vw;
+    }
+    #show-tools-button {
+      display: flex;
+      position: fixed;
+      z-index: 10;
+    }
+
+    #right-main-section {
+      display: flex;
+      width: 100%;
+      max-width: 100%;
+      padding: 30px 15px 0;
+      background-color: rgba(255, 255, 255, 0.8);
+      overflow-y: auto;
+    }
+  } */
 `;
