@@ -16,9 +16,10 @@ export class Path extends Shape {
   constructor(
     drawPath: SVGDrawPath[],
     svgParams?: Partial<SVGParamsBase>,
-    dontCountUp?: boolean
+    dontCountUp?: boolean,
+    isLocked: boolean = false
   ) {
-    super(undefined, svgParams, dontCountUp);
+    super(undefined, svgParams, dontCountUp, isLocked);
     this.#rawDrawPath = drawPath;
     this.drawPath = drawPath.map(path => {
       if (singleDirectionCommands.includes(path.command)) {
@@ -65,6 +66,7 @@ export class Path extends Shape {
     id: this.getId(),
     type: 'Path',
     drawPath: this.#rawDrawPath,
+    isLocked: this.isLocked,
     svgParams: this.getSvgParams(),
   });
 

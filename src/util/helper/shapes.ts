@@ -305,7 +305,7 @@ const getsvgParams = (element: SVGGraphicsElement): SVGParamsBase => {
     .getAttribute('stroke-dasharray')
     ?.split(' ')
     .map(parseInt);
-  const lineCap = (element.getAttribute('line-cap') ?? 'butt') as CanvasLineCap;
+  const lineCap = element.getAttribute('line-cap') as CanvasLineCap | undefined;
   const text = element.tagName === 'text' ? element.innerHTML : '';
   const bBox = element.getBBox();
   return {

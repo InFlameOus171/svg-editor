@@ -50,7 +50,6 @@ export class Editor {
     strokeWidth: '1',
     stroke: 'rgba(0,0,0,1)',
     fill: 'rgba(0,0,0,0)',
-    lineCap: 'butt',
     lineDash: [0],
     text: textPlaceHolder,
   };
@@ -88,23 +87,46 @@ export class Editor {
     });
   }
 
+  getSVGParams = () => ({
+    ...this.#currentParams,
+  });
+
   #createShape = (shapeRecord: Record<string, any>): ShapeType | undefined => {
     switch (shapeRecord.type) {
       case 'Ellipse': {
-        const { id, center, radiusX, radiusY, svgParams } = shapeRecord;
-        return new Ellipse(center, radiusX, radiusY, svgParams).replaceID(id);
+        const { id, center, radiusX, radiusY, isLocked, svgParams } =
+          shapeRecord;
+        return new Ellipse(
+          center,
+          radiusX,
+          radiusY,
+          svgParams,
+          true,
+          isLocked
+        ).replaceID(id);
       }
       case 'Rectangle':
-        const { width, height, id, startingCorner, svgParams } = shapeRecord;
+        const { width, height, id, startingCorner, isLocked, svgParams } =
+          shapeRecord;
         return new Rectangle(
           startingCorner,
           width,
           height,
-          svgParams
+          svgParams,
+          true,
+          isLocked
         ).replaceID(id);
       case 'TextShape': {
-        const { id, width, height, position, svgParams } = shapeRecord;
-        return new TextShape(width, height, position, svgParams).replaceID(id);
+        const { id, width, height, position, svgParams, isLocked } =
+          shapeRecord;
+        return new TextShape(
+          width,
+          height,
+          position,
+          svgParams,
+          true,
+          isLocked
+        ).replaceID(id);
       }
       case 'Freehand':
         break;
@@ -115,65 +137,86 @@ export class Editor {
     }
   };
 
-  updateShapes = (shapes: Array<Record<string, any> | ShapeType>) => {
-    if (isShapeType(shapes[0])) {
+  updateShapes = (shapes: Array<Record<string, any>>) => {
+    if (!shapes.length) {
+      this.#shapes = [];
+      this.#selectedShape = null;
+    } else {
+      shapes.forEach((shape: Record<string, any>) => {
+        let shapeAsShapeType: ShapeType | undefined;
+        if (isShapeType(shape)) {
+          shapeAsShapeType = shape;
+        } else {
+          shapeAsShapeType = this.#createShape(shape);
+        }
+        if (!shapeAsShapeType) return;
+        console.log('sjhaü', shapeAsShapeType);
+        const index = this.#shapes.findIndex(
+          innerShape => innerShape.getId() === shapeAsShapeType?.getId()
+        );
+        if (index >= 0) {
+          this.#shapes[index] = shapeAsShapeType;
+        } else {
+          this.#shapes.push(shapeAsShapeType);
+        }
+        this.#currentParams = shapeAsShapeType.getSvgParams();
+      });
+      if (this.#selectedTool?.toolName === Tools_List.SELECT) {
+        (this.#selectedTool as SelectTool).updateAllShapes(this.#shapes);
+      }
     }
-    console.log('shapes in update', shapes);
-    shapes.forEach((shape: Record<string, any>) => {
-      let shapeAsShapeType: ShapeType | undefined;
-      if (isShapeType(shape)) {
-        shapeAsShapeType = shape;
-      } else {
-        shapeAsShapeType = this.#createShape(shape);
-      }
-      if (!shapeAsShapeType) return;
-
-      const index = this.#shapes.findIndex(
-        innerShape => innerShape.getId() === shape.getId()
-      );
-      if (index >= 0) {
-        this.#shapes[index] = shapeAsShapeType;
-      } else {
-        this.#shapes.push(shapeAsShapeType);
-      }
-      this.#currentParams = shapeAsShapeType.getSvgParams();
-    });
-    this.onUpdateStyleInputFields();
     this.redrawShapes();
   };
 
-  #handleUpdateShapes = (toBeAppended: ShapeType | ShapeType[] | null) => {
+  resetEditor = () => {
+    if (this.#drawLayer) {
+      Pen.clearCanvas(this.#drawLayer);
+    }
+    if (this.#previewLayer) {
+      Pen.clearCanvas(this.#previewLayer);
+    }
+  };
+
+  #handleUpdateShapes = (toBeAppended?: ShapeType | ShapeType[] | null) => {
+    if (toBeAppended === undefined) {
+      return;
+    }
     if (toBeAppended === null) {
       this.onUnselectTool();
       return;
     }
     const shapes = Array.isArray(toBeAppended) ? toBeAppended : [toBeAppended];
     this.updateShapes(shapes);
-    this.#connection?.createShapes(this.#shapes);
+    this.#connection?.updateShapes(toBeAppended);
   };
 
   #onHandleSelectShape = (selectedShape: ShapeType | ShapeType[] | null) => {
     setIsButtonDisabled(this.#self, Tools_List.MOVE, !selectedShape);
     this.#isShapeOnlyBeingSelected = true;
-    if (!selectedShape) {
-      this.#connection?.unlockShapes();
-      this.#selectedShape = null;
-      return;
-    }
-    const shape = Array.isArray(selectedShape)
-      ? selectedShape[0]
-      : selectedShape;
-
-    this.#connection?.lockShape(shape);
-    this.#selectedShape = shape;
-    if (this.#selectedShape) {
-      this.#currentParams = this.#selectedShape.getSvgParams();
-      this.onUpdateStyleInputFields();
-      if (isText(this.#selectedShape)) {
-        setTextParamsSourceVisibility(this.#self, true);
+    if (!selectedShape && this.#selectedShape) {
+      this.#connection?.unlockShapes(this.#selectedShape);
+      const currentlyLockedShape = this.#selectedShape;
+      if (this.#connection) {
+        this.#connection.ws.onclose = () =>
+          this.#connection?.unlockShapes(currentlyLockedShape);
       }
+      this.#selectedShape = null;
+    } else {
+      const shape = Array.isArray(selectedShape)
+        ? selectedShape[0]
+        : selectedShape;
+
+      shape && this.#connection?.lockShapes(shape);
+      this.#selectedShape = shape;
+      if (this.#selectedShape) {
+        this.#currentParams = this.#selectedShape.getSvgParams();
+        this.onUpdateStyleInputFields();
+        if (isText(this.#selectedShape)) {
+          setTextParamsSourceVisibility(this.#self, true);
+        }
+      }
+      this.#isShapeOnlyBeingSelected = false;
     }
-    this.#isShapeOnlyBeingSelected = false;
   };
 
   #onMoveShape = (movedShape: ShapeType | ShapeType[] | null) => {
@@ -191,6 +234,7 @@ export class Editor {
       this.#shapes.push(shape);
     }
     this.redrawShapes();
+    this.#connection?.updateShapes(movedShape);
   };
 
   #openDownloadDialog = (url: string) => {
@@ -208,7 +252,6 @@ export class Editor {
       Pen.clearCanvas(this.#previewLayer, renderingContext);
     }
   };
-
   redrawShapes = () => {
     if (this.#drawContext && this.#drawLayer) {
       Pen.clearCanvas(this.#drawLayer, this.#drawContext);
@@ -245,6 +288,7 @@ export class Editor {
   #deleteShapeById = (shapeId: string) => {
     const index = this.#shapes.findIndex(shape => shape.getId() === shapeId);
     this.#shapes.splice(index, 1);
+    this.#connection?.deleteShapes([shapeId]);
   };
 
   deleteFromShapes = (shapeIdData: string | string[]) => {
@@ -401,8 +445,6 @@ export class Editor {
 
   applyStyles = () => {
     if (this.#selectedShape && this.#drawLayer) {
-      if (isText(this.#selectedShape)) {
-      }
       this.#selectedShape?.updateSVGParams(this.#currentParams);
       const changedShapeIndex = this.#shapes.findIndex(
         shape => shape.getId() === this.#selectedShape?.getId()
@@ -412,19 +454,23 @@ export class Editor {
       this.#shapes.forEach(shape => {
         Pen.draw(shape, undefined, this.#drawContext);
       });
+      this.#connection?.updateShapes(this.#shapes);
     }
     if (isSelectTool(this.#selectedTool) || isMoveTool(this.#selectedTool)) {
       this.#selectedTool.changeStyle(this.#currentParams);
     }
   };
 
+  setShapeParam = (field: keyof SVGParamsBase, value: any) => {
+    this.#currentParams[field] = value;
+    this.#selectedTool?.setSVGParam(field, value);
+  };
+
   setShapeParams = (
     fieldsUpdated: boolean = false,
     strokeWidth?: string,
-    stroke: string = '#000000',
-    fill: string = '#000000',
-    fillOpacity?: string,
-    strokeOpacity?: string,
+    stroke: string = 'rgba(0,0,0,1)',
+    fill: string = 'rgba(0,0,0,0)',
     lineCap: CanvasLineCap = 'butt',
     lineDash: number[] = [],
     fontFamily: string = 'Arial',
@@ -434,11 +480,9 @@ export class Editor {
     if (fieldsUpdated && this.#isShapeOnlyBeingSelected) {
       return;
     }
-    const normalizedFill = hexToRGBA(fill, fillOpacity);
-    const normalizedStroke = hexToRGBA(stroke, strokeOpacity);
     this.#currentParams = {
-      fill: normalizedFill,
-      stroke: normalizedStroke,
+      fill,
+      stroke,
       strokeWidth,
       lineCap,
       lineDash,

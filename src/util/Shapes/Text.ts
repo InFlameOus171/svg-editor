@@ -11,12 +11,14 @@ export class TextShape extends Shape {
     height: number,
     position: Coordinates,
     svgParams: SVGParamsBase,
-    countShapecountUp?: boolean
+    countShapecountUp?: boolean,
+    isLocked: boolean = false
   ) {
     super(
       getTextBoundaries(position, width, height),
       svgParams,
-      countShapecountUp
+      countShapecountUp,
+      isLocked
     );
     this.#width = width;
     this.#height = height;
@@ -56,6 +58,7 @@ export class TextShape extends Shape {
     width: this.#width,
     height: this.#height,
     position: this.#position,
+    isLocked: this.isLocked,
     svgParams: this.getSvgParams(),
   });
 

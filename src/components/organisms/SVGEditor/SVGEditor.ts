@@ -2,10 +2,11 @@ import { html, LitElement } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { Editor } from '../../../util/Editor';
 import { getFonts } from '../../../util/helper/availableFonts.js';
-import { Tools_List } from '../../../util/helper/constants.js';
+import { SVGParamFieldID, Tools_List } from '../../../util/helper/constants.js';
 import '../../atoms/MenuButton';
 import { handleUpdateSVGParameters } from '../../../util/helper/domUtil';
 import {
+  hexToRGBA,
   updateNextSiblingValue,
   updatePreviousSiblingValue,
 } from '../../../util/helper/util';
@@ -17,6 +18,7 @@ import {
   layoutStyle,
 } from './SVGEditor.styles';
 import { getToolboxButtonsProps } from './SVGEditor.util';
+import { SVGParamsBase } from '../../../types/types';
 
 @customElement('svg-editor')
 export class SVGEditor extends LitElement {
@@ -93,7 +95,8 @@ export class SVGEditor extends LitElement {
         !!userName ? userName : undefined,
         this.editor.deleteFromShapes,
         this.editor.updateShapes,
-        this.editor.getAllShapes
+        this.editor.getAllShapes,
+        this.editor.resetEditor
       );
       this.connection.setChat(this.shadowRoot?.getElementById('chatbox'));
       this.editor.setConnection(this.connection);
@@ -106,6 +109,56 @@ export class SVGEditor extends LitElement {
       document.title = document.title + ' | Room:' + roomId;
       this.hideConnectForm();
     }
+  };
+
+  handleSVGParamChange = (
+    field: keyof SVGParamsBase,
+    targetId: SVGParamFieldID
+  ) => {
+    let value;
+    const fillFields = [
+      SVGParamFieldID.FILL_COLOR,
+      SVGParamFieldID.FILL_OPACITY,
+    ];
+    const strokeFields = [
+      SVGParamFieldID.STROKE_COLOR,
+      SVGParamFieldID.STROKE_OPACITY,
+    ];
+    const dualFields = [...fillFields, ...strokeFields];
+
+    if (dualFields.includes(targetId)) {
+      let opacity, color;
+      if (strokeFields.includes(targetId)) {
+        opacity = (
+          this.shadowRoot?.getElementById(
+            SVGParamFieldID.STROKE_OPACITY
+          ) as HTMLInputElement
+        )?.value;
+        color = (
+          this.shadowRoot?.getElementById(
+            SVGParamFieldID.STROKE_COLOR
+          ) as HTMLInputElement
+        )?.value;
+        value = hexToRGBA(color ?? '#000000', opacity);
+      } else {
+        opacity = (
+          this.shadowRoot?.getElementById(
+            SVGParamFieldID.FILL_OPACITY
+          ) as HTMLInputElement
+        )?.value;
+        color = (
+          this.shadowRoot?.getElementById(
+            SVGParamFieldID.FILL_COLOR
+          ) as HTMLInputElement
+        )?.value;
+        value = hexToRGBA(color ?? '#000000', opacity);
+      }
+    } else {
+      value = (this.shadowRoot?.getElementById(targetId) as HTMLInputElement)
+        ?.value;
+    }
+    this.editor?.setShapeParam(field, value);
+    this.editor?.applyStyles();
   };
 
   hideConnectForm = () => {
@@ -177,7 +230,7 @@ export class SVGEditor extends LitElement {
           ></canvas>
         </div>
         <div id="right-main-section">
-          <tool-box .tools=${tools}></tool-box>
+          <tool-box id="tool-box" .tools=${tools}></tool-box>
           <div id="connection-info">
             <h3>Connection</h3>
             <div id="connect-form">
@@ -244,7 +297,11 @@ export class SVGEditor extends LitElement {
                   <input
                     type="number"
                     id="stroke-width-input"
-                    @input="${() => handleUpdateSVGParameters(this)}"
+                    @input="${() =>
+                      this.handleSVGParamChange(
+                        'strokeWidth',
+                        SVGParamFieldID.STROKE_WIDTH
+                      )}"
                   />
                 </label>
                 <label>
@@ -253,13 +310,21 @@ export class SVGEditor extends LitElement {
                     type="text"
                     id="line-dash-input"
                     placeholder="3,3,3,12..."
-                    @input=${() => handleUpdateSVGParameters(this)}
+                    @input="${() =>
+                      this.handleSVGParamChange(
+                        'lineDash',
+                        SVGParamFieldID.LINE_DASH
+                      )}"
                   />
                 </label>
                 <label>
                   Linecap:
                   <select
-                    @input="${() => handleUpdateSVGParameters(this)}"
+                    @input="${() =>
+                      this.handleSVGParamChange(
+                        'lineCap',
+                        SVGParamFieldID.LINE_CAP
+                      )}"
                     id="line-cap-input"
                   >
                     <option value="round">Round edge</option>
@@ -274,7 +339,11 @@ export class SVGEditor extends LitElement {
                     <input
                       type="color"
                       id="stroke-color-input"
-                      @change="${() => handleUpdateSVGParameters(this)}"
+                      @change=${() =>
+                        this.handleSVGParamChange(
+                          'stroke',
+                          SVGParamFieldID.STROKE_COLOR
+                        )}
                     />
                   </label>
                   <label>
@@ -286,7 +355,10 @@ export class SVGEditor extends LitElement {
                       max="1"
                       @input=${(event: InputEvent) => {
                         updateNextSiblingValue(event);
-                        handleUpdateSVGParameters(this);
+                        this.handleSVGParamChange(
+                          'stroke',
+                          SVGParamFieldID.STROKE_OPACITY
+                        );
                       }}
                     />
                     <input
@@ -294,7 +366,10 @@ export class SVGEditor extends LitElement {
                       type="number"
                       @change=${(event: InputEvent) => {
                         updatePreviousSiblingValue(event);
-                        handleUpdateSVGParameters(this);
+                        this.handleSVGParamChange(
+                          'stroke',
+                          SVGParamFieldID.STROKE_OPACITY
+                        );
                       }}
                     />
                   </label>
@@ -305,7 +380,11 @@ export class SVGEditor extends LitElement {
                     <input
                       type="color"
                       id="fill-color-input"
-                      @input="${() => handleUpdateSVGParameters(this)}"
+                      @input=${() =>
+                        this.handleSVGParamChange(
+                          'fill',
+                          SVGParamFieldID.FILL_COLOR
+                        )}
                     />
                   </label>
                   <label>
@@ -317,7 +396,10 @@ export class SVGEditor extends LitElement {
                       step="0.01"
                       @input=${(event: InputEvent) => {
                         updateNextSiblingValue(event);
-                        handleUpdateSVGParameters(this);
+                        this.handleSVGParamChange(
+                          'fill',
+                          SVGParamFieldID.FILL_OPACITY
+                        );
                       }}
                     />
                     <input
@@ -325,7 +407,10 @@ export class SVGEditor extends LitElement {
                       type="number"
                       @change=${(event: InputEvent) => {
                         updatePreviousSiblingValue(event);
-                        handleUpdateSVGParameters(this);
+                        this.handleSVGParamChange(
+                          'fill',
+                          SVGParamFieldID.FILL_OPACITY
+                        );
                       }}
                     />
                   </label>
@@ -337,13 +422,21 @@ export class SVGEditor extends LitElement {
                 >Font size:<input
                   type="number"
                   id="text-font-size-input"
-                  @input=${() => handleUpdateSVGParameters(this)}
+                  @input=${() =>
+                    this.handleSVGParamChange(
+                      'fontSize',
+                      SVGParamFieldID.TEXT_FONT_SIZE
+                    )}
               /></label>
               <label>
                 Font family:
                 <select
                   id="text-font-family-input"
-                  @input=${() => handleUpdateSVGParameters(this)}
+                  @input=${() =>
+                    this.handleSVGParamChange(
+                      'fontFamily',
+                      SVGParamFieldID.TEXT_FONT_FAMILY
+                    )}
                 >
                   ${this.availableFonts &&
                   Array.from(this.availableFonts).map(
@@ -356,7 +449,8 @@ export class SVGEditor extends LitElement {
                 <input
                   type="text"
                   id="text-input"
-                  @input=${() => handleUpdateSVGParameters(this)}
+                  @input=${() =>
+                    this.handleSVGParamChange('text', SVGParamFieldID.TEXT)}
                 />
               </label>
             </fieldset>

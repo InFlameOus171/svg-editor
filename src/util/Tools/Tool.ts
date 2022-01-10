@@ -45,6 +45,10 @@ export abstract class Tool<T extends ShapeType, V extends ShapeType = T> {
     this.drawContext = this.drawLayer.getContext('2d');
   }
 
+  setSVGParam = (field: keyof SVGParamsBase, value: any) => {
+    this.drawPenConfig[field] = value;
+  };
+
   setSVGParams = (drawPenConfig: SVGParamsBase) => {
     this.drawPenConfig = drawPenConfig;
   };

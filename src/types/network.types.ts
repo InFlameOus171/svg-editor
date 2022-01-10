@@ -39,6 +39,6 @@ export type ParsedData = {
   event?: WS_EVENTS;
   user?: string;
   userId?: string;
-  value?: string;
+  value?: Record<string, any>[] | string;
   [key: string]: any;
 };

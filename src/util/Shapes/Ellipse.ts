@@ -15,12 +15,14 @@ export class Ellipse extends Shape {
     radiusX: number,
     radiusY: number,
     svgParams?: Partial<SVGParamsBase>,
-    dontCountUp?: boolean
+    countShapeCountUp?: boolean,
+    isLocked: boolean = false
   ) {
     super(
       getCircleBoundaries(center, radiusX, radiusY),
       svgParams,
-      dontCountUp
+      countShapeCountUp,
+      isLocked
     );
     this.#center = center;
     this.radiusX = radiusX;
@@ -59,6 +61,7 @@ export class Ellipse extends Shape {
     center: this.#center,
     radiusX: this.radiusX,
     radiusY: this.radiusY,
+    isLocked: this.isLocked,
     svgParams: this.getSvgParams(),
   });
 

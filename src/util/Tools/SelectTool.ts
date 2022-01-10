@@ -31,15 +31,18 @@ export class SelectTool extends Tool<ShapeType> {
   }
   #drawOnPreview: (shape: ShapeType, svgParams?: SVGParamsBase) => void;
 
+  updateAllShapes = (shapes: ShapeType[] = []) => {
+    this.allShapes = shapes;
+  };
+
   #onClick = (event: MouseEvent) => {
     this.currentCoordinates = this.getCoords(event);
     const pointPositionCompareFunction = isPointInsideAnotherShape(
       this.currentCoordinates
     );
-    const selectableShapes: ShapeType[] = this.allShapes.filter(
-      pointPositionCompareFunction
-    );
-
+    const selectableShapes: ShapeType[] = this.allShapes.filter(shape => {
+      return pointPositionCompareFunction(shape) && !shape.isLocked;
+    });
     if (!selectableShapes.length) {
       this.currentShape = undefined;
       this.updatePreview();
@@ -88,7 +91,10 @@ export class SelectTool extends Tool<ShapeType> {
   };
   #onZoneSelection = (selectedZone?: Rectangle) => {
     const compareFunction = isShapeInsideAnotherShape(selectedZone);
-    const shapesInsideSelectedZone = this.allShapes.filter(compareFunction);
+    const selectableShapes: ShapeType[] = this.allShapes.filter(shape => {
+      return !shape.isLocked;
+    });
+    const shapesInsideSelectedZone = selectableShapes.filter(compareFunction);
     const highestIndex = Math.max(
       ...shapesInsideSelectedZone.map(shape => shape.index)
     );

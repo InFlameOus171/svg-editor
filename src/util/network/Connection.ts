@@ -13,14 +13,16 @@ export class Connection {
   #keeper: Keeper;
   #chat?: HTMLElement | null;
   onDeleteShapes: (ids: string[]) => void;
-  onUpdateShapes: (shapes: ShapeType[]) => void;
+  onUpdateShapes: (shapes: Record<string, any>[]) => void;
   onGetAllShapes: () => ShapeType[];
+  onResetEditor: () => void;
   constructor(
     roomId: string = '',
     user: string = 'user_' + nanoid(5),
     onDeleteShapes: (ids: string[]) => void,
-    onUpdateShapes: (shape: ShapeType[]) => void,
+    onUpdateShapes: (shape: Record<string, any>[]) => void,
     onGetAllShapes: () => ShapeType[],
+    onResetEditor: () => void,
     url: string = 'localhost',
     port: string = '8080'
   ) {
@@ -34,10 +36,12 @@ export class Connection {
     this.onDeleteShapes = onDeleteShapes;
     this.onUpdateShapes = onUpdateShapes;
     this.onGetAllShapes = onGetAllShapes;
+    this.onResetEditor = onResetEditor;
   }
 
   disconnect = () => {
     this.ws.close();
+    this.onResetEditor();
   };
 
   joinRoom = (roomId: string) => {
@@ -46,6 +50,20 @@ export class Connection {
 
   getRoom = () => {
     return this.#roomId;
+  };
+
+  #parseResponse = (response: any): ParsedData => {
+    const allParsedData = JSON.parse(response.data);
+    if (allParsedData.event === 'ping' || allParsedData.event === 'pong')
+      return allParsedData;
+    const { value, ...parsedData } = allParsedData;
+    const parsedValue =
+      typeof value === 'string'
+        ? value
+        : (JSON.parse(value) as string[] | undefined)?.map(
+            (innerValue): Record<string, any> => JSON.parse(innerValue)
+          );
+    return { ...parsedData, value: parsedValue };
   };
 
   #startKeepingConnectionAlive = (ws: WebSocket) => {
@@ -76,8 +94,8 @@ export class Connection {
     };
 
     ws.addEventListener('message', msg => {
-      const data: ParsedData = JSON.parse(msg.data);
-      const { value = '', event, user, userId } = data;
+      const data: ParsedData = this.#parseResponse(msg);
+      const { value, event, user, userId } = data;
       switch (event) {
         case 'message':
           {
@@ -86,21 +104,19 @@ export class Connection {
             const userName = document.createElement('div');
             const message = document.createElement('div');
             userName.innerHTML = user ? user + ':' : '';
-            message.innerHTML = value;
+            message.innerHTML = value as string;
             newEntry.appendChild(userName);
             newEntry.appendChild(message);
             this.#chat?.appendChild(newEntry);
           }
           break;
-        case 'update-shapes': {
-          this.onUpdateShapes((JSON.parse(value) ?? []) as ShapeType[]);
+        case 'get-shapes': {
+          const k = JSON.parse(value as string) ?? [];
+          console.log(k);
+          this.onUpdateShapes(JSON.parse(value as string) ?? []);
           break;
         }
-        case 'get-shapes': {
-          const updatedShapes = JSON.parse(value);
-          console.log('received shapes:', updatedShapes);
-          this.onUpdateShapes(updatedShapes);
-          break;
+        case 'ping': {
         }
       }
     });
@@ -127,39 +143,65 @@ export class Connection {
     });
   };
 
-  lockShape = (shape: ShapeType) => {
+  #sendShapeWithLock = (
+    shape: ShapeType | ShapeType[],
+    isLocked: boolean = true
+  ) => {
+    let _shapes: ShapeType[] = [];
+    if (!Array.isArray(shape)) {
+      shape.isLocked = isLocked;
+      _shapes = [shape];
+    } else {
+      shape.forEach(shape => (shape.isLocked = isLocked));
+      _shapes = shape;
+    }
     const payload = JSON.stringify({
-      event: 'lock-shape',
-      // value: shape.getId(),
+      event: isLocked ? 'lock-shapes' : 'unlock-shapes',
       roomId: this.#roomId,
       user: Connection.userName,
       userId: this.#userId,
-      value: JSON.stringify(shape.getDeconstructedShapeData()),
+      value: _shapes.map(shape =>
+        JSON.stringify(shape.getDeconstructedShapeData())
+      ),
     });
     this.ws.send(payload);
   };
 
-  unlockShapes = () => {
+  lockShapes = (shape: ShapeType | ShapeType[]) => {
+    this.#sendShapeWithLock(shape, true);
+  };
+
+  unlockShapes = (shape: ShapeType | ShapeType[]) => {
+    this.#sendShapeWithLock(shape, false);
+  };
+
+  deleteShapes = (ids: string[]) => {
     const payload = JSON.stringify({
-      event: 'unlock-shapes',
+      event: 'delete-shapes',
       roomId: this.#roomId,
       user: Connection.userName,
       userId: this.#userId,
+      value: ids,
     });
     this.ws.send(payload);
   };
 
-  createShapes = (shapes: ShapeType[]) => {
+  updateShapes = (shapes: ShapeType | ShapeType[]) => {
+    let _shapes: ShapeType[] = [];
+    if (!Array.isArray(shapes)) {
+      _shapes = [shapes];
+    } else {
+      _shapes = shapes;
+    }
     const payload = JSON.stringify({
       event: 'update-shapes',
       roomId: this.#roomId,
       user: Connection.userName,
       userId: this.#userId,
-      value: shapes.map(shape =>
+      value: _shapes.map(shape =>
         JSON.stringify(shape.getDeconstructedShapeData())
       ),
     });
-    console.log(payload);
     this.ws.send(payload);
   };
 

@@ -1,7 +1,7 @@
 import { SVGEditor } from '../../components/organisms/SVGEditor';
 import { SVGParamsBase } from '../../types/types';
 import { SVGParamFieldID, textPlaceHolder, Tools_List } from './constants';
-import { normalizeColorCode } from './util';
+import { hexToRGBA, normalizeColorCode } from './util';
 
 export const inputFieldGetterGenerator =
   (fieldRoot?: HTMLElement | null) => (id: SVGParamFieldID) => {
@@ -115,20 +115,37 @@ export const handleUpdateSVGParameters = (target: SVGEditor) => {
   const strokeOpacity = getValueById(SVGParamFieldID.STROKE_OPACITY);
   const strokeWidth = getValueById(SVGParamFieldID.STROKE_WIDTH);
   const text = getValueById(SVGParamFieldID.TEXT);
-  target.editor?.setShapeParams(
-    true,
+  const normalizedFill = hexToRGBA(fill ?? '#000000', fillOpacity);
+  const normalizedStroke = hexToRGBA(stroke ?? '#000000', strokeOpacity);
+  const first = [
     strokeWidth,
-    stroke,
-    fill,
-    fillOpacity,
-    strokeOpacity,
+    normalizedStroke,
+    normalizedFill,
     lineCap,
     lineDash,
     fontFamily,
     fontSize,
-    text
-  );
-  target.editor?.applyStyles();
+    text,
+  ].sort();
+  const { bBox, ...rest } = target.editor?.getSVGParams() ?? {};
+  const second = Object.values(rest).sort();
+  if (
+    !first.every((value, index) => {
+      JSON.stringify(value) === JSON.stringify(second[index]);
+    })
+  ) {
+    target.editor?.setShapeParams(
+      true,
+      strokeWidth,
+      normalizedStroke,
+      normalizedFill,
+      lineCap,
+      lineDash,
+      fontFamily,
+      fontSize,
+      text
+    );
+  }
 };
 
 export const getElementValueByIdGenerator =

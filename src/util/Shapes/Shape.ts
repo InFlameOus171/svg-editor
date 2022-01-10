@@ -20,6 +20,7 @@ export abstract class Shape {
   #lineDash?: number[];
   #fontSize?: number;
   #fontFamily?: string;
+  isLocked: boolean = false;
   text: string = textPlaceHolder;
   transformMatrix?: DOMMatrix;
   boundaries: BoundaryCoordinates;
@@ -33,21 +34,23 @@ export abstract class Shape {
       [-1, -1],
     ],
     svgParams: Partial<SVGParamsBase> = {},
-    countShapecountUp: boolean = true
+    countShapecountUp: boolean = true,
+    isLocked: boolean = false
   ) {
     if (countShapecountUp) {
       Shape.#counter++;
     }
     this.#id = nanoid();
-    this.#fill = svgParams.fill;
-    this.#stroke = svgParams.stroke;
-    this.#strokeWidth = svgParams.strokeWidth;
-    this.#lineDash = svgParams.lineDash;
-    this.#fontSize = svgParams.fontSize;
-    this.#fontFamily = svgParams.fontFamily;
+    this.#fill = svgParams.fill ?? 'rgba(0,0,0,0)';
+    this.#stroke = svgParams.stroke ?? 'rgba(0,0,0,1)';
+    this.#strokeWidth = svgParams.strokeWidth ?? '1';
+    this.#lineDash = svgParams.lineDash ?? [0];
+    this.#fontSize = svgParams.fontSize ?? 18;
+    this.#fontFamily = svgParams.fontFamily ?? 'Arial';
     this.text = svgParams.text ?? this.text;
     this.transformMatrix = svgParams.transformMatrix;
     this.boundaries = boundaries;
+    this.isLocked = isLocked;
     this.index = Shape.#counter;
   }
 

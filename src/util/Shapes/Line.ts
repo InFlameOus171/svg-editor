@@ -15,12 +15,14 @@ export class Line extends Shape {
     startPoint: Coordinates,
     endPoint: Coordinates,
     svgParams?: Partial<SVGParamsBase>,
-    countShapeCountUp?: boolean
+    countShapeCountUp?: boolean,
+    isLocked: boolean = false
   ) {
     super(
       getLineBoundaries(startPoint, endPoint),
       svgParams,
-      countShapeCountUp
+      countShapeCountUp,
+      isLocked
     );
     this.points = [startPoint, endPoint];
     this.#center = [
@@ -57,6 +59,7 @@ export class Line extends Shape {
     type: 'Line',
     startPoint: this.points[0],
     endPoint: this.points[1],
+    isLocked: this.isLocked,
     svgParams: this.getSvgParams(),
   });
 
