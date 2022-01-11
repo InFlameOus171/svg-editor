@@ -150,7 +150,6 @@ export class Editor {
           shapeAsShapeType = this.#createShape(shape);
         }
         if (!shapeAsShapeType) return;
-        console.log('sjhaü', shapeAsShapeType);
         const index = this.#shapes.findIndex(
           innerShape => innerShape.getId() === shapeAsShapeType?.getId()
         );
@@ -217,6 +216,11 @@ export class Editor {
       }
       this.#isShapeOnlyBeingSelected = false;
     }
+    if (!!selectedShape) {
+      setIsButtonActive(this.#self, Tools_List.SELECT, false);
+      this.#selectedTool?.destroy();
+      this.#selectedTool = null;
+    }
   };
 
   #onMoveShape = (movedShape: ShapeType | ShapeType[] | null) => {
@@ -262,7 +266,10 @@ export class Editor {
   };
 
   onUpdateStyleInputFields = () => {
-    updateStyleInputFields(this.#self, this.#currentParams);
+    updateStyleInputFields(
+      this.#self,
+      this.#selectedShape?.getSvgParams() ?? this.#currentParams
+    );
   };
 
   onSave = () => {
@@ -310,19 +317,15 @@ export class Editor {
     if (this.#selectedTool?.toolName) {
       setIsButtonActive(this.#self, this.#selectedTool?.toolName, false);
     }
-    if (this.#selectedTool) {
-      if (
-        ![Tools_List.SELECT, Tools_List.MOVE, undefined].includes(
-          this.#selectedTool?.toolName
-        )
-      ) {
+    if (tool) {
+      if (this.#selectedShape && tool !== Tools_List.SELECT) {
         this.#selectedTool?.destroy();
+        this.onUpdateStyleInputFields();
       } else {
         this.onUnselectTool();
       }
     }
     if (this.#drawLayer && this.#previewLayer) {
-      this.onUpdateStyleInputFields();
       this.#setAreFieldsEnabled(Object.values(SVGParamFieldID), true);
       switch (tool) {
         case Tools_List.DRAW: {
@@ -432,9 +435,7 @@ export class Editor {
       if (tool) {
         setIsButtonActive(this.#self, tool, true);
       }
-      if (
-        !(isSelectTool(this.#selectedTool) || isMoveTool(this.#selectedTool))
-      ) {
+      if (!isMoveTool(this.#selectedTool)) {
         this.#selectedShape = null;
         this.applyStyles();
       }
@@ -445,25 +446,24 @@ export class Editor {
 
   applyStyles = () => {
     if (this.#selectedShape && this.#drawLayer) {
-      this.#selectedShape?.updateSVGParams(this.#currentParams);
-      const changedShapeIndex = this.#shapes.findIndex(
-        shape => shape.getId() === this.#selectedShape?.getId()
-      );
-      this.#shapes[changedShapeIndex] = this.#selectedShape;
       Pen.clearCanvas(this.#drawLayer);
       this.#shapes.forEach(shape => {
         Pen.draw(shape, undefined, this.#drawContext);
       });
       this.#connection?.updateShapes(this.#shapes);
     }
-    if (isSelectTool(this.#selectedTool) || isMoveTool(this.#selectedTool)) {
-      this.#selectedTool.changeStyle(this.#currentParams);
-    }
   };
 
   setShapeParam = (field: keyof SVGParamsBase, value: any) => {
     this.#currentParams[field] = value;
-    this.#selectedTool?.setSVGParam(field, value);
+    this.#selectedShape?.updateSVGParam(field, value);
+    const changedIndex = this.#shapes.findIndex(
+      shape => this.#selectedShape?.getId() === shape.getId()
+    );
+    if (changedIndex !== undefined && this.#shapes && this.#selectedShape) {
+      this.#shapes[changedIndex] = this.#selectedShape;
+    }
+    this.applyStyles();
   };
 
   setShapeParams = (
@@ -498,11 +498,11 @@ export class Editor {
   };
 
   onUnselectTool = () => {
-    if (!this.#selectedShape) {
-      setIsButtonDisabled(this.#self, Tools_List.MOVE, true);
-    } else {
-      setIsButtonDisabled(this.#self, Tools_List.MOVE, false);
+    if (this.#selectedShape) {
+      this.#connection?.unlockShapes(this.#selectedShape);
     }
+    setIsButtonDisabled(this.#self, Tools_List.MOVE, true);
+    this.#selectedShape = null;
     this.#selectedTool?.destroy();
     this.#setAreFieldsEnabled(Object.values(SVGParamFieldID), false);
     setTextParamsSourceVisibility(this.#self, false);

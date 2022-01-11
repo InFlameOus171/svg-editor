@@ -59,6 +59,12 @@ export abstract class Shape {
     this.transformMatrix = new DOMMatrix([a, b, c, d, e + x, f + y]);
   };
 
+  updateSVGParam = (field: keyof SVGParamsBase, value: any) => {
+    const currentParams = this.getSvgParams();
+    currentParams[field] = value;
+    this.updateSVGParams(currentParams);
+  };
+
   updateSVGParams = (newParams: SVGParamsBase) => {
     this.#fill = newParams.fill;
     this.#stroke = newParams.stroke;

@@ -9,6 +9,7 @@ export const toolBoxButtonStyles = css`
     aspect-ratio: 1;
     border-radius: 0;
     border: 1px solid black;
+    background-color: white;
     padding: 5px;
     display: flex;
     flex-shrink: 2;
@@ -23,7 +24,6 @@ export const toolBoxButtonStyles = css`
 
   button[isActive='false'] {
     border: 1px solid grey;
-    background-color: white;
   }
 
   button[isActive='true'],

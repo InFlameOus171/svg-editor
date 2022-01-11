@@ -111,8 +111,6 @@ export class Connection {
           }
           break;
         case 'get-shapes': {
-          const k = JSON.parse(value as string) ?? [];
-          console.log(k);
           this.onUpdateShapes(JSON.parse(value as string) ?? []);
           break;
         }

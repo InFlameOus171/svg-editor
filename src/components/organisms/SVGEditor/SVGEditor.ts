@@ -154,11 +154,26 @@ export class SVGEditor extends LitElement {
         value = hexToRGBA(color ?? '#000000', opacity);
       }
     } else {
-      value = (this.shadowRoot?.getElementById(targetId) as HTMLInputElement)
-        ?.value;
+      if (SVGParamFieldID.LINE_DASH === targetId) {
+        value = (
+          this.shadowRoot?.getElementById(
+            SVGParamFieldID.LINE_DASH
+          ) as HTMLInputElement
+        )?.value
+          .trim()
+          .split(/[\s,]+/)
+          .filter(splitValue => !!splitValue)
+          .map(lineDashValue => parseInt(lineDashValue));
+        console.log(value);
+        if (value.some(innerValue => !isFinite(innerValue))) {
+          value = [0];
+        }
+      } else {
+        value = (this.shadowRoot?.getElementById(targetId) as HTMLInputElement)
+          ?.value;
+      }
     }
     this.editor?.setShapeParam(field, value);
-    this.editor?.applyStyles();
   };
 
   hideConnectForm = () => {
