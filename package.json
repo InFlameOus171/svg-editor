@@ -3,7 +3,7 @@
   "description": "Webcomponent svg-editor following open-wc recommendations",
   "license": "MIT",
   "author": "Yasin Calli",
-  "version": "0.9.0",
+  "version": "1.0.0",
   "main": "dist/src/index.js",
   "module": "dist/src/index.js",
   "exports": {
@@ -12,10 +12,11 @@
   "scripts": {
     "lint_fix": "eslint ./src/**/*.ts --fix",
     "lint_check": "eslint ./src/**/*.ts",
-    "get_size_of_bundle": "node getSizeOfFile ./build/index.js",
-    "rename_to_old": "node rename.js ./build/index.js ./build/index.old.js",
-    "minify_bundle": "minify ./build/index.old.js > ./build/index.js && node removeOldIndex.js ./build/index.old.js",
-    "start": "tsc && concurrently -k -r \"tsc --watch --preserveWatchOutput\" \"wds\"",
+    "get_size_of_bundle": "node getSizeOfFile ./build/svg-editor.js",
+    "rename_to_old": "node rename.js ./build/svg-editor.js ./build/svg-editor.old.js",
+    "minify_bundle": "minify ./build/svg-editor.old.js > ./build/svg-editor.js && node removeOldIndex.js ./build/svg-editor.old.js",
+    "start": "npm run check_for_circular_deps && tsc && concurrently -k -r \"tsc --watch --preserveWatchOutput\" \"wds\"",
+    "check_for_circular_deps": "madge --extensions ts --circular --exclude \".*\\.types.ts|typeguards.ts\" ./src",
     "build": "tsc && rollup -c && npm run rename_to_old && npm run minify_bundle && npm run get_size_of_bundle",
     "test": "jest"
   },
@@ -24,7 +25,6 @@
     "nanoid": "^3.1.30"
   },
   "devDependencies": {
-    "@custom-elements-manifest/analyzer": "^0.4.17",
     "@open-wc/eslint-config": "^4.3.0",
     "@open-wc/testing": "next",
     "@rollup/plugin-commonjs": "^21.0.1",
@@ -43,9 +43,7 @@
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^4.0.0",
-    "husky": "^4.3.8",
     "jest": "^27.4.1",
-    "lint-staged": "^10.5.4",
     "minify": "^8.0.3",
     "prettier": "^2.4.1",
     "rollup": "^2.56.3",
@@ -54,7 +52,6 @@
     "tslib": "^2.3.1",
     "typescript": "^4.5.4"
   },
-  "customElements": "custom-elements.json",
   "eslintConfig": {
     "parser": "@typescript-eslint/parser",
     "extends": [

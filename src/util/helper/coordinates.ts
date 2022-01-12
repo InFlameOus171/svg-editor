@@ -1,11 +1,11 @@
-import { ShapeType } from '../../types/shapes';
-import {
+import type { ShapeType } from '../../types/shapes.types';
+import type {
   BoundaryCoordinates,
   Coordinates,
   SVGDrawPath,
   VectorCoordinates,
 } from '../../types/types';
-import { Partition } from '../../types/util.types';
+import type { Partition } from '../../types/util.types';
 import { relativeCommands, singleDirectionCommands } from './util';
 
 export const getCanvasRectangleValuesFromPoints = (

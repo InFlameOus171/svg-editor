@@ -1,4 +1,8 @@
-import { Coordinates, RectSVGParams, SVGParamsBase } from '../../types/types';
+import type {
+  Coordinates,
+  RectSVGParams,
+  SVGParamsBase,
+} from '../../types/types';
 import { getRectBoundaries } from '../helper/coordinates';
 import { Shape } from './Shape';
 

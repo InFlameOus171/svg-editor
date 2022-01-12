@@ -1,8 +1,8 @@
 import { LitElement, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { NullableString } from '../../../types/types.js';
+import type { NullableString } from '../../../types/types.js';
 import { Tools_List } from '../../../util/helper/constants.js';
-import { IToolboxButtonProps } from '../../atoms/ToolboxButton/ToolboxButton.types';
+import type { IToolboxButtonProps } from '../../atoms/ToolboxButton/ToolboxButton.types';
 import { toolBoxStyles } from './ToolBox.styles';
 import { getButtonColumn } from './ToolBox.util';
 

@@ -1,4 +1,4 @@
-import { Coordinates, BoundaryCoordinates } from '../../types/types';
+import type { Coordinates, BoundaryCoordinates } from '../../types/types';
 import { getUniqueXandYCoordinatesFromBoundaries } from '../helper/util';
 
 export const getFreehandBoundaries = (

@@ -1,4 +1,8 @@
-import { Coordinates, SVGParamsBase, TextSVGParams } from '../../types/types';
+import type {
+  Coordinates,
+  SVGParamsBase,
+  TextSVGParams,
+} from '../../types/types';
 import { getTextBoundaries } from '../helper/coordinates';
 import { Shape } from './Shape';
 

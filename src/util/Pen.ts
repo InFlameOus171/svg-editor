@@ -1,5 +1,5 @@
-import { ShapeType } from '../types/shapes';
-import { SVGParamsBase } from '../types/types';
+import type { ShapeType } from '../types/shapes.types';
+import type { SVGParamsBase } from '../types/types';
 import { typeOfShape } from './helper/typeguards';
 import { Ellipse } from './Shapes/Ellipse';
 import { Freehand } from './Shapes/Freehand';
@@ -133,36 +133,6 @@ const Pen = {
     }
   },
 
-  measureText: (
-    text: string,
-    params: SVGParamsBase,
-    layer?: HTMLCanvasElement | null,
-    measureContext?: CanvasRenderingContext2D | null
-  ) => {
-    const canvas = document.createElement('canvas');
-    document.body.appendChild(canvas);
-    let context =
-      layer?.getContext('2d') ?? measureContext ?? canvas.getContext('2d');
-    if (!context) {
-      return;
-    }
-    context.font = `${params.fontSize}px ${params.fontFamily}`;
-    if (params.stroke) {
-      context.strokeStyle = params.stroke;
-    }
-    if (params.lineDash) {
-      context.setLineDash(params.lineDash);
-    }
-    if (params.lineCap) {
-      context.lineCap = params.lineCap;
-    }
-    const size = context.measureText(text);
-    const width = size.width;
-    const height = size.fontBoundingBoxAscent + size.fontBoundingBoxDescent;
-    document.body.removeChild(canvas);
-    return { width, height };
-  },
-
   drawText: (
     textShape: TextShape,
     context?: CanvasRenderingContext2D | null,
@@ -177,6 +147,7 @@ const Pen = {
         context.strokeStyle = rest.stroke;
       }
       if (params.lineDash) {
+        console.log(params.lineDash);
         context.setLineDash(params.lineDash);
       }
       if (params.lineCap) {
@@ -190,6 +161,7 @@ const Pen = {
         'px ',
         (fontFamily ?? 'Arial').toLowerCase()
       );
+      console.log('writing text', text, position, params, rest);
       context.fillText(text, ...position);
       context.strokeText(text, ...position);
       context?.closePath();

@@ -100,7 +100,7 @@ export const layoutContentStyle = css`
     flex: 1 2 220px;
     max-width: 15%;
     flex-direction: column;
-    padding: 30px 15px 0;
+    padding: 20px 15px 0;
     background-color: rgba(255, 255, 255, 0.8);
     overflow-y: auto;
   }
@@ -114,7 +114,7 @@ export const layoutContentStyle = css`
   }
 
   #chat {
-    height: 30%;
+    height: 100%;
     display: flex;
     flex-direction: column;
     flex: 2 0 auto;
@@ -126,6 +126,11 @@ export const layoutContentStyle = css`
     display: flex;
     flex-direction: column;
     flex: 0 1 20%;
+  }
+
+  #connection-section {
+    display: flex;
+    flex-direction: column;
   }
 
   #connection-info #connect-form > label {
@@ -159,6 +164,10 @@ export const layoutContentStyle = css`
   }
 
   #chat #chatbox {
+    height: 100%;
+    height: -moz-available; /* WebKit-based browsers will ignore this. */
+    height: -webkit-fill-available; /* Mozilla-based browsers will ignore this. */
+    height: fill-available;
     flex: 1 0.5 auto;
     overflow: auto;
     background-color: white;
@@ -211,28 +220,4 @@ export const layoutContentStyle = css`
     justify-content: flex-end;
     padding: 10px 10px 0 0;
   }
-
-  /* @media only screen and (max-width: 960px) {
-    #content {
-      flex-direction: column;
-    }
-    #draw-container {
-      height: 100vh;
-      width: 100vw;
-    }
-    #show-tools-button {
-      display: flex;
-      position: fixed;
-      z-index: 10;
-    }
-
-    #right-main-section {
-      display: flex;
-      width: 100%;
-      max-width: 100%;
-      padding: 30px 15px 0;
-      background-color: rgba(255, 255, 255, 0.8);
-      overflow-y: auto;
-    }
-  } */
 `;

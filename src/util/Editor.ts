@@ -1,27 +1,29 @@
 import { SVGEditor } from '../components/organisms/SVGEditor';
-import { Shapes, ShapeType } from '../types/shapes';
-import { Coordinates, SVGParamsBase } from '../types/types';
+import type { ShapeType } from '../types/shapes.types';
+import type { Coordinates, SVGParamsBase } from '../types/types';
 import {
+  highlightStyle,
   SVGParamFieldID,
   textPlaceHolder,
   Tools_List,
 } from './helper/constants';
 import {
-  setIsButtonDisabled,
   setIsButtonActive,
+  setIsButtonDisabled,
   updateStyleInputFields,
 } from './helper/domUtil';
 import { generateSVGURLFromShapes } from './helper/shapes';
 import {
   isMoveTool,
-  isSelectTool,
   isShapeType,
   isText,
+  typeOfShape,
 } from './helper/typeguards';
-import { hexToRGBA } from './helper/util';
 import { Connection } from './network';
 import { Pen } from './Pen';
 import { Ellipse } from './Shapes/Ellipse';
+import { Freehand } from './Shapes/Freehand';
+import { Line } from './Shapes/Line';
 import { Rectangle } from './Shapes/Rectangle';
 import { TextShape } from './Shapes/Text';
 import { DrawTool } from './Tools/DrawTool';
@@ -60,6 +62,7 @@ export class Editor {
   ) => void;
   #selectedShape?: ShapeType | null = null;
   #drawContext: CanvasRenderingContext2D | null;
+  #previewContext: CanvasRenderingContext2D | null;
   constructor(
     drawLayer: HTMLCanvasElement,
     previewLayer: HTMLCanvasElement,
@@ -71,11 +74,13 @@ export class Editor {
     this.#self = self;
     this.#offset = offset;
     this.#currentParams = {
+      text: textPlaceHolder,
       strokeWidth: '1',
       stroke: 'rgba(0,0,0,1)',
       fill: 'rgba(0,0,0,0)',
     };
     this.#drawContext = this.#drawLayer?.getContext('2d');
+    this.#previewContext = this.#previewLayer?.getContext('2d');
     this.#setAreFieldsEnabled = paramFieldStateHandler(
       this.#self
     ).setAreFieldsEnabled;
@@ -128,10 +133,20 @@ export class Editor {
           isLocked
         ).replaceID(id);
       }
-      case 'Freehand':
-        break;
-      case 'Line':
-        break;
+      case 'Freehand': {
+        const { id, isLocked, svgParams, points } = shapeRecord;
+        return new Freehand(points, svgParams, true, isLocked).replaceID(id);
+      }
+      case 'Line': {
+        const { id, isLocked, startPoint, endPoint, svgParams } = shapeRecord;
+        return new Line(
+          startPoint,
+          endPoint,
+          svgParams,
+          true,
+          isLocked
+        ).replaceID(id);
+      }
       case 'Path':
         break;
     }
@@ -257,8 +272,46 @@ export class Editor {
     }
   };
   redrawShapes = () => {
-    if (this.#drawContext && this.#drawLayer) {
+    if (
+      this.#drawContext &&
+      this.#drawLayer &&
+      this.#previewLayer &&
+      this.#previewContext
+    ) {
       Pen.clearCanvas(this.#drawLayer, this.#drawContext);
+      Pen.clearCanvas(this.#previewLayer, this.#previewContext);
+
+      if (this.#selectedShape) {
+        console.log('exists', this.#selectedShape.getSvgParams());
+        if (typeOfShape(this.#selectedShape) === 'TextShape') {
+          console.log('text-styles', {
+            ...this.#selectedShape.getSvgParams(),
+            ...this.#currentParams,
+            ...highlightStyle,
+            lineDash: [0],
+          });
+          Pen.draw(
+            this.#selectedShape,
+            {
+              ...this.#selectedShape.getSvgParams(),
+              ...this.#currentParams,
+              ...highlightStyle,
+              lineDash: [0],
+            },
+            this.#previewContext
+          );
+        } else {
+          Pen.draw(
+            this.#selectedShape,
+            {
+              ...this.#selectedShape.getSvgParams(),
+              ...this.#currentParams,
+              ...highlightStyle,
+            },
+            this.#previewContext
+          );
+        }
+      }
       this.#shapes.forEach(shape => {
         Pen.draw(shape, undefined, this.#drawContext);
       });
@@ -446,10 +499,7 @@ export class Editor {
 
   applyStyles = () => {
     if (this.#selectedShape && this.#drawLayer) {
-      Pen.clearCanvas(this.#drawLayer);
-      this.#shapes.forEach(shape => {
-        Pen.draw(shape, undefined, this.#drawContext);
-      });
+      this.redrawShapes();
       this.#connection?.updateShapes(this.#shapes);
     }
   };

@@ -4,21 +4,21 @@ export const toolBoxStyles = css`
   :host {
     display: flex;
     justify-content: center;
-    padding-bottom: 20px;
-    flex: 2 1 30%;
+    padding-bottom: 10px;
   }
   :host > #column-wrapper {
     background-color: rgba(255, 255, 255, 0.8);
     display: flex;
     flex-wrap: wrap;
     gap: 5px;
+    padding: 20px;
     justify-content: center;
-    padding: 10px;
     transition: width 1s, height 1s;
-    width: 120px;
   }
   span[class^='row-'] {
-    width: 45%;
+    display: flex;
+    justify-content: center;
+    width: 30%;
   }
   span[class^='row-'] > toolbox-button {
     display: flex;

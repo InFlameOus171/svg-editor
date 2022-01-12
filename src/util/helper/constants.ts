@@ -1,4 +1,4 @@
-import { SVGParamsBase } from '../../types/types';
+import type { SVGParamsBase } from '../../types/types';
 
 export const acceptedTags = [
   'circle',

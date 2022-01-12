@@ -4,7 +4,7 @@ import { IToolboxButtonProps } from '../../atoms/ToolboxButton/ToolboxButton.typ
 export const getButtonColumn = (tools?: Array<IToolboxButtonProps>) => {
   let counter = 0;
   return tools?.map((tool, index) => {
-    index % 2 == 0 && ++counter;
+    index % 3 == 0 && ++counter;
     return html`
       <span class="row-${counter}">
         <toolbox-button

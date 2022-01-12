@@ -1,4 +1,4 @@
-import { ShapeType } from '../../types/shapes';
+import type { ShapeType } from '../../types/shapes.types';
 import {
   Coordinates,
   EllipseSVGParams,
@@ -397,6 +397,7 @@ const convertToShapeType = (element: SVGGraphicsElement): ShapeType => {
 
 export const convertSVGDocumentToShapes = (id: string): ShapeType[] => {
   const svg = document.getElementById(id);
+  console.log(svg);
   if (svg) {
     return acceptedTags
       .map(tag =>

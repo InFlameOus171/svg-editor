@@ -1,5 +1,5 @@
-import { Coordinates, Matrix } from '../../types/types';
-import { Partition } from '../../types/util.types';
+import type { Coordinates, Matrix } from '../../types/types';
+import type { Partition } from '../../types/util.types';
 import { hexColorCodeRegExp } from './regularExpressions';
 
 export const partition = <T>(

@@ -1,13 +1,13 @@
 import { nanoid } from 'nanoid';
-import {
+import type {
   BoundaryCoordinates,
   Coordinates,
   SVGParamsBase,
 } from '../../types/types';
 import { textPlaceHolder } from '../helper/constants';
 import { getTextBoundaries } from '../helper/coordinates';
+import { measureText } from '../helper/domUtil';
 import { isText } from '../helper/typeguards';
-import { Pen } from '../Pen';
 
 export abstract class Shape {
   static #counter: number = 0;
@@ -75,7 +75,7 @@ export abstract class Shape {
     this.#fontSize = newParams.fontSize;
     if (isText(this)) {
       this.text = newParams.text ?? this.text;
-      const measures = Pen.measureText(this.text, this.getSvgParams());
+      const measures = measureText(this.text, this.getSvgParams());
       if (measures) {
         this.boundaries = getTextBoundaries(
           this.getCenter(),

@@ -1,24 +1,23 @@
 import { html, LitElement } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
+import type { SVGParamsBase } from '../../../types/types';
 import { Editor } from '../../../util/Editor';
 import { getFonts } from '../../../util/helper/availableFonts.js';
 import { SVGParamFieldID, Tools_List } from '../../../util/helper/constants.js';
-import '../../atoms/MenuButton';
-import { handleUpdateSVGParameters } from '../../../util/helper/domUtil';
 import {
   hexToRGBA,
   updateNextSiblingValue,
   updatePreviousSiblingValue,
 } from '../../../util/helper/util';
 import { Connection } from '../../../util/network';
-import { IToolboxButtonProps } from '../../atoms/ToolboxButton/ToolboxButton.types';
+import '../../atoms/MenuButton';
+import type { IToolboxButtonProps } from '../../atoms/ToolboxButton/ToolboxButton.types';
 import {
   layoutContentStyle,
   layoutHeaderStyle,
   layoutStyle,
 } from './SVGEditor.styles';
 import { getToolboxButtonsProps } from './SVGEditor.util';
-import { SVGParamsBase } from '../../../types/types';
 
 @customElement('svg-editor')
 export class SVGEditor extends LitElement {
@@ -246,56 +245,58 @@ export class SVGEditor extends LitElement {
         </div>
         <div id="right-main-section">
           <tool-box id="tool-box" .tools=${tools}></tool-box>
-          <div id="connection-info">
-            <h3>Connection</h3>
-            <div id="connect-form">
-              <div>
-                <label
-                  ><div id="username-form-label">Username:</div>
-                  <input
-                    id="user"
-                    type="text"
-                    maxlength="10"
-                    placeholder=${Connection.userName ?? ''}
-                /></label>
-                <label
-                  ><div id="connect-form-label">Room ID:</div>
-                  <input id="room" type="text"
-                /></label>
+          <span id="connection-section" status="disconnected">
+            <div id="connection-info">
+              <h3>Connection</h3>
+              <div id="connect-form">
+                <div>
+                  <label
+                    ><div id="username-form-label">Username:</div>
+                    <input
+                      id="user"
+                      type="text"
+                      maxlength="10"
+                      placeholder=${Connection.userName ?? ''}
+                  /></label>
+                  <label
+                    ><div id="connect-form-label">Room ID:</div>
+                    <input id="room" type="text"
+                  /></label>
+                </div>
+                <div id="connect-button-container">
+                  <button @click=${this.handleJoinRoom}>Connect</button>
+                </div>
               </div>
-              <div id="connect-button-container">
-                <button @click=${this.handleJoinRoom}>Connect</button>
+              <div id="room-information">
+                <div>
+                  Connected as ${Connection.userName} <br />
+                  Room ID: ${this.connection?.getRoom()}
+                </div>
+                <div id="disconnect-button-container">
+                  <button @click=${this.handleLeaveRoom}>Disconnect</button>
+                </div>
               </div>
             </div>
-            <div id="room-information">
-              <div>
-                Connected as ${Connection.userName} <br />
-                Room ID: ${this.connection?.getRoom()}
-              </div>
-              <div id="disconnect-button-container">
-                <button @click=${this.handleLeaveRoom}>Disconnect</button>
+            <div id="chat">
+              <h3>Chat</h3>
+              <div id="chatbox"></div>
+              <div id="chat-form">
+                <input
+                  disabled
+                  id="message-field"
+                  type="text"
+                  placeholder="Message..."
+                />
+                <button
+                  id="send-message-button"
+                  disabled
+                  @click=${this.handleSendMessage}
+                >
+                  Send
+                </button>
               </div>
             </div>
-          </div>
-          <div id="chat">
-            <h3>Chat</h3>
-            <div id="chatbox"></div>
-            <div id="chat-form">
-              <input
-                disabled
-                id="message-field"
-                type="text"
-                placeholder="Message..."
-              />
-              <button
-                id="send-message-button"
-                disabled
-                @click=${this.handleSendMessage}
-              >
-                Send
-              </button>
-            </div>
-          </div>
+          </span>
         </div>
       </div>
       <dialog-section

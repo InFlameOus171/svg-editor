@@ -1,6 +1,6 @@
 import { nanoid } from 'nanoid';
-import { ParsedData } from '../../types/network.types';
-import { ShapeType } from '../../types/shapes';
+import type { ParsedData } from '../../types/network.types';
+import type { ShapeType } from '../../types/shapes.types';
 import { Keeper } from './Keeper';
 
 export class Connection {
@@ -111,6 +111,7 @@ export class Connection {
           }
           break;
         case 'get-shapes': {
+          console.log('RECEIVED SHAPES', JSON.parse(value as string));
           this.onUpdateShapes(JSON.parse(value as string) ?? []);
           break;
         }

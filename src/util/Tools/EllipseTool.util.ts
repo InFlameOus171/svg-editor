@@ -1,4 +1,4 @@
-import { SVGParamsBase, Coordinates } from '../../types/types';
+import type { SVGParamsBase, Coordinates } from '../../types/types';
 import { calculateDistanceBetweenPoints } from '../helper/coordinates';
 import { Ellipse } from '../Shapes/Ellipse';
 

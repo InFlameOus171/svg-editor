@@ -1,5 +1,4 @@
-import { SVGEditor } from '.';
-import { SVGParamFieldID, Tools_List } from '../../../util/helper/constants';
+import { Tools_List } from '../../../util/helper/constants';
 import { IToolboxButtonProps } from '../../atoms/ToolboxButton/ToolboxButton.types';
 
 export const getToolboxButtonsProps = (

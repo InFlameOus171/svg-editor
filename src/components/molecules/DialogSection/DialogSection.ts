@@ -12,23 +12,33 @@ export class DialogSection extends LitElement {
   @property()
   onSave?: (event: MouseEvent) => void;
 
+  #readerEventHandler = (readerEvent: ProgressEvent<FileReader>) => {
+    try {
+      const content = readerEvent.target?.result;
+      if (typeof content === 'string') {
+        const parser = new DOMParser();
+        this.onSelectSvgFile?.(
+          parser.parseFromString(content, 'image/svg+xml')
+        );
+      }
+    } catch (error) {
+      console.log(error);
+      alert('SVG Element count not be imported');
+    }
+  };
+
   handleSelectFile = (event: Event) => {
-    const fileInputElement = event.target as HTMLInputElement;
-    const file = fileInputElement?.files?.[0];
+    const files = (event.target as any).files as FileList | undefined;
+    const file = files?.[0];
     if (!file) {
       return;
     }
 
+    console.log(files?.[0]);
+
     const reader = new FileReader();
-    reader.addEventListener('load', readerEvent => {
-      // TODO - Validate file
-      const content = readerEvent.target?.result;
-      if (typeof content === 'string') {
-        this.onSelectSvgFile?.(
-          new DOMParser().parseFromString(content, 'image/svg+xml')
-        );
-      }
-    });
+    reader.addEventListener('load', this.#readerEventHandler);
+    (event.target as any).value = '';
     reader.readAsText(file);
   };
 
@@ -40,7 +50,7 @@ export class DialogSection extends LitElement {
           id="open-file"
           type="file"
           hidden
-          @change=${this.handleSelectFile}
+          @input=${this.handleSelectFile}
           accept="image/svg+xml"
         />
       </label>

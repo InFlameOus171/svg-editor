@@ -1,6 +1,6 @@
 import { SVGEditor } from '../../components/organisms/SVGEditor';
-import { ShapeType } from '../../types/shapes';
-import { Coordinates } from '../../types/types';
+import type { ShapeType } from '../../types/shapes.types';
+import type { Coordinates } from '../../types/types';
 import { convertSVGDocumentToShapes } from '../helper/shapes';
 import { Tool } from './Tool';
 
@@ -16,18 +16,19 @@ export class ImportTool extends Tool<ShapeType> {
 
   drawSvg = (svg: Document) => {
     if (svg.firstChild) {
-      // TODO document not appendable ?
       const createdSVG = document.createElementNS(
         'http://www.w3.org/2000/svg',
         'svg'
       );
+      console.log(svg);
       const elementId = '#imported-svg#';
       createdSVG.setAttribute('id', elementId);
+      console.log(svg.firstChild);
       createdSVG.appendChild(svg.firstChild);
       const appendedSvg = document.body.appendChild(createdSVG);
       const shapes = convertSVGDocumentToShapes(elementId);
-      document.body.removeChild(appendedSvg);
       this.onUpdateEditor(shapes);
+      document.body.removeChild(appendedSvg);
     }
   };
 

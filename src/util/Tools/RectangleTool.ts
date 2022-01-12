@@ -1,6 +1,6 @@
 import { SVGEditor } from '../../components/organisms/SVGEditor';
-import { ShapeType } from '../../types/shapes';
-import { Coordinates, SVGParamsBase } from '../../types/types';
+import type { ShapeType } from '../../types/shapes.types';
+import type { Coordinates, SVGParamsBase } from '../../types/types';
 import { Tools_List } from '../helper/constants';
 import {
   getCanvasRectangleValuesFromPoints,

@@ -1,5 +1,5 @@
 import { SVGEditor } from '../../components/organisms/SVGEditor';
-import { ShapeType } from '../../types/shapes';
+import type { ShapeType } from '../../types/shapes.types';
 import { Coordinates, SVGParamsBase } from '../../types/types';
 import { highlightStyle, Tools_List } from '../helper/constants';
 import { Pen } from '../Pen';

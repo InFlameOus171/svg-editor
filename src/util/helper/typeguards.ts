@@ -1,4 +1,4 @@
-import { Shapes, ShapeType, ToolType } from '../../types/shapes';
+import type { Shapes, ShapeType } from '../../types/shapes.types';
 import { Ellipse } from '../Shapes/Ellipse';
 import { Freehand } from '../Shapes/Freehand';
 import { Line } from '../Shapes/Line';

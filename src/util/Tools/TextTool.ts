@@ -1,8 +1,8 @@
 import { SVGEditor } from '../../components/organisms/SVGEditor';
-import { ShapeType } from '../../types/shapes';
-import { Coordinates, SVGParamsBase } from '../../types/types';
-import { Tools_List } from '../helper/constants';
-import { Pen } from '../Pen';
+import type { ShapeType } from '../../types/shapes.types';
+import type { Coordinates, SVGParamsBase } from '../../types/types';
+import { textPlaceHolder, Tools_List } from '../helper/constants';
+import { measureText } from '../helper/domUtil';
 import { TextShape } from '../Shapes/Text';
 import { setTextParamsSourceVisibility } from './TextTool.util';
 import { Tool } from './Tool';
@@ -18,14 +18,19 @@ export class TextTool extends Tool<TextShape> {
   ) {
     super(drawLayer, self, onCreate, offset, previewLayer, currentStyles);
     setTextParamsSourceVisibility(self, true);
+    if (!this.drawPenConfig.text) {
+      this.drawPenConfig.text = textPlaceHolder;
+    }
     this.toolName = Tools_List.TEXT;
   }
 
   #onClick = (event: MouseEvent) => {
+    console.log('clicked');
     if (event.button !== 0) return;
     const position = this.getCoords(event);
+    console.log(position);
     if (this.previewContext && this.drawPenConfig?.text) {
-      const size = Pen.measureText(
+      const size = measureText(
         this.drawPenConfig.text,
         {
           fill: 'rgba(0,0,0,0)',
