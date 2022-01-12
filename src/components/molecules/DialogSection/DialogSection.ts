@@ -22,7 +22,6 @@ export class DialogSection extends LitElement {
         );
       }
     } catch (error) {
-      console.log(error);
       alert('SVG Element count not be imported');
     }
   };
@@ -33,8 +32,6 @@ export class DialogSection extends LitElement {
     if (!file) {
       return;
     }
-
-    console.log(files?.[0]);
 
     const reader = new FileReader();
     reader.addEventListener('load', this.#readerEventHandler);

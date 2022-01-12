@@ -147,7 +147,6 @@ const Pen = {
         context.strokeStyle = rest.stroke;
       }
       if (params.lineDash) {
-        console.log(params.lineDash);
         context.setLineDash(params.lineDash);
       }
       if (params.lineCap) {
@@ -161,7 +160,6 @@ const Pen = {
         'px ',
         (fontFamily ?? 'Arial').toLowerCase()
       );
-      console.log('writing text', text, position, params, rest);
       context.fillText(text, ...position);
       context.strokeText(text, ...position);
       context?.closePath();

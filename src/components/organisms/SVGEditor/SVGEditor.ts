@@ -163,7 +163,6 @@ export class SVGEditor extends LitElement {
           .split(/[\s,]+/)
           .filter(splitValue => !!splitValue)
           .map(lineDashValue => parseInt(lineDashValue));
-        console.log(value);
         if (value.some(innerValue => !isFinite(innerValue))) {
           value = [0];
         }

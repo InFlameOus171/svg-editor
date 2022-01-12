@@ -111,7 +111,6 @@ export class Connection {
           }
           break;
         case 'get-shapes': {
-          console.log('RECEIVED SHAPES', JSON.parse(value as string));
           this.onUpdateShapes(JSON.parse(value as string) ?? []);
           break;
         }

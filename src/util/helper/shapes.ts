@@ -397,7 +397,6 @@ const convertToShapeType = (element: SVGGraphicsElement): ShapeType => {
 
 export const convertSVGDocumentToShapes = (id: string): ShapeType[] => {
   const svg = document.getElementById(id);
-  console.log(svg);
   if (svg) {
     return acceptedTags
       .map(tag =>

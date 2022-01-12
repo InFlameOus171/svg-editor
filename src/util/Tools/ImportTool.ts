@@ -20,10 +20,8 @@ export class ImportTool extends Tool<ShapeType> {
         'http://www.w3.org/2000/svg',
         'svg'
       );
-      console.log(svg);
       const elementId = '#imported-svg#';
       createdSVG.setAttribute('id', elementId);
-      console.log(svg.firstChild);
       createdSVG.appendChild(svg.firstChild);
       const appendedSvg = document.body.appendChild(createdSVG);
       const shapes = convertSVGDocumentToShapes(elementId);

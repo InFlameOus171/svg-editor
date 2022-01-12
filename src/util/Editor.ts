@@ -282,14 +282,7 @@ export class Editor {
       Pen.clearCanvas(this.#previewLayer, this.#previewContext);
 
       if (this.#selectedShape) {
-        console.log('exists', this.#selectedShape.getSvgParams());
         if (typeOfShape(this.#selectedShape) === 'TextShape') {
-          console.log('text-styles', {
-            ...this.#selectedShape.getSvgParams(),
-            ...this.#currentParams,
-            ...highlightStyle,
-            lineDash: [0],
-          });
           Pen.draw(
             this.#selectedShape,
             {

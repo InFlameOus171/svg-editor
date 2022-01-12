@@ -25,10 +25,8 @@ export class TextTool extends Tool<TextShape> {
   }
 
   #onClick = (event: MouseEvent) => {
-    console.log('clicked');
     if (event.button !== 0) return;
     const position = this.getCoords(event);
-    console.log(position);
     if (this.previewContext && this.drawPenConfig?.text) {
       const size = measureText(
         this.drawPenConfig.text,
