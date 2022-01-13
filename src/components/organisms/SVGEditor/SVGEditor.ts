@@ -4,6 +4,9 @@ import type { SVGParamsBase } from '../../../types/types';
 import { Editor } from '../../../util/Editor';
 import { getFonts } from '../../../util/helper/availableFonts.js';
 import { SVGParamFieldID, Tools_List } from '../../../util/helper/constants.js';
+import '../../atoms/ToolboxButton';
+import '../../molecules/DialogSection';
+import '../../molecules/ToolBox';
 import {
   hexToRGBA,
   updateNextSiblingValue,
