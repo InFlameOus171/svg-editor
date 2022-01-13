@@ -1,0 +1,11 @@
+export declare const decimalNumberRegExp: RegExp;
+export declare const decimalNumberRegExpGlobal: RegExp;
+export declare const separatorRegExp: RegExp;
+export declare const pathCommandsRegExp: RegExp;
+export declare const matrixRegExp: RegExp;
+export declare const translateRegExp: RegExp;
+export declare const scaleRegExp: RegExp;
+export declare const rotateRegExp: RegExp;
+export declare const skewXRegExp: RegExp;
+export declare const skewYRegExp: RegExp;
+export declare const hexColorCodeRegExp: RegExp;

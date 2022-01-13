@@ -1,0 +1,35 @@
+import { SVGEditor } from '../../components/organisms/SVGEditor';
+import type { ShapeType } from '../../types/shapes.types';
+import type { Coordinates, SVGParamsBase } from '../../types/types';
+import { Tools_List } from '../helper/constants';
+export declare abstract class Tool<T extends ShapeType, V extends ShapeType = T> {
+    #private;
+    drawLayer: HTMLCanvasElement;
+    previewLayer?: HTMLCanvasElement;
+    self: SVGEditor;
+    currentShape?: V;
+    allShapes: T[];
+    shallWait: boolean;
+    drawContext: CanvasRenderingContext2D | null;
+    previewContext: CanvasRenderingContext2D | null;
+    previewPenConfig?: SVGParamsBase;
+    drawPenConfig: SVGParamsBase;
+    toolName?: Tools_List;
+    offset: Coordinates;
+    isDrawing: boolean;
+    previousCoordinates: [number, number];
+    currentCoordinates: [number, number];
+    onUpdateEditor: (shape: ShapeType | ShapeType[] | null) => void;
+    constructor(drawLayer: HTMLCanvasElement, self: SVGEditor, onUpdateEditor: (shape: ShapeType | ShapeType[] | null) => void, offset?: Coordinates, previewLayer?: HTMLCanvasElement, drawPenConfig?: SVGParamsBase, previewPenConfig?: SVGParamsBase);
+    setSVGParam: (field: keyof SVGParamsBase, value: any) => void;
+    setSVGParams: (drawPenConfig: SVGParamsBase) => void;
+    resetPreview: () => void;
+    resetView: () => void;
+    resetCoordinates: () => void;
+    highlightPreview: () => void;
+    unHighlightpreview: () => void;
+    updateShapeData: (newCoordinates: Coordinates) => void;
+    getCoords: (e: MouseEvent) => [number, number];
+    executeAction: () => void;
+    destroy: () => void;
+}

@@ -1,0 +1,1 @@
+{"version":3,"file":"util.types.js","sourceRoot":"","sources":["../../../src/types/util.types.ts"],"names":[],"mappings":"","sourcesContent":["export type Partition<T> = [T[], T[]];\n\nexport type FlattenedElement = {\n  element: Element;\n  elementOffset: [number, number];\n};\n"]}

@@ -1,8 +1,8 @@
-node_modules
-web-dev-server.config.mjs
-web-test-runner.config.mjs
-package-lock.json
-.gitignore
-.editorconfig
-.eslintignore
-.eslingrc.json
+/node_modules/
+/web-dev-server.config.mjs
+/web-test-runner.config.mjs
+/package-lock.json
+/.gitignore
+/.editorconfig
+/.eslintignore
+/.eslingrc.json

@@ -1,0 +1,1 @@
+{"version":3,"file":"index.js","sourceRoot":"","sources":["../../src/index.ts"],"names":[],"mappings":"AAAA,OAAO,kCAAkC,CAAC","sourcesContent":["import './components/organisms/SVGEditor';\r\n\r\ndeclare global {\r\n  namespace JSX {\r\n    interface IntrinsicElements {\r\n      'svg-editor': SVGEditor;\r\n    }\r\n\r\n    interface SVGEditor {}\r\n  }\r\n}\r\n"]}
