@@ -60,10 +60,11 @@ export class ToolboxButton extends LitElement {
       >
         ${this.icon
           ? html`
-          <img 
-          alt=${this.toolName} 
+          <img
+          alt=${this.toolName}
           class=${(this.class ?? '') + 'tool-icon'}
-          src=${this.icon}>
+          onerror=${`this.onerror = null; this.src="public/images/${this.icon[1]}"`}
+          src=${this.icon[0] + this.icon[1]}>
           </img>`
           : this.toolName}
       </button>

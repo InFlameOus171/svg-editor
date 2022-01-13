@@ -1,5 +1,5 @@
 {
-  "name": "svg-editor",
+  "name": "@inflameous/svg-editor-wc",
   "description": "Webcomponent svg-editor following open-wc recommendations",
   "license": "MIT",
   "author": "Yasin Calli",
@@ -91,5 +91,21 @@
   "prettier": {
     "singleQuote": true,
     "arrowParens": "avoid"
-  }
+  },
+  "directories": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/InFlameOus171/svg-editor.git"
+  },
+  "keywords": [
+    "svg-editor",
+    "web",
+    "component"
+  ],
+  "bugs": {
+    "url": "https://github.com/InFlameOus171/svg-editor/issues"
+  },
+  "homepage": "https://github.com/InFlameOus171/svg-editor#readme"
 }
