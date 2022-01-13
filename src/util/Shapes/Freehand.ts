@@ -1,9 +1,9 @@
-import {
+import type {
   Coordinates,
   FreehandSVGParams,
   SVGParamsBase,
 } from '../../types/types';
-import { getFreehandBoundaries } from '../helper/coordinates';
+import { getFreehandBoundaries } from './Freehand.util';
 import { Shape } from './Shape';
 
 export class Freehand extends Shape {
@@ -12,10 +12,16 @@ export class Freehand extends Shape {
 
   constructor(
     points: Coordinates[],
-    styleAttributes?: Partial<SVGParamsBase>,
-    countShapecountUp?: boolean
+    svgParams?: Partial<SVGParamsBase>,
+    countShapecountUp?: boolean,
+    isLocked: boolean = false
   ) {
-    super(getFreehandBoundaries(points), styleAttributes, countShapecountUp);
+    super(
+      getFreehandBoundaries(points),
+      svgParams,
+      countShapecountUp,
+      isLocked
+    );
     this.#points = points;
     this.#updateCenter();
   }
@@ -52,9 +58,15 @@ export class Freehand extends Shape {
 
   toSVGFreehandParams = (): FreehandSVGParams => ({
     points: this.toString(),
-    fill: this.getFill(),
-    stroke: this.getStroke(),
-    strokeWidth: this.getStrokeWidth(),
+    ...this.getSvgParams(),
+  });
+
+  getDeconstructedShapeData = () => ({
+    id: this.getId(),
+    type: 'Freehand',
+    points: this.#points,
+    isLocked: this.isLocked,
+    svgParams: this.getSvgParams(),
   });
 
   toString = () => {

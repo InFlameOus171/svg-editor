@@ -1,19 +1,24 @@
-import { EditorLayout } from '../../components/organisms/EditorLayout';
-import { Tools_List } from '../../types/shapes';
-import { Coordinates } from '../../types/types';
+import { SVGEditor } from '../../components/organisms/SVGEditor';
+import type { ShapeType } from '../../types/shapes.types';
+import type { Coordinates, SVGParamsBase } from '../../types/types';
+import { Tools_List } from '../helper/constants';
+import { Pen } from '../Pen';
 import { Freehand } from '../Shapes/Freehand';
 import { Line } from '../Shapes/Line';
 import { Tool } from './Tool';
 
 export class DrawTool extends Tool<Freehand, Line> {
-  timesPerSecond: number = 30;
+  timesPerSecond: number = 120;
   currentShapeComponents: Coordinates[] = [];
   constructor(
     drawLayer: HTMLCanvasElement,
-    self: EditorLayout,
+    previewLayer: HTMLCanvasElement,
+    self: SVGEditor,
+    onCreate: (shape: ShapeType | ShapeType[] | null) => void,
+    currentStyles: SVGParamsBase,
     offset: Coordinates
   ) {
-    super(drawLayer, self, offset);
+    super(drawLayer, self, onCreate, offset, previewLayer, currentStyles);
     this.resetPreview();
     this.toolName = Tools_List.DRAW;
   }
@@ -26,32 +31,26 @@ export class DrawTool extends Tool<Freehand, Line> {
   };
 
   #draw = () => {
-    this.currentShape && this.pen.drawLine(this.currentShape, this.context);
+    this.currentShape && Pen.drawLine(this.currentShape, this.previewContext);
   };
 
-  #updateShapeData = (newCoordinates: Coordinates) => {
-    this.previousCoordinates = this.currentCoordinates;
-    this.currentCoordinates = newCoordinates;
-    const newShape = new Line(
-      this.previousCoordinates,
-      this.currentCoordinates,
-      undefined,
-      false
-    );
-    this.currentShapeComponents.push(this.currentCoordinates);
-    this.currentShape = newShape;
-  };
-
-  #onDown = (e: MouseEvent) => {
-    this.previousCoordinates = this.currentCoordinates;
-    this.currentCoordinates = this.getCoords(e);
+  #onDown = (event: MouseEvent) => {
+    if (event.button !== 0) return;
     this.isDrawing = true;
+    this.currentShapeComponents = [];
+    this.previousCoordinates = this.currentCoordinates;
+    this.currentCoordinates = this.getCoords(event);
   };
 
   #onUp = () => {
-    this.allShapes.push(
-      new Freehand(this.currentShapeComponents, undefined, false)
-    );
+    if (this.currentShapeComponents.length > 2) {
+      const completeShape = new Freehand(
+        this.currentShapeComponents,
+        this.drawPenConfig
+      );
+      this.onUpdateEditor(completeShape);
+    }
+
     this.currentShapeComponents = [];
     this.isDrawing = false;
   };
@@ -60,12 +59,20 @@ export class DrawTool extends Tool<Freehand, Line> {
     this.isDrawing = false;
   };
 
-  #onMove = (e: MouseEvent) => {
+  #onMove = (event: MouseEvent) => {
     if (!this.isDrawing || this.shallWait) {
       return;
     }
-    const newCoordinates = this.getCoords(e);
-    this.#updateShapeData(newCoordinates);
+    this.previousCoordinates = this.currentCoordinates;
+    this.currentCoordinates = this.getCoords(event);
+    this.currentShape = new Line(
+      this.previousCoordinates,
+      this.currentCoordinates,
+      this.drawPenConfig,
+      false
+    );
+    Pen.drawLine(this.currentShape, this.previewContext);
+    this.currentShapeComponents.push(this.currentCoordinates);
     this.#draw();
     this.#handleTimeOut();
   };
@@ -82,6 +89,5 @@ export class DrawTool extends Tool<Freehand, Line> {
     this.drawLayer.removeEventListener('mousedown', this.#onDown);
     this.drawLayer.removeEventListener('mouseup', this.#onUp);
     this.drawLayer.removeEventListener('mouseout', this.#onOut);
-    return this.allShapes;
   };
 }

@@ -1,6 +1,10 @@
+import { Tools_List } from '../../../util/helper/constants';
+
 export interface IToolboxButtonProps {
-  onClick?: (id: string) => void;
-  title: string;
-  id: string;
-  isSelected?: boolean;
+  onClick?: (id: Tools_List) => void;
+  toolName: string;
+  icon?: string;
+  id: Tools_List;
+  class?: string;
+  disabled?: boolean;
 }

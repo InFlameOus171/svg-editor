@@ -1,31 +1,43 @@
-import { EditorLayout } from '../../components/organisms/EditorLayout';
-import { Tools_List } from '../../types/shapes';
-import { Coordinates } from '../../types/types';
-import {
-  generateCircle,
-  generateEllipse as generateEllipse,
-} from '../helper/coordinates';
+import { SVGEditor } from '../../components/organisms/SVGEditor';
+import type { ShapeType } from '../../types/shapes.types';
+import { Coordinates, SVGParamsBase } from '../../types/types';
+import { highlightStyle, Tools_List } from '../helper/constants';
+import { Pen } from '../Pen';
 import { Ellipse } from '../Shapes/Ellipse';
+import { generateCircle, generateEllipse } from './EllipseTool.util';
 import { Tool } from './Tool';
 
 export class EllipseTool extends Tool<Ellipse> {
+  isCircle: boolean = false;
+
   constructor(
     drawLayer: HTMLCanvasElement,
     previewLayer: HTMLCanvasElement,
-    self: EditorLayout,
+    self: SVGEditor,
+    onCreate: (shape: ShapeType | ShapeType[] | null) => void,
+    drawPenConfig: SVGParamsBase,
     offset: Coordinates
   ) {
-    super(drawLayer, self, offset, previewLayer);
+    super(
+      drawLayer,
+      self,
+      onCreate,
+      offset,
+      previewLayer,
+      drawPenConfig,
+      highlightStyle
+    );
     this.resetPreview();
-    this.toolName = Tools_List.ELLIPSE;
     const renderingContext = this.drawLayer.getContext('2d');
     if (renderingContext) {
-      this.context = renderingContext;
+      this.drawContext = renderingContext;
     }
+    this.toolName = Tools_List.ELLIPSE;
   }
 
   #draw = () => {
-    this.currentShape && this.pen.drawEllipse(this.currentShape, this.context);
+    this.currentShape &&
+      Pen.drawEllipse(this.currentShape, this.drawContext, this.drawPenConfig);
     this.resetPreview();
   };
 
@@ -40,8 +52,9 @@ export class EllipseTool extends Tool<Ellipse> {
   };
 
   #onDown = (event: MouseEvent) => {
-    this.previousCoordinates = this.getCoords(event);
+    if (event.button !== 0) return;
     this.isDrawing = true;
+    this.previousCoordinates = this.getCoords(event);
   };
 
   #onUp = (event: MouseEvent) => {
@@ -50,18 +63,19 @@ export class EllipseTool extends Tool<Ellipse> {
     if (this.isCircle) {
       this.currentShape = generateCircle(
         this.previousCoordinates,
-        this.currentCoordinates
+        this.currentCoordinates,
+        this.drawPenConfig
       );
     } else {
       this.currentShape = generateEllipse(
         this.previousCoordinates,
-        this.currentCoordinates
+        this.currentCoordinates,
+        this.drawPenConfig
       );
     }
-    this.allShapes.push(this.currentShape);
+    this.onUpdateEditor(this.currentShape);
     this.#draw();
   };
-  isCircle: boolean = false;
 
   #onMove = (event: MouseEvent) => {
     this.currentCoordinates = this.getCoords(event);
@@ -72,20 +86,20 @@ export class EllipseTool extends Tool<Ellipse> {
         const previewShape = generateCircle(
           this.previousCoordinates,
           this.currentCoordinates,
-          undefined,
+          this.previewPenConfig,
           false
         );
         this.currentShape = previewShape;
-        this.pen.drawEllipse(previewShape, this.previewContext);
+        Pen.drawEllipse(previewShape, this.previewContext);
       } else {
         const previewShape = generateEllipse(
           this.previousCoordinates,
           this.currentCoordinates,
-          undefined,
+          this.previewPenConfig,
           false
         );
         this.currentShape = previewShape;
-        this.pen.drawEllipse(previewShape, this.previewContext);
+        Pen.drawEllipse(previewShape, this.previewContext);
       }
     }
   };
@@ -104,6 +118,5 @@ export class EllipseTool extends Tool<Ellipse> {
     this.drawLayer.removeEventListener('mouseup', this.#onUp);
     window.removeEventListener('keydown', this.#onKeyDown);
     window.removeEventListener('keyup', this.#onKeyUp);
-    return this.allShapes;
   };
 }

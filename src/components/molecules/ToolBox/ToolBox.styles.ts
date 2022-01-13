@@ -2,19 +2,29 @@ import { css } from 'lit';
 
 export const toolBoxStyles = css`
   :host {
-    min-width: 145px;
-    transition: width 1s, height 1s;
-    background-color: rgba(255, 255, 255, 0.8);
-    width: fit-content;
     display: flex;
-    gap: 5px;
-    padding: 5px;
+    justify-content: center;
+    padding-bottom: 10px;
   }
-  :host > .col-0,
-  :host > .col-1 {
-    flex: 0.5 1 15%;
+  :host > #column-wrapper {
+    background-color: rgba(255, 255, 255, 0.8);
     display: flex;
-    flex-direction: column;
+    flex-wrap: wrap;
     gap: 5px;
+    padding: 20px;
+    justify-content: center;
+    transition: width 1s, height 1s;
+  }
+  span[class^='row-'] {
+    display: flex;
+    justify-content: center;
+    width: 30%;
+  }
+  span[class^='row-'] > toolbox-button {
+    display: flex;
+    aspect-ratio: 1;
+    max-height: 50px;
+    justify-content: center;
+    align-items: center;
   }
 `;

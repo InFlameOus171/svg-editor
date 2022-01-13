@@ -1,4 +1,8 @@
-import { Coordinates, RectSVGParams, SVGParamsBase } from '../../types/types';
+import type {
+  Coordinates,
+  RectSVGParams,
+  SVGParamsBase,
+} from '../../types/types';
 import { getRectBoundaries } from '../helper/coordinates';
 import { Shape } from './Shape';
 
@@ -11,13 +15,15 @@ export class Rectangle extends Shape {
     startingCorner: Coordinates,
     width: number,
     height: number,
-    styleAttributes?: Partial<SVGParamsBase>,
-    isPreview?: boolean
+    svgParams: Partial<SVGParamsBase> = {},
+    countShapecountUp?: boolean,
+    isLocked: boolean = false
   ) {
     super(
       getRectBoundaries(startingCorner, width, height),
-      styleAttributes,
-      isPreview
+      svgParams,
+      countShapecountUp,
+      isLocked
     );
     this.#startingCorner = startingCorner;
     this.#width = width;
@@ -60,9 +66,17 @@ export class Rectangle extends Shape {
     y: this.#startingCorner[1].toString(),
     width: this.#width.toString(),
     height: this.#height.toString(),
-    fill: this.getFill(),
-    stroke: this.getStroke(),
-    strokeWidth: this.getStrokeWidth(),
+    ...this.getSvgParams(),
+  });
+
+  getDeconstructedShapeData = () => ({
+    id: this.getId(),
+    type: 'Rectangle',
+    startingCorner: this.#startingCorner,
+    width: this.#width,
+    height: this.#height,
+    isLocked: this.isLocked,
+    svgParams: this.getSvgParams(),
   });
 
   toString = () => {

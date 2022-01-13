@@ -1,38 +1,56 @@
-import { Coordinates, SVGDrawPath, SVGParamsBase } from '../../types/types';
+import type {
+  BoundaryCoordinates,
+  Coordinates,
+  SVGDrawPath,
+  SVGParamsBase,
+} from '../../types/types';
 import { getPathBoundaries, sumOfCoordinates } from '../helper/coordinates';
-import { getPathCommands } from '../helper/shapes';
 import { singleDirectionCommands } from '../helper/util';
 import { Shape } from './Shape';
 
 export class Path extends Shape {
   drawPath: SVGDrawPath[];
-  offset: Coordinates;
+  #rawDrawPath: SVGDrawPath[];
   #center: Coordinates = [-1, -1];
 
   constructor(
     drawPath: SVGDrawPath[],
-    styleAttributes?: Partial<SVGParamsBase>,
+    svgParams?: Partial<SVGParamsBase>,
     dontCountUp?: boolean,
-    offset: Coordinates = [0, 0]
+    isLocked: boolean = false
   ) {
-    super(undefined, styleAttributes, dontCountUp);
-    console.log(drawPath);
-
+    super(undefined, svgParams, dontCountUp, isLocked);
+    this.#rawDrawPath = drawPath;
     this.drawPath = drawPath.map(path => {
       if (singleDirectionCommands.includes(path.command)) {
         return { command: path.command, points: path.points };
       }
       return {
         command: path.command,
-        points: (path.points as Array<Coordinates>)?.map(point => [
-          point[0] + offset[0],
-          point[1] + offset[1],
-        ]),
+        points: path.points,
       };
     });
-
-    this.boundaries = getPathBoundaries(this.drawPath);
-    this.offset = offset;
+    if (svgParams?.bBox) {
+      const { x, y, width, height } = svgParams.bBox;
+      const boundaries = [
+        [x, y],
+        [x, y + height],
+        [x + width, y],
+        [x + width, y + height],
+      ];
+      this.boundaries = boundaries.map(boundary => {
+        const point = new DOMPoint(boundary[0], boundary[1]);
+        const transformedPoint = point.matrixTransform(this.transformMatrix);
+        return [transformedPoint.x, transformedPoint.y];
+      }) as BoundaryCoordinates;
+    } else {
+      this.boundaries = getPathBoundaries(this.drawPath);
+    }
+    const sumOfBoundaries = this.boundaries.reduce(
+      (acc, curr) => sumOfCoordinates(acc)(curr),
+      [0, 0]
+    );
+    this.#center = [sumOfBoundaries[0] / 4, sumOfBoundaries[1] / 4];
   }
 
   getCenter: () => Coordinates = () => {
@@ -41,56 +59,28 @@ export class Path extends Shape {
 
   toSVGPathParams = () => ({
     d: this.toString(),
-    fill: this.getFill(),
-    stroke: this.getStroke(),
-    strokeWidth: this.getStrokeWidth(),
+    ...this.getSvgParams(),
+  });
+
+  getDeconstructedShapeData = () => ({
+    id: this.getId(),
+    type: 'Path',
+    drawPath: this.#rawDrawPath,
+    isLocked: this.isLocked,
+    svgParams: this.getSvgParams(),
   });
 
   moveTo = (coordinates: Coordinates) => {
-    const pathCommands = getPathCommands(this.toString());
     const [dx, dy] = [
       coordinates[0] - this.#center[0],
       coordinates[1] - this.#center[1],
     ];
-    const newPathCommands = pathCommands.map(pathCommand => {
-      if (['M', 'm'].includes(pathCommand.command)) {
-        return {
-          command: pathCommand.command,
-          points: (pathCommand.points as Array<Coordinates>).map(
-            (point: Coordinates): Coordinates =>
-              sumOfCoordinates(point)([dx, dy])
-          ),
-        };
-      }
-      return pathCommand;
-    });
-    const newPath = new Path(
-      newPathCommands,
-      {
-        fill: this.getFill(),
-        stroke: this.getStroke(),
-        strokeWidth: this.getStrokeWidth(),
-      },
-      false
-    );
-    this.#center = newPath.getCenter();
-    this.boundaries = newPath.boundaries;
-    this.drawPath = newPath.drawPath;
-    // moveCommands.forEach(moveCommand => {
-    //   if (moveCommand) {
-    //     const changedCommands = [
-    //       {
-    //         command: moveCommand.command,
-    //         points: (moveCommand.points as Array<Coordinates>).map(
-    //           (point: Coordinates): Coordinates =>
-    //             sumOfCoordinates(point)([dx, dy])
-    //         ),
-    //       },
-    //       ...pathCommands,
-    //     ];
-
-    //   }
-    // });
+    this.moveTransformMatrix(dx, dy);
+    this.#center = [this.#center[0] + dx, this.#center[1] + dy];
+    this.boundaries = this.boundaries.map(boundary => [
+      boundary[0] + dx,
+      boundary[1] + dy,
+    ]) as BoundaryCoordinates;
   };
 
   toString = (): string => {

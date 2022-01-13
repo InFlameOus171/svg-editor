@@ -1,11 +1,12 @@
-import { EditorLayout } from '../../components/organisms/EditorLayout';
-import { Tools_List } from '../../types/shapes';
-import { Coordinates } from '../../types/types';
+import { SVGEditor } from '../../components/organisms/SVGEditor';
+import type { ShapeType } from '../../types/shapes.types';
+import type { Coordinates, SVGParamsBase } from '../../types/types';
+import { Tools_List } from '../helper/constants';
 import {
   getCanvasRectangleValuesFromPoints,
   getFormattedRectangleValuesFromPoints,
 } from '../helper/coordinates';
-import { createRect } from '../helper/shapes';
+import { Pen } from '../Pen';
 import { Rectangle } from '../Shapes/Rectangle';
 import { Tool } from './Tool';
 
@@ -13,24 +14,19 @@ export class RectangleTool extends Tool<Rectangle> {
   constructor(
     drawLayer: HTMLCanvasElement,
     previewLayer: HTMLCanvasElement,
-    self: EditorLayout,
+    self: SVGEditor,
+    onCreate: (shape: ShapeType | ShapeType[] | null) => void,
+    styles: SVGParamsBase,
     offset: Coordinates
   ) {
-    super(drawLayer, self, offset, previewLayer);
+    super(drawLayer, self, onCreate, offset, previewLayer, styles);
     this.resetPreview();
     const renderingContext = this.drawLayer.getContext('2d');
     if (renderingContext) {
-      this.context = renderingContext;
+      this.drawContext = renderingContext;
     }
     this.toolName = Tools_List.RECT;
   }
-
-  #draw = () => {
-    if (this.currentShape) {
-      this.pen.drawRectangle(this.currentShape, this.context);
-    }
-    this.resetPreview();
-  };
 
   executeAction = () => {
     this.drawLayer.addEventListener('mousemove', this.onMove);
@@ -42,23 +38,24 @@ export class RectangleTool extends Tool<Rectangle> {
     this.drawLayer.removeEventListener('mousemove', this.onMove);
     this.drawLayer.removeEventListener('mousedown', this.onDown);
     this.drawLayer.removeEventListener('mouseup', this.onUp);
-    return this.allShapes;
   };
 
   onDown = (event: MouseEvent) => {
+    if (event.button !== 0) return;
+    this.highlightPreview();
     this.currentCoordinates = this.getCoords(event);
     this.previousCoordinates = this.currentCoordinates;
     this.isDrawing = true;
   };
 
   onUp = () => {
+    this.resetPreview();
+    this.resetView();
     this.isDrawing = false;
     if (this.currentShape) {
       this.createRectangle();
-      this.allShapes.push(this.currentShape);
+      this.onUpdateEditor(this.currentShape);
     }
-    this.resetPreview();
-    this.#draw();
     this.resetCoordinates();
   };
 
@@ -69,7 +66,12 @@ export class RectangleTool extends Tool<Rectangle> {
         this.previousCoordinates,
         this.currentCoordinates
       );
-    this.currentShape = new Rectangle(startingCorner, width, height);
+    this.currentShape = new Rectangle(
+      startingCorner,
+      width,
+      height,
+      this.drawPenConfig
+    );
   };
 
   createRectanglePreview = () => {
@@ -82,7 +84,7 @@ export class RectangleTool extends Tool<Rectangle> {
       startingCorner,
       width,
       height,
-      undefined,
+      this.previewPenConfig,
       false
     );
   };
@@ -93,7 +95,11 @@ export class RectangleTool extends Tool<Rectangle> {
       this.createRectanglePreview();
       if (this.currentShape) {
         this.resetPreview();
-        this.pen.drawRectangle(this.currentShape, this.previewContext);
+        Pen.drawRectangle(
+          this.currentShape,
+          this.previewContext,
+          this.previewPenConfig
+        );
       }
     }
   };

@@ -1,21 +1,22 @@
 import { html } from 'lit';
 import { IToolboxButtonProps } from '../../atoms/ToolboxButton/ToolboxButton.types';
 
-export const getButtonColumn = (
-  interval: [number, number],
-  tools?: Array<any>
-) =>
-  tools?.slice(interval[0], interval[1]).map(
-    (tool, index) =>
-      html`
-        <span class="row-${index}">
-          <toolbox-button
-            .onClick=${tool.onClick}
-            .buttonId=${tool.id}
-            .title=${tool.title}
-            .isSelected=${tool.isSelected}
-          >
-          </toolbox-button>
-        </span>
-      `
-  );
+export const getButtonColumn = (tools?: Array<IToolboxButtonProps>) => {
+  let counter = 0;
+  return tools?.map((tool, index) => {
+    index % 3 == 0 && ++counter;
+    return html`
+      <span class="row-${counter}">
+        <toolbox-button
+          id=${'tool-box-button-' + tool.id}
+          .onClick=${tool.onClick}
+          .buttonId=${tool.id}
+          .toolName=${tool.toolName}
+          .icon=${tool.icon}
+          .disabled=${tool.disabled}
+        >
+        </toolbox-button>
+      </span>
+    `;
+  });
+};

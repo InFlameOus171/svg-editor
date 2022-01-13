@@ -1,5 +1,4 @@
-import {
-  BoundaryCoordinates,
+import type {
   Coordinates,
   EllipseSVGParams,
   SVGParamsBase,
@@ -15,13 +14,15 @@ export class Ellipse extends Shape {
     center: Coordinates,
     radiusX: number,
     radiusY: number,
-    styleAttributes?: Partial<SVGParamsBase>,
-    dontCountUp?: boolean
+    svgParams?: Partial<SVGParamsBase>,
+    countShapeCountUp?: boolean,
+    isLocked: boolean = false
   ) {
     super(
       getCircleBoundaries(center, radiusX, radiusY),
-      styleAttributes,
-      dontCountUp
+      svgParams,
+      countShapeCountUp,
+      isLocked
     );
     this.#center = center;
     this.radiusX = radiusX;
@@ -51,14 +52,21 @@ export class Ellipse extends Shape {
     cy: this.#center[1].toString(),
     rx: this.radiusX.toString(),
     ry: this.radiusY.toString(),
-    fill: this.getFill(),
-    stroke: this.getStroke(),
-    strokeWidth: this.getStrokeWidth(),
+    ...this.getSvgParams(),
+  });
+
+  getDeconstructedShapeData = () => ({
+    type: 'Ellipse',
+    id: this.getId(),
+    center: this.#center,
+    radiusX: this.radiusX,
+    radiusY: this.radiusY,
+    isLocked: this.isLocked,
+    svgParams: this.getSvgParams(),
   });
 
   toString = () => {
     return JSON.stringify({
-      type: 'Ellipse',
       center: this.#center,
       radiusX: this.radiusX,
       radiusY: this.radiusY,

@@ -1,11 +1,10 @@
-import {
+import type {
   Coordinates,
   LineSVGParams,
   SVGParamsBase,
   VectorCoordinates,
 } from '../../types/types';
 import { getLineBoundaries } from '../helper/coordinates';
-import { Pen } from '../Pen';
 import { Shape } from './Shape';
 
 export class Line extends Shape {
@@ -15,13 +14,15 @@ export class Line extends Shape {
   constructor(
     startPoint: Coordinates,
     endPoint: Coordinates,
-    styleAttributes?: Partial<SVGParamsBase>,
-    dontCountUp?: boolean
+    svgParams?: Partial<SVGParamsBase>,
+    countShapeCountUp?: boolean,
+    isLocked: boolean = false
   ) {
     super(
       getLineBoundaries(startPoint, endPoint),
-      styleAttributes,
-      dontCountUp
+      svgParams,
+      countShapeCountUp,
+      isLocked
     );
     this.points = [startPoint, endPoint];
     this.#center = [
@@ -50,9 +51,16 @@ export class Line extends Shape {
     y1: this.points[0][1].toString(),
     x2: this.points[1][0].toString(),
     y2: this.points[1][1].toString(),
-    fill: this.getFill(),
-    stroke: this.getStroke(),
-    strokeWidth: this.getStrokeWidth(),
+    ...this.getSvgParams(),
+  });
+
+  getDeconstructedShapeData = () => ({
+    id: this.getId(),
+    type: 'Line',
+    startPoint: this.points[0],
+    endPoint: this.points[1],
+    isLocked: this.isLocked,
+    svgParams: this.getSvgParams(),
   });
 
   toString = () => {

@@ -1,10 +1,6 @@
-import { ShapeType } from '../../types/shapes';
-import { BoundaryCoordinates, Coordinates } from '../../types/types';
-import { FlattenedElement, Partition } from '../../types/util.types';
-import { Ellipse } from '../Shapes/Ellipse';
-import { Freehand } from '../Shapes/Freehand';
-import { Line } from '../Shapes/Line';
-import { Rectangle } from '../Shapes/Rectangle';
+import type { Coordinates, Matrix } from '../../types/types';
+import type { Partition } from '../../types/util.types';
+import { hexColorCodeRegExp } from './regularExpressions';
 
 export const partition = <T>(
   array: Array<T>,
@@ -63,140 +59,128 @@ export const elementArrayToObject = (elements: Element[]) =>
     return { ...acc, [elem.tagName]: [...(acc[elem.tagName] ?? []), elem] };
   }, {});
 
-const translateRegExp = new RegExp(/(?<=translate)\((\w*) (\w*)\)/);
+// ref: https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/transform
+export const transformCoordinatesByMatrix =
+  (matrix: Matrix) =>
+  (coordinates: Coordinates): Coordinates => {
+    const [a, b, c, d, e, f] = matrix;
+    const [oldX, oldY] = coordinates;
+    const newX = a * oldX + c * oldX + e;
+    const newY = b * oldY + d * oldY + f;
+    return [newX, newY];
+  };
 
-export const flattenElementsAndCalculateOffset = (
-  element: Element,
-  elementOffset: [number, number] = [0, 0]
-): FlattenedElement[] => {
-  const children: Element[] = arrayFrom(element.children);
-  if (!!children.length) {
-    return children.reduce((acc: FlattenedElement[], innerElement: Element) => {
-      const translate = innerElement
-        .getAttribute('transform')
-        ?.match(translateRegExp);
-      const offset = [parseFloat(translate?.[1]), parseFloat(translate?.[2])];
-
-      const addedOffset: [number, number] = [
-        elementOffset[0] + offset[0],
-        elementOffset[1] + offset[1],
-      ];
-
-      const result = flattenElementsAndCalculateOffset(
-        innerElement,
-        addedOffset
-      );
-      return [...acc, ...result];
-    }, []);
-  } else {
-    return [{ element, elementOffset }];
-  }
+export const transformAllCoordinatesByMatrix = (
+  matrix: Matrix,
+  coordinates: Coordinates[]
+) => {
+  return coordinates.map(transformCoordinatesByMatrix(matrix));
 };
 
-const acceptedTags = [
-  'circle',
-  'ellipse',
-  'rect',
-  'polyline',
-  'line' /* 'path' */,
+export const parseToFixed2HexString = (colorValue: RegExpMatchArray) => {
+  let codeValue = parseInt(colorValue[0]).toString(16);
+  if (codeValue.length < 2) {
+    codeValue = '0'.concat(codeValue);
+  }
+
+  return codeValue;
+};
+
+export const hexToRGBA = (colorCode: string, opacity: string = '1') => {
+  const [, r, g, b] = hexColorCodeRegExp.exec(colorCode) ?? [
+    '#000000',
+    '00',
+    '00',
+    '00',
+  ];
+  const parsedColorCodes = [parseInt(r, 16), parseInt(g, 16), parseInt(b, 16)];
+  return 'rgba('.concat(parsedColorCodes.join(','), ',', opacity, ')');
+};
+
+export const normalizeColorCode = (
+  colorCode?: string | null
+): { colorCode: string; opacity: string } => {
+  if (!colorCode) {
+    return { colorCode: '#000000', opacity: '0' };
+  }
+  if (colorCode.charAt(0) !== '#') {
+    const numberMatcher = new RegExp(/\d*\.?\d+/g);
+    const parsedColorCodes = [...colorCode.matchAll(numberMatcher)];
+    if (parsedColorCodes.length === 4) {
+      const opacity = parsedColorCodes.pop()?.[0] ?? '0';
+      const rgbColors = parsedColorCodes.map(parseToFixed2HexString);
+      return { colorCode: '#'.concat(rgbColors.join('')), opacity };
+    } else {
+      const rgbColors = parsedColorCodes.map(parseToFixed2HexString);
+      return { colorCode: '#'.concat(rgbColors.join('')), opacity: '1' };
+    }
+  }
+  if (colorCode.length === 4) {
+    const code = colorCode.substring(1);
+    return {
+      colorCode: '#'.concat(
+        code[0],
+        code[0],
+        code[1],
+        code[1],
+        code[2],
+        code[2]
+      ),
+      opacity: '1',
+    };
+  }
+  return { colorCode, opacity: '1' };
+};
+
+export const updateNextSiblingValue = (event: InputEvent) => {
+  if ((event.target as HTMLInputElement)?.nextElementSibling)
+    (
+      (event.target as HTMLInputElement).nextElementSibling as HTMLInputElement
+    ).value = (event.currentTarget as HTMLInputElement)?.value;
+};
+
+export const updatePreviousSiblingValue = (event: InputEvent) => {
+  if ((event.target as HTMLInputElement)?.previousElementSibling)
+    (
+      (event.target as HTMLInputElement)
+        .previousElementSibling as HTMLInputElement
+    ).value = (event.currentTarget as HTMLInputElement)?.value;
+};
+
+export const relativeCoordinatesCommands = [
+  'a',
+  'c',
+  'm',
+  's',
+  'q',
+  't',
+  'l',
+  'z',
 ];
 
-const isShapeElement = (flattenedElement: FlattenedElement) => {
-  return acceptedTags.includes(flattenedElement.element.tagName);
-};
-
-Element.prototype.getFloatAttribute = function (attribute: string) {
-  return parseFloat(this.getAttribute(attribute));
-};
-
-const getStyleAttributes = (element: Element) => {
-  const fill = element.getAttribute('fill') ?? '';
-  const stroke = element.getAttribute('stroke') ?? '';
-  const strokeWidth = element.getAttribute('stroke-width') ?? '';
-  return { fill, stroke, strokeWidth };
-};
-
-const convertToShapeType = ({ element, elementOffset }: FlattenedElement) => {
-  const [dx, dy] = elementOffset;
-  const styleAttributes = getStyleAttributes(element);
-  switch (element.tagName) {
-    case acceptedTags[0]: {
-      const cx = element.getFloatAttribute('cx') + dx;
-      const cy = element.getFloatAttribute('cy') + dy;
-      const r = element.getFloatAttribute('r');
-      return new Ellipse([cx, cy], r, r, styleAttributes);
-    }
-    case acceptedTags[1]: {
-      {
-        const cx = element.getFloatAttribute('cx') + dx;
-        const cy = element.getFloatAttribute('cy') + dy;
-        const rx = element.getFloatAttribute('rx');
-        const ry = element.getFloatAttribute('ry');
-        return new Ellipse([cx, cy], rx, ry, styleAttributes);
-      }
-    }
-    case acceptedTags[2]: {
-      {
-        const x = element.getFloatAttribute('x') + dx;
-        const y = element.getFloatAttribute('y') + dy;
-        const width = element.getFloatAttribute('width');
-        const height = element.getFloatAttribute('height');
-        return new Rectangle([x, y], width, height, styleAttributes);
-      }
-    }
-    case acceptedTags[3]: {
-      {
-        const points = (element.getAttribute('points') ?? '')
-          .split(' ')
-          .map((coordinate): [number, number] => {
-            const [x, y] = coordinate.split(',');
-            return [parseFloat(x), parseFloat(y)];
-          });
-        return new Freehand(points, styleAttributes);
-      }
-    }
-    case acceptedTags[4]: {
-      {
-        const x1 = element.getFloatAttribute('x1');
-        const x2 = element.getFloatAttribute('x2');
-        const y1 = element.getFloatAttribute('y1');
-        const y2 = element.getFloatAttribute('y2');
-        return new Line([x1, y1], [x2, y2], styleAttributes);
-      }
-    }
-  }
-};
-
-type ReturnType = [FlattenedElement[], FlattenedElement[]];
-
-export const getConvertedSVGShapes = (
-  element: Element
-): { shapes: ShapeType[]; paths: FlattenedElement[] } => {
-  const useableElements = flattenElementsAndCalculateOffset(element);
-  const [shapeElements, pathElements] = useableElements.reduce(
-    (acc: ReturnType, elem): ReturnType => {
-      if (isShapeElement(elem)) {
-        return [[...acc[0], elem], [...acc[1]]];
-      }
-      return [[...acc[0]], [...acc[1], elem]];
-    },
-    [[], []]
-  );
-  return {
-    shapes: shapeElements
-      .map(convertToShapeType)
-      .filter(value => value !== undefined) as ShapeType[],
-    paths: pathElements,
-  };
-};
-
-export const relativeCommands = ['a', 'c', 'm', 's', 'q', 't', 'l', 'z'];
-
-export const absoluteCommands = ['A', 'C', 'L', 'M', 'Q', 'S', 'T', 'Z'];
+export const absoluteCoordinatesCommands = [
+  'A',
+  'C',
+  'L',
+  'M',
+  'Q',
+  'S',
+  'T',
+  'Z',
+];
 
 export const relativeSingleDirectionCommands = ['h', 'v'];
 
 export const absoluteSingleDirectionCommands = ['H', 'V'];
+
+export const relativeCommands = [
+  ...relativeCoordinatesCommands,
+  relativeSingleDirectionCommands,
+];
+export const absoluteCommands = [
+  ...absoluteCoordinatesCommands,
+  absoluteSingleDirectionCommands,
+];
 
 export const singleDirectionCommands = [
   ...relativeSingleDirectionCommands,
@@ -204,10 +188,7 @@ export const singleDirectionCommands = [
 ];
 
 export const pathCommandValues = [
-  ...relativeCommands,
-  ...absoluteCommands,
+  ...relativeCoordinatesCommands,
+  ...absoluteCoordinatesCommands,
   ...singleDirectionCommands,
 ];
-
-// Reads path string and groups each match in three groups: 1st: path command, 2nd: x coordinate and y coordinates "x,y"
-export const pathCommandsRegExp = new RegExp(/(-?\d+\.?\d*)|[a-zA-Z]/g);

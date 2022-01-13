@@ -1,63 +1,33 @@
-import { EditorLayout } from '../../components/organisms/EditorLayout';
-import { ShapeType } from '../../types/shapes';
-import { Coordinates, SVGDrawPath, SVGParamsBase } from '../../types/types';
-import { FlattenedElement } from '../../types/util.types';
-import { getPathCommands } from '../helper/shapes';
-import {
-  getConvertedSVGShapes,
-  pathCommandsRegExp,
-  pathCommandValues,
-} from '../helper/util';
-import { Path } from '../Shapes/Path';
+import { SVGEditor } from '../../components/organisms/SVGEditor';
+import type { ShapeType } from '../../types/shapes.types';
+import type { Coordinates } from '../../types/types';
+import { convertSVGDocumentToShapes } from '../helper/shapes';
 import { Tool } from './Tool';
 
 export class ImportTool extends Tool<ShapeType> {
-  #draw: (shape: ShapeType) => void;
-
   constructor(
     drawLayer: HTMLCanvasElement,
-    self: EditorLayout,
+    self: SVGEditor,
+    onImport: (shape: ShapeType | ShapeType[] | null) => void,
     offset: Coordinates
   ) {
-    super(drawLayer, self, offset);
-    this.#draw = this.pen.generatePen(this.context).draw;
+    super(drawLayer, self, onImport, offset);
   }
 
-  #getPathStyleAttributes = (element: Element): Partial<SVGParamsBase> => {
-    const fill = element.getAttribute('fill') ?? '';
-    const stroke = element.getAttribute('stroke') ?? '';
-    const strokeWidth = element.getAttribute('stroke-width') ?? '';
-    return { fill, stroke, strokeWidth };
-  };
-
-  #createPathObject = ({ element, elementOffset }: FlattenedElement) => {
-    const pathDString = element.getAttribute('d') ?? '';
-    console.log(pathDString);
-    const pathStyleAttributes = this.#getPathStyleAttributes(element);
-    const pathCommands = getPathCommands(pathDString);
-    const newPath = new Path(
-      pathCommands,
-      pathStyleAttributes,
-      false,
-      elementOffset
-    );
-    this.allShapes.push(newPath);
-    this.#draw(newPath);
-    console.log(newPath.toString());
-  };
-
-  #drawPaths = (paths?: FlattenedElement[]) => {
-    const filteredPaths = paths?.filter(
-      element => element.element.tagName === 'path'
-    );
-    filteredPaths?.length && filteredPaths.forEach(this.#createPathObject);
-  };
-
   drawSvg = (svg: Document) => {
-    const { shapes, paths } = getConvertedSVGShapes(svg.documentElement);
-    this.allShapes.push(...shapes);
-    this.#drawPaths(paths);
-    shapes.forEach(this.#draw);
+    if (svg.firstChild) {
+      const createdSVG = document.createElementNS(
+        'http://www.w3.org/2000/svg',
+        'svg'
+      );
+      const elementId = '#imported-svg#';
+      createdSVG.setAttribute('id', elementId);
+      createdSVG.appendChild(svg.firstChild);
+      const appendedSvg = document.body.appendChild(createdSVG);
+      const shapes = convertSVGDocumentToShapes(elementId);
+      this.onUpdateEditor(shapes);
+      document.body.removeChild(appendedSvg);
+    }
   };
 
   destroy = () => {

@@ -4,13 +4,14 @@
     "module": "es6",
     "moduleResolution": "node",
     "noEmitOnError": true,
-    "lib": ["es6", "dom"],
+    "lib": ["es2020", "dom"],
     "strict": true,
     "esModuleInterop": false,
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
     "importHelpers": true,
     "outDir": "dist",
+    "forceConsistentCasingInFileNames": true,
     "sourceMap": true,
     "inlineSources": true,
     "rootDir": "./",
@@ -18,9 +19,5 @@
     "skipLibCheck": true,
     "incremental": true
   },
-  "include": [
-    "src/**/*.ts",
-    "src/components/templates/index.js",
-    "src/components/atoms/ToolboxButton/index.js"
-  ]
+  "include": ["src/**/*.ts"]
 }

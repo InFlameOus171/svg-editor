@@ -1,15 +1,6 @@
-import { Line } from '../util/Shapes/Line';
-
-declare global {
-  interface Element {
-    getFloatAttribute: (value: string) => number;
-  }
-}
-
 export type NullableString = null | string;
 export type NullableNumber = null | number;
 export type Coordinates = [number, number];
-export type RectangleComponents = [Line, Line, Line, Line];
 export type VectorCoordinates = [Coordinates, Coordinates];
 export type BoundaryCoordinates = [
   Coordinates,
@@ -22,6 +13,13 @@ export type SVGParamsBase = {
   fill?: string;
   stroke?: string;
   strokeWidth?: string;
+  lineDash?: number[];
+  lineCap?: CanvasLineCap;
+  fontFamily?: string;
+  fontSize?: number;
+  transformMatrix?: DOMMatrix;
+  text?: string;
+  bBox?: SVGRect;
 };
 
 export type EllipseSVGParams = SVGParamsBase & {
@@ -49,6 +47,10 @@ export type LineSVGParams = SVGParamsBase & {
   y2: string;
 };
 
+export type TextSVGParams = SVGParamsBase & {
+  position: Coordinates;
+};
+
 export type PathSVGParams = SVGParamsBase & {
   d: string;
 };
@@ -61,3 +63,5 @@ export type SVGDrawPath = {
   command: string;
   points?: Coordinates[] | string;
 };
+
+export type Matrix = [number, number, number, number, number, number];
