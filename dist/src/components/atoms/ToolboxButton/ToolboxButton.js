@@ -61,7 +61,7 @@ __decorate([
     property({ type: String })
 ], ToolboxButton.prototype, "toolName", void 0);
 __decorate([
-    property({ type: String })
+    property({ type: Array })
 ], ToolboxButton.prototype, "icon", void 0);
 __decorate([
     property({ type: String })

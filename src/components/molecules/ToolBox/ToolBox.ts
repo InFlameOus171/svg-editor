@@ -30,10 +30,10 @@ export class ToolBox extends LitElement {
 
   static styles = toolBoxStyles;
 
-  connectedCallback(): void {
-    super.connectedCallback();
-    this.requestUpdate();
-  }
+  // connectedCallback(): void {
+  //   super.connectedCallback();
+  //   this.requestUpdate();
+  // }
 
   render() {
     return html`

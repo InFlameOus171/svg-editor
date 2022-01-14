@@ -8,8 +8,8 @@ export class ToolboxButton extends LitElement {
   @property({ type: String })
   toolName: string = 'tool';
 
-  @property({ type: String })
-  icon?: string;
+  @property({ type: Array })
+  icon?: [string, string];
 
   @property({ type: String })
   class?: string;

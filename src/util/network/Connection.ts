@@ -1,55 +1,65 @@
 import { nanoid } from 'nanoid';
-import type { ParsedData } from '../../types/network.types';
+import type { ConnectionStatus, ParsedData } from '../../types/network.types';
 import type { ShapeType } from '../../types/shapes.types';
 import { Keeper } from './Keeper';
 
 export class Connection {
-  ws: WebSocket;
-  static userName: string = 'user_' + nanoid(5);
+  #userName: string = 'user_' + nanoid(5);
+  #chatLog: Array<{ userName: string; message: string }> = [];
   #userId: string;
   #url: string;
   #port: string;
-  #roomId: string;
-  #keeper: Keeper;
-  #chat?: HTMLElement | null;
+  #roomId: string = '';
+  ws: WebSocket | null = null;
+  #keeper?: Keeper;
+  #status?: ConnectionStatus = 'disconnected';
   onDeleteShapes: (ids: string[]) => void;
   onUpdateShapes: (shapes: Record<string, any>[]) => void;
   onGetAllShapes: () => ShapeType[];
   onResetEditor: () => void;
+  onUpdateConnectionStatus: (status: ConnectionStatus) => void;
+  onNewMessage: (chatLog: Array<{ userName: string; message: string }>) => void;
+
   constructor(
-    roomId: string = '',
-    user: string = 'user_' + nanoid(5),
     onDeleteShapes: (ids: string[]) => void,
     onUpdateShapes: (shape: Record<string, any>[]) => void,
     onGetAllShapes: () => ShapeType[],
     onResetEditor: () => void,
+    onUpdateConnectionStatus: (status: ConnectionStatus) => void,
+    onNewMessage: (
+      chatLog: Array<{ userName: string; message: string }>
+    ) => void,
     url: string = 'localhost',
     port: string = '8080'
   ) {
     this.#url = url;
     this.#port = port;
-    this.#roomId = roomId;
-    Connection.userName = user;
     this.#userId = nanoid();
-    this.ws = this.createNewWebSocket();
-    this.#keeper = this.#startKeepingConnectionAlive(this.ws);
     this.onDeleteShapes = onDeleteShapes;
     this.onUpdateShapes = onUpdateShapes;
     this.onGetAllShapes = onGetAllShapes;
     this.onResetEditor = onResetEditor;
+    this.onNewMessage = onNewMessage;
+    this.onUpdateConnectionStatus = onUpdateConnectionStatus;
+    this.updateStatus('disconnected');
   }
 
   disconnect = () => {
-    this.ws.close();
+    this.ws?.close();
+    this.updateStatus('disconnected');
     this.onResetEditor();
-  };
-
-  joinRoom = (roomId: string) => {
-    this.connect(this.#url, this.#port, roomId);
   };
 
   getRoom = () => {
     return this.#roomId;
+  };
+
+  getChatLog = () => {
+    return this.#chatLog;
+  };
+
+  getUserName = () => {
+    return this.#userName;
   };
 
   #parseResponse = (response: any): ParsedData => {
@@ -74,13 +84,9 @@ export class Connection {
     return this.#keeper;
   };
 
-  setChat = (element?: HTMLElement | null) => {
-    this.#chat = element;
-  };
-
-  createNewWebSocket = () => {
+  #createNewWebSocket = () => {
     const ws = new WebSocket(`ws://${this.#url}:${this.#port}`);
-
+    this.ws = ws;
     ws.onopen = () => {
       const payload = {
         event: 'join-room',
@@ -88,26 +94,22 @@ export class Connection {
         value: JSON.stringify(
           this.onGetAllShapes().map(shape => shape.getDeconstructedShapeData())
         ),
-        user: Connection.userName,
+        user: this.#userName,
       };
+      this.updateStatus('connected');
       ws.send(JSON.stringify(payload));
     };
 
     ws.addEventListener('message', msg => {
       const data: ParsedData = this.#parseResponse(msg);
-      const { value, event, user, userId } = data;
+      const { value, event, user } = data;
       switch (event) {
         case 'message':
           {
-            const newEntry = document.createElement('div');
-            newEntry.setAttribute('class', 'chat-entry');
-            const userName = document.createElement('div');
-            const message = document.createElement('div');
-            userName.innerHTML = user ? user + ':' : '';
-            message.innerHTML = value as string;
-            newEntry.appendChild(userName);
-            newEntry.appendChild(message);
-            this.#chat?.appendChild(newEntry);
+            if (user && value) {
+              this.#chatLog?.push({ userName: user, message: value as string });
+              this.onNewMessage(this.#chatLog);
+            }
           }
           break;
         case 'get-shapes': {
@@ -119,19 +121,20 @@ export class Connection {
       }
     });
     this.#startKeepingConnectionAlive(ws);
-    return ws;
+    this.#keeper = this.#startKeepingConnectionAlive(this.ws);
   };
 
   sendChatMessage = (message?: string) => {
+    console.log(message);
     if (!message) return;
     const payload = JSON.stringify({
       event: 'message',
       roomId: this.#roomId,
-      user: Connection.userName,
+      user: this.#userName,
       userId: this.#userId,
       value: message,
     });
-    this.ws.send(payload);
+    this.ws?.send(payload);
   };
 
   sendShapes = (shapes: ShapeType[]) => {
@@ -156,13 +159,13 @@ export class Connection {
     const payload = JSON.stringify({
       event: isLocked ? 'lock-shapes' : 'unlock-shapes',
       roomId: this.#roomId,
-      user: Connection.userName,
+      user: this.#userName,
       userId: this.#userId,
       value: _shapes.map(shape =>
         JSON.stringify(shape.getDeconstructedShapeData())
       ),
     });
-    this.ws.send(payload);
+    this.ws?.send(payload);
   };
 
   lockShapes = (shape: ShapeType | ShapeType[]) => {
@@ -173,15 +176,22 @@ export class Connection {
     this.#sendShapeWithLock(shape, false);
   };
 
+  updateStatus = (status: ConnectionStatus) => {
+    this.#status = status;
+    this.onUpdateConnectionStatus(this.#status);
+  };
+
+  getStatus = () => this.#status;
+
   deleteShapes = (ids: string[]) => {
     const payload = JSON.stringify({
       event: 'delete-shapes',
       roomId: this.#roomId,
-      user: Connection.userName,
+      user: this.#userName,
       userId: this.#userId,
       value: ids,
     });
-    this.ws.send(payload);
+    this.ws?.send(payload);
   };
 
   updateShapes = (shapes: ShapeType | ShapeType[]) => {
@@ -194,24 +204,27 @@ export class Connection {
     const payload = JSON.stringify({
       event: 'update-shapes',
       roomId: this.#roomId,
-      user: Connection.userName,
+      user: this.#userName,
       userId: this.#userId,
       value: _shapes.map(shape =>
         JSON.stringify(shape.getDeconstructedShapeData())
       ),
     });
-    this.ws.send(payload);
+    this.ws?.send(payload);
   };
 
   connect = (
+    roomId: string,
+    userName: string = this.#userName,
     url: string = this.#url,
-    port: string = this.#port,
-    roomId?: string
+    port: string = this.#port
   ) => {
+    this.updateStatus('connecting');
     this.disconnect();
-    url = url;
-    port = port;
-    roomId = roomId ?? roomId;
-    this.createNewWebSocket();
+    this.#createNewWebSocket();
+    this.#userName = userName;
+    this.#roomId = roomId;
+    this.#url = url;
+    this.#port = port;
   };
 }

@@ -1,24 +1,32 @@
-var _Connection_userId, _Connection_url, _Connection_port, _Connection_roomId, _Connection_keeper, _Connection_chat, _Connection_parseResponse, _Connection_startKeepingConnectionAlive, _Connection_sendShapeWithLock;
+var _Connection_userName, _Connection_chatLog, _Connection_userId, _Connection_url, _Connection_port, _Connection_roomId, _Connection_keeper, _Connection_status, _Connection_parseResponse, _Connection_startKeepingConnectionAlive, _Connection_createNewWebSocket, _Connection_sendShapeWithLock;
 import { __classPrivateFieldGet, __classPrivateFieldSet, __rest } from "tslib";
 import { nanoid } from 'nanoid';
 import { Keeper } from './Keeper';
 export class Connection {
-    constructor(roomId = '', user = 'user_' + nanoid(5), onDeleteShapes, onUpdateShapes, onGetAllShapes, onResetEditor, url = 'localhost', port = '8080') {
+    constructor(onDeleteShapes, onUpdateShapes, onGetAllShapes, onResetEditor, onUpdateConnectionStatus, onNewMessage, url = 'localhost', port = '8080') {
+        _Connection_userName.set(this, 'user_' + nanoid(5));
+        _Connection_chatLog.set(this, []);
         _Connection_userId.set(this, void 0);
         _Connection_url.set(this, void 0);
         _Connection_port.set(this, void 0);
-        _Connection_roomId.set(this, void 0);
+        _Connection_roomId.set(this, '');
+        this.ws = null;
         _Connection_keeper.set(this, void 0);
-        _Connection_chat.set(this, void 0);
+        _Connection_status.set(this, 'disconnected');
         this.disconnect = () => {
-            this.ws.close();
+            var _a;
+            (_a = this.ws) === null || _a === void 0 ? void 0 : _a.close();
+            this.updateStatus('disconnected');
             this.onResetEditor();
-        };
-        this.joinRoom = (roomId) => {
-            this.connect(__classPrivateFieldGet(this, _Connection_url, "f"), __classPrivateFieldGet(this, _Connection_port, "f"), roomId);
         };
         this.getRoom = () => {
             return __classPrivateFieldGet(this, _Connection_roomId, "f");
+        };
+        this.getChatLog = () => {
+            return __classPrivateFieldGet(this, _Connection_chatLog, "f");
+        };
+        this.getUserName = () => {
+            return __classPrivateFieldGet(this, _Connection_userName, "f");
         };
         _Connection_parseResponse.set(this, (response) => {
             var _a;
@@ -38,36 +46,30 @@ export class Connection {
             __classPrivateFieldSet(this, _Connection_keeper, new Keeper(ws), "f");
             return __classPrivateFieldGet(this, _Connection_keeper, "f");
         });
-        this.setChat = (element) => {
-            __classPrivateFieldSet(this, _Connection_chat, element, "f");
-        };
-        this.createNewWebSocket = () => {
+        _Connection_createNewWebSocket.set(this, () => {
             const ws = new WebSocket(`ws://${__classPrivateFieldGet(this, _Connection_url, "f")}:${__classPrivateFieldGet(this, _Connection_port, "f")}`);
+            this.ws = ws;
             ws.onopen = () => {
                 const payload = {
                     event: 'join-room',
                     roomId: __classPrivateFieldGet(this, _Connection_roomId, "f"),
                     value: JSON.stringify(this.onGetAllShapes().map(shape => shape.getDeconstructedShapeData())),
-                    user: Connection.userName,
+                    user: __classPrivateFieldGet(this, _Connection_userName, "f"),
                 };
+                this.updateStatus('connected');
                 ws.send(JSON.stringify(payload));
             };
             ws.addEventListener('message', msg => {
                 var _a, _b;
                 const data = __classPrivateFieldGet(this, _Connection_parseResponse, "f").call(this, msg);
-                const { value, event, user, userId } = data;
+                const { value, event, user } = data;
                 switch (event) {
                     case 'message':
                         {
-                            const newEntry = document.createElement('div');
-                            newEntry.setAttribute('class', 'chat-entry');
-                            const userName = document.createElement('div');
-                            const message = document.createElement('div');
-                            userName.innerHTML = user ? user + ':' : '';
-                            message.innerHTML = value;
-                            newEntry.appendChild(userName);
-                            newEntry.appendChild(message);
-                            (_a = __classPrivateFieldGet(this, _Connection_chat, "f")) === null || _a === void 0 ? void 0 : _a.appendChild(newEntry);
+                            if (user && value) {
+                                (_a = __classPrivateFieldGet(this, _Connection_chatLog, "f")) === null || _a === void 0 ? void 0 : _a.push({ userName: user, message: value });
+                                this.onNewMessage(__classPrivateFieldGet(this, _Connection_chatLog, "f"));
+                            }
                         }
                         break;
                     case 'get-shapes': {
@@ -79,19 +81,21 @@ export class Connection {
                 }
             });
             __classPrivateFieldGet(this, _Connection_startKeepingConnectionAlive, "f").call(this, ws);
-            return ws;
-        };
+            __classPrivateFieldSet(this, _Connection_keeper, __classPrivateFieldGet(this, _Connection_startKeepingConnectionAlive, "f").call(this, this.ws), "f");
+        });
         this.sendChatMessage = (message) => {
+            var _a;
+            console.log(message);
             if (!message)
                 return;
             const payload = JSON.stringify({
                 event: 'message',
                 roomId: __classPrivateFieldGet(this, _Connection_roomId, "f"),
-                user: Connection.userName,
+                user: __classPrivateFieldGet(this, _Connection_userName, "f"),
                 userId: __classPrivateFieldGet(this, _Connection_userId, "f"),
                 value: message,
             });
-            this.ws.send(payload);
+            (_a = this.ws) === null || _a === void 0 ? void 0 : _a.send(payload);
         };
         this.sendShapes = (shapes) => {
             if (!shapes.length)
@@ -101,6 +105,7 @@ export class Connection {
             });
         };
         _Connection_sendShapeWithLock.set(this, (shape, isLocked = true) => {
+            var _a;
             let _shapes = [];
             if (!Array.isArray(shape)) {
                 shape.isLocked = isLocked;
@@ -113,11 +118,11 @@ export class Connection {
             const payload = JSON.stringify({
                 event: isLocked ? 'lock-shapes' : 'unlock-shapes',
                 roomId: __classPrivateFieldGet(this, _Connection_roomId, "f"),
-                user: Connection.userName,
+                user: __classPrivateFieldGet(this, _Connection_userName, "f"),
                 userId: __classPrivateFieldGet(this, _Connection_userId, "f"),
                 value: _shapes.map(shape => JSON.stringify(shape.getDeconstructedShapeData())),
             });
-            this.ws.send(payload);
+            (_a = this.ws) === null || _a === void 0 ? void 0 : _a.send(payload);
         });
         this.lockShapes = (shape) => {
             __classPrivateFieldGet(this, _Connection_sendShapeWithLock, "f").call(this, shape, true);
@@ -125,17 +130,24 @@ export class Connection {
         this.unlockShapes = (shape) => {
             __classPrivateFieldGet(this, _Connection_sendShapeWithLock, "f").call(this, shape, false);
         };
+        this.updateStatus = (status) => {
+            __classPrivateFieldSet(this, _Connection_status, status, "f");
+            this.onUpdateConnectionStatus(__classPrivateFieldGet(this, _Connection_status, "f"));
+        };
+        this.getStatus = () => __classPrivateFieldGet(this, _Connection_status, "f");
         this.deleteShapes = (ids) => {
+            var _a;
             const payload = JSON.stringify({
                 event: 'delete-shapes',
                 roomId: __classPrivateFieldGet(this, _Connection_roomId, "f"),
-                user: Connection.userName,
+                user: __classPrivateFieldGet(this, _Connection_userName, "f"),
                 userId: __classPrivateFieldGet(this, _Connection_userId, "f"),
                 value: ids,
             });
-            this.ws.send(payload);
+            (_a = this.ws) === null || _a === void 0 ? void 0 : _a.send(payload);
         };
         this.updateShapes = (shapes) => {
+            var _a;
             let _shapes = [];
             if (!Array.isArray(shapes)) {
                 _shapes = [shapes];
@@ -146,32 +158,32 @@ export class Connection {
             const payload = JSON.stringify({
                 event: 'update-shapes',
                 roomId: __classPrivateFieldGet(this, _Connection_roomId, "f"),
-                user: Connection.userName,
+                user: __classPrivateFieldGet(this, _Connection_userName, "f"),
                 userId: __classPrivateFieldGet(this, _Connection_userId, "f"),
                 value: _shapes.map(shape => JSON.stringify(shape.getDeconstructedShapeData())),
             });
-            this.ws.send(payload);
+            (_a = this.ws) === null || _a === void 0 ? void 0 : _a.send(payload);
         };
-        this.connect = (url = __classPrivateFieldGet(this, _Connection_url, "f"), port = __classPrivateFieldGet(this, _Connection_port, "f"), roomId) => {
+        this.connect = (roomId, userName = __classPrivateFieldGet(this, _Connection_userName, "f"), url = __classPrivateFieldGet(this, _Connection_url, "f"), port = __classPrivateFieldGet(this, _Connection_port, "f")) => {
+            this.updateStatus('connecting');
             this.disconnect();
-            url = url;
-            port = port;
-            roomId = roomId !== null && roomId !== void 0 ? roomId : roomId;
-            this.createNewWebSocket();
+            __classPrivateFieldGet(this, _Connection_createNewWebSocket, "f").call(this);
+            __classPrivateFieldSet(this, _Connection_userName, userName, "f");
+            __classPrivateFieldSet(this, _Connection_roomId, roomId, "f");
+            __classPrivateFieldSet(this, _Connection_url, url, "f");
+            __classPrivateFieldSet(this, _Connection_port, port, "f");
         };
         __classPrivateFieldSet(this, _Connection_url, url, "f");
         __classPrivateFieldSet(this, _Connection_port, port, "f");
-        __classPrivateFieldSet(this, _Connection_roomId, roomId, "f");
-        Connection.userName = user;
         __classPrivateFieldSet(this, _Connection_userId, nanoid(), "f");
-        this.ws = this.createNewWebSocket();
-        __classPrivateFieldSet(this, _Connection_keeper, __classPrivateFieldGet(this, _Connection_startKeepingConnectionAlive, "f").call(this, this.ws), "f");
         this.onDeleteShapes = onDeleteShapes;
         this.onUpdateShapes = onUpdateShapes;
         this.onGetAllShapes = onGetAllShapes;
         this.onResetEditor = onResetEditor;
+        this.onNewMessage = onNewMessage;
+        this.onUpdateConnectionStatus = onUpdateConnectionStatus;
+        this.updateStatus('disconnected');
     }
 }
-_Connection_userId = new WeakMap(), _Connection_url = new WeakMap(), _Connection_port = new WeakMap(), _Connection_roomId = new WeakMap(), _Connection_keeper = new WeakMap(), _Connection_chat = new WeakMap(), _Connection_parseResponse = new WeakMap(), _Connection_startKeepingConnectionAlive = new WeakMap(), _Connection_sendShapeWithLock = new WeakMap();
-Connection.userName = 'user_' + nanoid(5);
+_Connection_userName = new WeakMap(), _Connection_chatLog = new WeakMap(), _Connection_userId = new WeakMap(), _Connection_url = new WeakMap(), _Connection_port = new WeakMap(), _Connection_roomId = new WeakMap(), _Connection_keeper = new WeakMap(), _Connection_status = new WeakMap(), _Connection_parseResponse = new WeakMap(), _Connection_startKeepingConnectionAlive = new WeakMap(), _Connection_createNewWebSocket = new WeakMap(), _Connection_sendShapeWithLock = new WeakMap();
 //# sourceMappingURL=Connection.js.map

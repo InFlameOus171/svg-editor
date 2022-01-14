@@ -10,10 +10,10 @@ let ToolBox = class ToolBox extends LitElement {
         this.tools = [];
         this.toolsLength = (_a = this.tools) === null || _a === void 0 ? void 0 : _a.length;
     }
-    connectedCallback() {
-        super.connectedCallback();
-        this.requestUpdate();
-    }
+    // connectedCallback(): void {
+    //   super.connectedCallback();
+    //   this.requestUpdate();
+    // }
     render() {
         return html `
       <div id="column-wrapper">${getButtonColumn(this.tools)}</div>

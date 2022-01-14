@@ -16,6 +16,7 @@ export declare type ServerMessageEventType = typeof ServerMessageEvents[number];
 export declare type ClientMessageEventType = typeof MessageEvents[number];
 export declare type GeneralMessageEventType = typeof GeneralMessageEvents[number];
 export declare type MessageEventType = typeof MessageEvents[number];
+export declare type ConnectionStatus = 'disconnected' | 'connected' | 'connecting';
 export declare type ParsedData = {
     event?: WS_EVENTS;
     user?: string;

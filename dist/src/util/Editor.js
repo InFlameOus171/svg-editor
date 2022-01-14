@@ -121,13 +121,13 @@ export class Editor {
             (_a = __classPrivateFieldGet(this, _Editor_connection, "f")) === null || _a === void 0 ? void 0 : _a.updateShapes(toBeAppended);
         });
         _Editor_onHandleSelectShape.set(this, (selectedShape) => {
-            var _a, _b, _c;
+            var _a, _b, _c, _d;
             setIsButtonDisabled(__classPrivateFieldGet(this, _Editor_self, "f"), Tools_List.MOVE, !selectedShape);
             __classPrivateFieldSet(this, _Editor_isShapeOnlyBeingSelected, true, "f");
             if (!selectedShape && __classPrivateFieldGet(this, _Editor_selectedShape, "f")) {
                 (_a = __classPrivateFieldGet(this, _Editor_connection, "f")) === null || _a === void 0 ? void 0 : _a.unlockShapes(__classPrivateFieldGet(this, _Editor_selectedShape, "f"));
                 const currentlyLockedShape = __classPrivateFieldGet(this, _Editor_selectedShape, "f");
-                if (__classPrivateFieldGet(this, _Editor_connection, "f")) {
+                if ((_b = __classPrivateFieldGet(this, _Editor_connection, "f")) === null || _b === void 0 ? void 0 : _b.ws) {
                     __classPrivateFieldGet(this, _Editor_connection, "f").ws.onclose = () => { var _a; return (_a = __classPrivateFieldGet(this, _Editor_connection, "f")) === null || _a === void 0 ? void 0 : _a.unlockShapes(currentlyLockedShape); };
                 }
                 __classPrivateFieldSet(this, _Editor_selectedShape, null, "f");
@@ -136,7 +136,7 @@ export class Editor {
                 const shape = Array.isArray(selectedShape)
                     ? selectedShape[0]
                     : selectedShape;
-                shape && ((_b = __classPrivateFieldGet(this, _Editor_connection, "f")) === null || _b === void 0 ? void 0 : _b.lockShapes(shape));
+                shape && ((_c = __classPrivateFieldGet(this, _Editor_connection, "f")) === null || _c === void 0 ? void 0 : _c.lockShapes(shape));
                 __classPrivateFieldSet(this, _Editor_selectedShape, shape, "f");
                 if (__classPrivateFieldGet(this, _Editor_selectedShape, "f")) {
                     __classPrivateFieldSet(this, _Editor_currentParams, __classPrivateFieldGet(this, _Editor_selectedShape, "f").getSvgParams(), "f");
@@ -149,7 +149,7 @@ export class Editor {
             }
             if (!!selectedShape) {
                 setIsButtonActive(__classPrivateFieldGet(this, _Editor_self, "f"), Tools_List.SELECT, false);
-                (_c = __classPrivateFieldGet(this, _Editor_selectedTool, "f")) === null || _c === void 0 ? void 0 : _c.destroy();
+                (_d = __classPrivateFieldGet(this, _Editor_selectedTool, "f")) === null || _d === void 0 ? void 0 : _d.destroy();
                 __classPrivateFieldSet(this, _Editor_selectedTool, null, "f");
             }
         });

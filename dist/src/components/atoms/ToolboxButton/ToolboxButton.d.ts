@@ -3,7 +3,7 @@ import { Tools_List } from '../../../util/helper/constants';
 export declare class ToolboxButton extends LitElement {
     #private;
     toolName: string;
-    icon?: string;
+    icon?: [string, string];
     class?: string;
     buttonId?: Tools_List;
     disabled?: boolean;

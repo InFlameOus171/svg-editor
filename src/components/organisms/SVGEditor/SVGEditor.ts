@@ -1,20 +1,22 @@
 import { html, LitElement } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
+import { nanoid } from 'nanoid';
+import { ConnectionStatus } from '../../../types/network.types';
 import type { SVGParamsBase } from '../../../types/types';
 import { Editor } from '../../../util/Editor';
-import { getFonts } from '../../../util/helper/availableFonts.js';
 import { SVGParamFieldID, Tools_List } from '../../../util/helper/constants.js';
-import '../../atoms/ToolboxButton';
-import '../../molecules/DialogSection';
-import '../../molecules/ToolBox';
-import {
-  hexToRGBA,
-  updateNextSiblingValue,
-  updatePreviousSiblingValue,
-} from '../../../util/helper/util';
+import { hexToRGBA } from '../../../util/helper/util';
 import { Connection } from '../../../util/network';
 import '../../atoms/MenuButton';
+import '../../atoms/PositionInformation';
+import '../../atoms/ToolboxButton';
 import type { IToolboxButtonProps } from '../../atoms/ToolboxButton/ToolboxButton.types';
+import '../../molecules/ConnectionSection';
+import '../../molecules/DialogSection';
+import '../../molecules/DrawZone';
+import { DrawZone } from '../../molecules/DrawZone';
+import '../../molecules/FooterFields';
+import '../../molecules/ToolBox';
 import {
   layoutContentStyle,
   layoutHeaderStyle,
@@ -31,52 +33,59 @@ export class SVGEditor extends LitElement {
   @state()
   editor: Editor | null = null;
   @state()
+  position?: [number, number];
+  @state()
   connection?: Connection;
   @state()
-  availableFonts?: Set<string>;
+  chatLog: Array<{ userName: string; message: string }> = [];
+  @state()
+  connectionStatus: ConnectionStatus =
+    this.connection?.getStatus() ?? 'disconnected';
 
   static styles = [layoutStyle, layoutHeaderStyle, layoutContentStyle];
 
-  constructor() {
-    super();
-    getFonts().then(fonts => (this.availableFonts = fonts));
+  firstUpdated() {
+    this.updateResize();
   }
 
-  async firstUpdated() {
-    this.updateResize();
-    this.hideRoomInformation();
+  updateChatLog = (chatLog: Array<{ userName: string; message: string }>) => {
+    this.chatLog = [...chatLog];
+  };
 
-    const canvas = this.shadowRoot?.getElementById(
-      'drawzone'
-    ) as HTMLCanvasElement;
-    canvas.addEventListener('mousemove', (event: MouseEvent) => {
-      const rect = canvas.getBoundingClientRect();
-      const position = this.shadowRoot?.getElementById('position');
-      if (position) {
-        position.innerHTML = `x:${event.clientX - rect.left} - y:${
-          event.clientY - rect.top
-        }`;
+  updateConnection = (status: ConnectionStatus) => {
+    this.connectionStatus = status;
+  };
+
+  updated(_changedProperties: Map<string | number | symbol, unknown>): void {
+    if (!this.editor && this.editor !== _changedProperties.get('editor')) {
+      const drawZone = this.shadowRoot?.getElementById('draw-zone') as
+        | DrawZone
+        | undefined;
+      const drawLayer = drawZone?.shadowRoot?.getElementById(
+        'draw-layer'
+      ) as HTMLCanvasElement;
+      const previewLayer = drawZone?.shadowRoot?.getElementById(
+        'preview-layer'
+      ) as HTMLCanvasElement | undefined;
+      console.log(drawLayer, previewLayer, drawZone?.shadowRoot);
+      if (drawLayer && previewLayer) {
+        new ResizeObserver(this.updateResize).observe(drawLayer);
+        this.editor = new Editor(
+          drawLayer,
+          previewLayer,
+          [previewLayer.offsetLeft, previewLayer.offsetTop],
+          this
+        );
+
+        this.connection = new Connection(
+          this.editor.deleteFromShapes,
+          this.editor.updateShapes,
+          this.editor.getAllShapes,
+          this.editor.resetEditor,
+          this.updateConnection,
+          this.updateChatLog
+        );
       }
-    });
-    canvas.addEventListener('mouseout', (event: MouseEvent) => {
-      const position = this.shadowRoot?.getElementById('position');
-      if (position) {
-        position.innerHTML = '- - -';
-      }
-    });
-
-    const previewLayer = this.shadowRoot?.getElementById(
-      'preview-layer'
-    ) as HTMLCanvasElement;
-
-    if (canvas) {
-      new ResizeObserver(this.updateResize).observe(canvas);
-      this.editor = new Editor(
-        canvas,
-        previewLayer,
-        [previewLayer.offsetLeft, previewLayer.offsetTop],
-        this
-      );
     }
   }
 
@@ -84,32 +93,12 @@ export class SVGEditor extends LitElement {
     this.editor?.onSelectTool(tool);
   };
 
-  handleJoinRoom = () => {
-    if (this.editor) {
-      const roomId = (
-        this.shadowRoot?.getElementById('room') as HTMLInputElement
-      ).value;
-      const userName = (
-        this.shadowRoot?.getElementById('user') as HTMLInputElement
-      ).value;
-      this.connection = new Connection(
-        roomId,
-        !!userName ? userName : undefined,
-        this.editor.deleteFromShapes,
-        this.editor.updateShapes,
-        this.editor.getAllShapes,
-        this.editor.resetEditor
-      );
-      this.connection.setChat(this.shadowRoot?.getElementById('chatbox'));
+  handleJoinRoom = (data: { userName?: string; roomId?: string }) => {
+    const { userName, roomId } = data;
+    if (this.editor && roomId && this.connection) {
+      this.connection.connect(roomId, userName);
       this.editor.setConnection(this.connection);
-      this.shadowRoot
-        ?.getElementById('message-field')
-        ?.removeAttribute('disabled');
-      this.shadowRoot
-        ?.getElementById('send-message-button')
-        ?.removeAttribute('disabled');
       document.title = document.title + ' | Room:' + roomId;
-      this.hideConnectForm();
     }
   };
 
@@ -177,47 +166,9 @@ export class SVGEditor extends LitElement {
     this.editor?.setShapeParam(field, value);
   };
 
-  hideConnectForm = () => {
-    const connectForm = this.shadowRoot?.getElementById('connect-form');
-    if (connectForm) {
-      connectForm.style.display = 'none';
-    }
-    const connectionInfo = this.shadowRoot?.getElementById('room-information');
-    if (connectionInfo) {
-      connectionInfo.style.display = 'flex';
-    }
-  };
-
-  hideRoomInformation = () => {
-    const connectForm = this.shadowRoot?.getElementById('connect-form');
-    if (connectForm) {
-      connectForm.style.display = 'flex';
-    }
-    const connectionInfo = this.shadowRoot?.getElementById('room-information');
-    if (connectionInfo) {
-      connectionInfo.style.display = 'none';
-    }
-  };
-
   handleLeaveRoom = () => {
     this.connection?.disconnect();
-    this.shadowRoot
-      ?.getElementById('message-field')
-      ?.setAttribute('disabled', '');
-    this.shadowRoot
-      ?.getElementById('send-message-button')
-      ?.setAttribute('disabled', '');
     document.title = 'SVG Editor';
-    this.hideRoomInformation();
-  };
-
-  handleSendMessage = () => {
-    const chatValue = (
-      this.shadowRoot?.getElementById('message-field') as
-        | HTMLInputElement
-        | undefined
-    )?.value;
-    this.connection?.sendChatMessage(chatValue);
   };
 
   updateResize = () => {
@@ -227,78 +178,31 @@ export class SVGEditor extends LitElement {
 
   render() {
     const tools: IToolboxButtonProps[] = getToolboxButtonsProps(
-      this.handleSelectTool
+      (tools: Tools_List | null) => {
+        this.handleSelectTool(tools);
+        console.log(tools);
+      }
     );
     return html`
       <div id="content">
-        <!-- Mobile view to be implemented  -->
-        <!-- <menu-button></menu-button> -->
-        <div id="draw-container">
-          <canvas
-            id="drawzone"
-            height=${this.height}
-            width=${this.width}
-          ></canvas>
-          <canvas
-            id="preview-layer"
-            height=${this.height}
-            width=${this.width}
-          ></canvas>
-        </div>
+        <draw-zone
+          id="draw-zone"
+          .height=${this.height}
+          .width=${this.width}
+          .onPositionChange=${(position?: [number, number]) =>
+            (this.position = position)}
+        ></draw-zone>
         <div id="right-main-section">
           <tool-box id="tool-box" .tools=${tools}></tool-box>
-          <span id="connection-section" status="disconnected">
-            <div id="connection-info">
-              <h3>Connection</h3>
-              <div id="connect-form">
-                <div>
-                  <label
-                    ><div id="username-form-label">Username:</div>
-                    <input
-                      id="user"
-                      type="text"
-                      maxlength="10"
-                      placeholder=${Connection.userName ?? ''}
-                  /></label>
-                  <label
-                    ><div id="connect-form-label">Room ID:</div>
-                    <input id="room" type="text"
-                  /></label>
-                </div>
-                <div id="connect-button-container">
-                  <button @click=${this.handleJoinRoom}>Connect</button>
-                </div>
-              </div>
-              <div id="room-information">
-                <div>
-                  Connected as ${Connection.userName} <br />
-                  Room ID: ${this.connection?.getRoom()}
-                </div>
-                <div id="disconnect-button-container">
-                  <button @click=${this.handleLeaveRoom}>Disconnect</button>
-                </div>
-              </div>
-            </div>
-            <div id="chat">
-              <h3>Chat</h3>
-              <div id="chatbox"></div>
-              <div id="chat-form">
-                <input
-                  disabled
-                  id="message-field"
-                  type="text"
-                  placeholder="Message..."
-                />
-                <button
-                  id="send-message-button"
-                  disabled
-                  @click=${this.handleSendMessage}
-                >
-                  Send
-                </button>
-              </div>
-            </div>
-          </span>
+          <connection-section
+            .status=${this.connectionStatus}
+            .onJoinRoom=${this.handleJoinRoom}
+            .onLeaveRoom=${this.handleLeaveRoom}
+            .onSendMessage=${this.connection?.sendChatMessage}
+            .userName=${this.connection?.getUserName() ?? 'user_' + nanoid(6)}
+            .roomId=${this.connection?.getRoom() ?? ''}
+            .chatLog=${this.chatLog}
+          ></connection-section>
         </div>
       </div>
       <dialog-section
@@ -306,177 +210,10 @@ export class SVGEditor extends LitElement {
         .onSelectSvgFile=${this.editor?.importSVG}
       ></dialog-section>
       <div id="footer">
-        <fieldset id="footer-fields">
-          <div id="footer-input">
-            <div id="left-input-section">
-              <div>
-                <label>
-                  Stroke width:
-                  <input
-                    type="number"
-                    id="stroke-width-input"
-                    @input="${() =>
-                      this.handleSVGParamChange(
-                        'strokeWidth',
-                        SVGParamFieldID.STROKE_WIDTH
-                      )}"
-                  />
-                </label>
-                <label>
-                  Line dash:
-                  <input
-                    type="text"
-                    id="line-dash-input"
-                    placeholder="3,3,3,12..."
-                    @input="${() =>
-                      this.handleSVGParamChange(
-                        'lineDash',
-                        SVGParamFieldID.LINE_DASH
-                      )}"
-                  />
-                </label>
-                <label>
-                  Linecap:
-                  <select
-                    @input="${() =>
-                      this.handleSVGParamChange(
-                        'lineCap',
-                        SVGParamFieldID.LINE_CAP
-                      )}"
-                    id="line-cap-input"
-                  >
-                    <option value="round">Round edge</option>
-                    <option value="butt">Flat edge</option>
-                  </select>
-                </label>
-              </div>
-              <div id="footer-input-fields">
-                <div>
-                  <label>
-                    Color:
-                    <input
-                      type="color"
-                      id="stroke-color-input"
-                      @change=${() =>
-                        this.handleSVGParamChange(
-                          'stroke',
-                          SVGParamFieldID.STROKE_COLOR
-                        )}
-                    />
-                  </label>
-                  <label>
-                    Opacity:
-                    <input
-                      type="range"
-                      min="0"
-                      step="0.1"
-                      max="1"
-                      @input=${(event: InputEvent) => {
-                        updateNextSiblingValue(event);
-                        this.handleSVGParamChange(
-                          'stroke',
-                          SVGParamFieldID.STROKE_OPACITY
-                        );
-                      }}
-                    />
-                    <input
-                      id="stroke-opacity-input"
-                      type="number"
-                      @change=${(event: InputEvent) => {
-                        updatePreviousSiblingValue(event);
-                        this.handleSVGParamChange(
-                          'stroke',
-                          SVGParamFieldID.STROKE_OPACITY
-                        );
-                      }}
-                    />
-                  </label>
-                </div>
-                <div>
-                  <label>
-                    Fill:
-                    <input
-                      type="color"
-                      id="fill-color-input"
-                      @input=${() =>
-                        this.handleSVGParamChange(
-                          'fill',
-                          SVGParamFieldID.FILL_COLOR
-                        )}
-                    />
-                  </label>
-                  <label>
-                    Opacity:
-                    <input
-                      type="range"
-                      min="0"
-                      max="1"
-                      step="0.01"
-                      @input=${(event: InputEvent) => {
-                        updateNextSiblingValue(event);
-                        this.handleSVGParamChange(
-                          'fill',
-                          SVGParamFieldID.FILL_OPACITY
-                        );
-                      }}
-                    />
-                    <input
-                      id="fill-opacity-input"
-                      type="number"
-                      @change=${(event: InputEvent) => {
-                        updatePreviousSiblingValue(event);
-                        this.handleSVGParamChange(
-                          'fill',
-                          SVGParamFieldID.FILL_OPACITY
-                        );
-                      }}
-                    />
-                  </label>
-                </div>
-              </div>
-            </div>
-            <fieldset id="right-input-section">
-              <label
-                >Font size:<input
-                  type="number"
-                  id="text-font-size-input"
-                  @input=${() =>
-                    this.handleSVGParamChange(
-                      'fontSize',
-                      SVGParamFieldID.TEXT_FONT_SIZE
-                    )}
-              /></label>
-              <label>
-                Font family:
-                <select
-                  id="text-font-family-input"
-                  @input=${() =>
-                    this.handleSVGParamChange(
-                      'fontFamily',
-                      SVGParamFieldID.TEXT_FONT_FAMILY
-                    )}
-                >
-                  ${this.availableFonts &&
-                  Array.from(this.availableFonts).map(
-                    font => html`<option value=${font}>${font}</option>`
-                  )}
-                </select>
-              </label>
-              <label>
-                Text:
-                <input
-                  type="text"
-                  id="text-input"
-                  @input=${() =>
-                    this.handleSVGParamChange('text', SVGParamFieldID.TEXT)}
-                />
-              </label>
-            </fieldset>
-          </div>
-        </fieldset>
-        <div id="position-container">
-          <span id="position">- - -</span>
-        </div>
+        <footer-fields
+          .handleSVGParamChange=${this.handleSVGParamChange}
+        ></footer-fields>
+        <position-information .position=${this.position}></position-information>
       </div>
     `;
   }

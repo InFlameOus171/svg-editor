@@ -8,55 +8,6 @@ export const layoutStyle = css `
     background-color: #2196f3;
   }
 
-  #footer {
-    display: flex;
-    flex-direction: column;
-    padding: 10px 0;
-    border-top: 1px solid rgba(0, 0, 0, 0.3);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.3);
-    background-color: rgba(255, 255, 255, 0.8);
-  }
-
-  #footer #footer-fields {
-    border: none;
-    flex: 2 1 auto;
-    display: flex;
-    flex-direction: column;
-  }
-
-  #footer-fields > #footer-input {
-    width: 100%;
-    justify-content: space-between;
-    display: flex;
-  }
-
-  #footer #footer-input #left-input-section {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-  }
-  #footer #footer-input #right-input-section {
-    visibility: hidden;
-    border: none;
-    padding: 0 20px 20px;
-    background-color: inherit;
-    border-left: 1px solid rgba(0, 0, 0, 0.3);
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-  }
-
-  #footer #footer-input-fields {
-    display: flex;
-    flex-direction: column;
-  }
-
-  #footer #footer-submit-button {
-    width: 100%;
-    display: flex;
-    justify-content: flex-end;
-  }
-
   #stroke-opacity-input {
     max-width: '20px';
   }
@@ -87,7 +38,7 @@ export const layoutContentStyle = css `
     position: relative;
   }
 
-  #drawzone {
+  #draw-layer {
     top: 0;
     left: 0;
     position: absolute;
@@ -95,7 +46,6 @@ export const layoutContentStyle = css `
 
   #right-main-section {
     display: flex;
-    flex: 1 2 220px;
     max-width: 15%;
     flex-direction: column;
     padding: 20px 15px 0;

@@ -8,6 +8,5 @@ export declare class ToolBox extends LitElement {
     toolsLength: number | undefined;
     selectedTool?: NullableString;
     static styles: import("lit").CSSResult;
-    connectedCallback(): void;
     render(): import("lit-html").TemplateResult<1>;
 }

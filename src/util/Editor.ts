@@ -210,7 +210,7 @@ export class Editor {
     if (!selectedShape && this.#selectedShape) {
       this.#connection?.unlockShapes(this.#selectedShape);
       const currentlyLockedShape = this.#selectedShape;
-      if (this.#connection) {
+      if (this.#connection?.ws) {
         this.#connection.ws.onclose = () =>
           this.#connection?.unlockShapes(currentlyLockedShape);
       }

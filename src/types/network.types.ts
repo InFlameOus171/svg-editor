@@ -35,6 +35,8 @@ export type ClientMessageEventType = typeof MessageEvents[number];
 export type GeneralMessageEventType = typeof GeneralMessageEvents[number];
 export type MessageEventType = typeof MessageEvents[number];
 
+export type ConnectionStatus = 'disconnected' | 'connected' | 'connecting';
+
 export type ParsedData = {
   event?: WS_EVENTS;
   user?: string;
