@@ -3,8 +3,6 @@ import { html, LitElement } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { nanoid } from 'nanoid';
 import { Editor } from '../../../util/Editor';
-import { SVGParamFieldID } from '../../../util/helper/constants.js';
-import { hexToRGBA } from '../../../util/helper/util';
 import { Connection } from '../../../util/network';
 import '../../atoms/MenuButton';
 import '../../atoms/PositionInformation';
@@ -43,44 +41,6 @@ let SVGEditor = class SVGEditor extends LitElement {
                 document.title = document.title + ' | Room:' + roomId;
             }
         };
-        this.handleSVGParamChange = (field, targetId) => {
-            var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
-            let value;
-            const fillFields = [
-                SVGParamFieldID.FILL_COLOR,
-                SVGParamFieldID.FILL_OPACITY,
-            ];
-            const strokeFields = [
-                SVGParamFieldID.STROKE_COLOR,
-                SVGParamFieldID.STROKE_OPACITY,
-            ];
-            const dualFields = [...fillFields, ...strokeFields];
-            if (dualFields.includes(targetId)) {
-                let opacity, color;
-                if (strokeFields.includes(targetId)) {
-                    opacity = (_b = (_a = this.shadowRoot) === null || _a === void 0 ? void 0 : _a.getElementById(SVGParamFieldID.STROKE_OPACITY)) === null || _b === void 0 ? void 0 : _b.value;
-                    color = (_d = (_c = this.shadowRoot) === null || _c === void 0 ? void 0 : _c.getElementById(SVGParamFieldID.STROKE_COLOR)) === null || _d === void 0 ? void 0 : _d.value;
-                    value = hexToRGBA(color !== null && color !== void 0 ? color : '#000000', opacity);
-                }
-                else {
-                    opacity = (_f = (_e = this.shadowRoot) === null || _e === void 0 ? void 0 : _e.getElementById(SVGParamFieldID.FILL_OPACITY)) === null || _f === void 0 ? void 0 : _f.value;
-                    color = (_h = (_g = this.shadowRoot) === null || _g === void 0 ? void 0 : _g.getElementById(SVGParamFieldID.FILL_COLOR)) === null || _h === void 0 ? void 0 : _h.value;
-                    value = hexToRGBA(color !== null && color !== void 0 ? color : '#000000', opacity);
-                }
-            }
-            else {
-                if (SVGParamFieldID.LINE_DASH === targetId) {
-                    value = (_k = (_j = this.shadowRoot) === null || _j === void 0 ? void 0 : _j.getElementById(SVGParamFieldID.LINE_DASH)) === null || _k === void 0 ? void 0 : _k.value.trim().split(/[\s,]+/).filter(splitValue => !!splitValue).map(lineDashValue => parseInt(lineDashValue));
-                    if (value.some(innerValue => !isFinite(innerValue))) {
-                        value = [0];
-                    }
-                }
-                else {
-                    value = (_m = (_l = this.shadowRoot) === null || _l === void 0 ? void 0 : _l.getElementById(targetId)) === null || _m === void 0 ? void 0 : _m.value;
-                }
-            }
-            (_o = this.editor) === null || _o === void 0 ? void 0 : _o.setShapeParam(field, value);
-        };
         this.handleLeaveRoom = () => {
             var _a;
             (_a = this.connection) === null || _a === void 0 ? void 0 : _a.disconnect();
@@ -108,7 +68,7 @@ let SVGEditor = class SVGEditor extends LitElement {
         }
     }
     render() {
-        var _a, _b, _c, _d, _e, _f, _g;
+        var _a, _b, _c, _d, _e, _f, _g, _h;
         const tools = getToolboxButtonsProps((tools) => {
             this.handleSelectTool(tools);
         });
@@ -139,7 +99,7 @@ let SVGEditor = class SVGEditor extends LitElement {
       ></dialog-section>
       <div id="footer">
         <footer-fields
-          .handleSVGParamChange=${this.handleSVGParamChange}
+          .onSVGParamChange=${(_h = this.editor) === null || _h === void 0 ? void 0 : _h.setShapeParam}
         ></footer-fields>
         <position-information .position=${this.position}></position-information>
       </div>

@@ -1,8 +1,7 @@
 import { LitElement } from 'lit';
 import { ConnectionStatus } from '../../../types/network.types';
-import type { SVGParamsBase } from '../../../types/types';
 import { Editor } from '../../../util/Editor';
-import { SVGParamFieldID, Tools_List } from '../../../util/helper/constants.js';
+import { Tools_List } from '../../../util/helper/constants.js';
 import { Connection } from '../../../util/network';
 import '../../atoms/MenuButton';
 import '../../atoms/PositionInformation';
@@ -36,7 +35,6 @@ export declare class SVGEditor extends LitElement {
         userName?: string;
         roomId?: string;
     }) => void;
-    handleSVGParamChange: (field: keyof SVGParamsBase, targetId: SVGParamFieldID) => void;
     handleLeaveRoom: () => void;
     updateResize: () => void;
     render(): import("lit-html").TemplateResult<1>;

@@ -101,70 +101,6 @@ export class SVGEditor extends LitElement {
     }
   };
 
-  handleSVGParamChange = (
-    field: keyof SVGParamsBase,
-    targetId: SVGParamFieldID
-  ) => {
-    let value;
-    const fillFields = [
-      SVGParamFieldID.FILL_COLOR,
-      SVGParamFieldID.FILL_OPACITY,
-    ];
-    const strokeFields = [
-      SVGParamFieldID.STROKE_COLOR,
-      SVGParamFieldID.STROKE_OPACITY,
-    ];
-    const dualFields = [...fillFields, ...strokeFields];
-
-    if (dualFields.includes(targetId)) {
-      let opacity, color;
-      if (strokeFields.includes(targetId)) {
-        opacity = (
-          this.shadowRoot?.getElementById(
-            SVGParamFieldID.STROKE_OPACITY
-          ) as HTMLInputElement
-        )?.value;
-        color = (
-          this.shadowRoot?.getElementById(
-            SVGParamFieldID.STROKE_COLOR
-          ) as HTMLInputElement
-        )?.value;
-        value = hexToRGBA(color ?? '#000000', opacity);
-      } else {
-        opacity = (
-          this.shadowRoot?.getElementById(
-            SVGParamFieldID.FILL_OPACITY
-          ) as HTMLInputElement
-        )?.value;
-        color = (
-          this.shadowRoot?.getElementById(
-            SVGParamFieldID.FILL_COLOR
-          ) as HTMLInputElement
-        )?.value;
-        value = hexToRGBA(color ?? '#000000', opacity);
-      }
-    } else {
-      if (SVGParamFieldID.LINE_DASH === targetId) {
-        value = (
-          this.shadowRoot?.getElementById(
-            SVGParamFieldID.LINE_DASH
-          ) as HTMLInputElement
-        )?.value
-          .trim()
-          .split(/[\s,]+/)
-          .filter(splitValue => !!splitValue)
-          .map(lineDashValue => parseInt(lineDashValue));
-        if (value.some(innerValue => !isFinite(innerValue))) {
-          value = [0];
-        }
-      } else {
-        value = (this.shadowRoot?.getElementById(targetId) as HTMLInputElement)
-          ?.value;
-      }
-    }
-    this.editor?.setShapeParam(field, value);
-  };
-
   handleLeaveRoom = () => {
     this.connection?.disconnect();
     document.title = 'SVG Editor';
@@ -209,7 +145,7 @@ export class SVGEditor extends LitElement {
       ></dialog-section>
       <div id="footer">
         <footer-fields
-          .handleSVGParamChange=${this.handleSVGParamChange}
+          .onSVGParamChange=${this.editor?.setShapeParam}
         ></footer-fields>
         <position-information .position=${this.position}></position-information>
       </div>

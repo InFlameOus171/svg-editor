@@ -4,6 +4,7 @@ import { SVGParamsBase } from '../../../types/types';
 import { getFonts } from '../../../util/helper/availableFonts';
 import { SVGParamFieldID } from '../../../util/helper/constants';
 import {
+  hexToRGBA,
   updateNextSiblingValue,
   updatePreviousSiblingValue,
 } from '../../../util/helper/util';
@@ -15,10 +16,7 @@ export class FooterFields extends LitElement {
   availableFonts?: Set<string>;
 
   @property()
-  handleSVGParamChange?: (
-    field: keyof SVGParamsBase,
-    targetId: SVGParamFieldID
-  ) => void;
+  onSVGParamChange?: (field: keyof SVGParamsBase, value: any) => void;
 
   static styles = [footerFieldsStyles];
 
@@ -26,6 +24,70 @@ export class FooterFields extends LitElement {
     super();
     getFonts().then(fonts => (this.availableFonts = fonts));
   }
+
+  #handleSVGParamChange = (
+    field: keyof SVGParamsBase,
+    targetId: SVGParamFieldID
+  ) => {
+    let value;
+    const fillFields = [
+      SVGParamFieldID.FILL_COLOR,
+      SVGParamFieldID.FILL_OPACITY,
+    ];
+    const strokeFields = [
+      SVGParamFieldID.STROKE_COLOR,
+      SVGParamFieldID.STROKE_OPACITY,
+    ];
+    const dualFields = [...fillFields, ...strokeFields];
+
+    if (dualFields.includes(targetId)) {
+      let opacity, color;
+      if (strokeFields.includes(targetId)) {
+        opacity = (
+          this.shadowRoot?.getElementById(
+            SVGParamFieldID.STROKE_OPACITY
+          ) as HTMLInputElement
+        )?.value;
+        color = (
+          this.shadowRoot?.getElementById(
+            SVGParamFieldID.STROKE_COLOR
+          ) as HTMLInputElement
+        )?.value;
+        value = hexToRGBA(color ?? '#000000', opacity);
+      } else {
+        opacity = (
+          this.shadowRoot?.getElementById(
+            SVGParamFieldID.FILL_OPACITY
+          ) as HTMLInputElement
+        )?.value;
+        color = (
+          this.shadowRoot?.getElementById(
+            SVGParamFieldID.FILL_COLOR
+          ) as HTMLInputElement
+        )?.value;
+        value = hexToRGBA(color ?? '#000000', opacity);
+      }
+    } else {
+      if (SVGParamFieldID.LINE_DASH === targetId) {
+        value = (
+          this.shadowRoot?.getElementById(
+            SVGParamFieldID.LINE_DASH
+          ) as HTMLInputElement
+        )?.value
+          .trim()
+          .split(/[\s,]+/)
+          .filter(splitValue => !!splitValue)
+          .map(lineDashValue => parseInt(lineDashValue));
+        if (value.some(innerValue => !isFinite(innerValue))) {
+          value = [0];
+        }
+      } else {
+        value = (this.shadowRoot?.getElementById(targetId) as HTMLInputElement)
+          ?.value;
+      }
+    }
+    this.onSVGParamChange?.(field, value);
+  };
 
   render() {
     return html` <fieldset id="footer-fields">
@@ -38,7 +100,7 @@ export class FooterFields extends LitElement {
                 type="number"
                 id="stroke-width-input"
                 @input="${() =>
-                  this.handleSVGParamChange?.(
+                  this.#handleSVGParamChange?.(
                     'strokeWidth',
                     SVGParamFieldID.STROKE_WIDTH
                   )}"
@@ -51,7 +113,7 @@ export class FooterFields extends LitElement {
                 id="line-dash-input"
                 placeholder="3,3,3,12..."
                 @input="${() =>
-                  this.handleSVGParamChange?.(
+                  this.#handleSVGParamChange?.(
                     'lineDash',
                     SVGParamFieldID.LINE_DASH
                   )}"
@@ -61,7 +123,7 @@ export class FooterFields extends LitElement {
               Linecap:
               <select
                 @input="${() =>
-                  this.handleSVGParamChange?.(
+                  this.#handleSVGParamChange?.(
                     'lineCap',
                     SVGParamFieldID.LINE_CAP
                   )}"
@@ -80,7 +142,7 @@ export class FooterFields extends LitElement {
                   type="color"
                   id="stroke-color-input"
                   @change=${() =>
-                    this.handleSVGParamChange?.(
+                    this.#handleSVGParamChange?.(
                       'stroke',
                       SVGParamFieldID.STROKE_COLOR
                     )}
@@ -95,7 +157,7 @@ export class FooterFields extends LitElement {
                   max="1"
                   @input=${(event: InputEvent) => {
                     updateNextSiblingValue(event);
-                    this.handleSVGParamChange?.(
+                    this.#handleSVGParamChange?.(
                       'stroke',
                       SVGParamFieldID.STROKE_OPACITY
                     );
@@ -106,7 +168,7 @@ export class FooterFields extends LitElement {
                   type="number"
                   @change=${(event: InputEvent) => {
                     updatePreviousSiblingValue(event);
-                    this.handleSVGParamChange?.(
+                    this.#handleSVGParamChange?.(
                       'stroke',
                       SVGParamFieldID.STROKE_OPACITY
                     );
@@ -121,7 +183,7 @@ export class FooterFields extends LitElement {
                   type="color"
                   id="fill-color-input"
                   @input=${() =>
-                    this.handleSVGParamChange?.(
+                    this.#handleSVGParamChange?.(
                       'fill',
                       SVGParamFieldID.FILL_COLOR
                     )}
@@ -136,7 +198,7 @@ export class FooterFields extends LitElement {
                   step="0.01"
                   @input=${(event: InputEvent) => {
                     updateNextSiblingValue(event);
-                    this.handleSVGParamChange?.(
+                    this.#handleSVGParamChange?.(
                       'fill',
                       SVGParamFieldID.FILL_OPACITY
                     );
@@ -147,7 +209,7 @@ export class FooterFields extends LitElement {
                   type="number"
                   @change=${(event: InputEvent) => {
                     updatePreviousSiblingValue(event);
-                    this.handleSVGParamChange?.(
+                    this.#handleSVGParamChange?.(
                       'fill',
                       SVGParamFieldID.FILL_OPACITY
                     );
@@ -163,7 +225,7 @@ export class FooterFields extends LitElement {
               type="number"
               id="text-font-size-input"
               @input=${() =>
-                this.handleSVGParamChange?.(
+                this.#handleSVGParamChange?.(
                   'fontSize',
                   SVGParamFieldID.TEXT_FONT_SIZE
                 )}
@@ -173,7 +235,7 @@ export class FooterFields extends LitElement {
             <select
               id="text-font-family-input"
               @input=${() =>
-                this.handleSVGParamChange?.(
+                this.#handleSVGParamChange?.(
                   'fontFamily',
                   SVGParamFieldID.TEXT_FONT_FAMILY
                 )}
@@ -190,7 +252,7 @@ export class FooterFields extends LitElement {
               type="text"
               id="text-input"
               @input=${() =>
-                this.handleSVGParamChange?.('text', SVGParamFieldID.TEXT)}
+                this.#handleSVGParamChange?.('text', SVGParamFieldID.TEXT)}
             />
           </label>
         </fieldset>
