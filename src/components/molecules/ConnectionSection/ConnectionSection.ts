@@ -29,11 +29,6 @@ export class ConnectionSection extends LitElement {
   @property()
   onSendMessage?: (message?: string) => void;
 
-  protected updated(
-    _changedProperties: Map<string | number | symbol, unknown>
-  ): void {
-    console.log('did antyhing change', _changedProperties);
-  }
   render() {
     return html`
       <h3>Connection</h3>

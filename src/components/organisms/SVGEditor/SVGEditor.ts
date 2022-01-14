@@ -67,7 +67,6 @@ export class SVGEditor extends LitElement {
       const previewLayer = drawZone?.shadowRoot?.getElementById(
         'preview-layer'
       ) as HTMLCanvasElement | undefined;
-      console.log(drawLayer, previewLayer, drawZone?.shadowRoot);
       if (drawLayer && previewLayer) {
         new ResizeObserver(this.updateResize).observe(drawLayer);
         this.editor = new Editor(
@@ -180,7 +179,6 @@ export class SVGEditor extends LitElement {
     const tools: IToolboxButtonProps[] = getToolboxButtonsProps(
       (tools: Tools_List | null) => {
         this.handleSelectTool(tools);
-        console.log(tools);
       }
     );
     return html`

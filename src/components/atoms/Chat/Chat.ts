@@ -42,7 +42,6 @@ export class Chat extends LitElement {
           ?.removeAttribute('disabled');
       }
     }
-    console.log(_changedProperties);
   }
 
   render() {
@@ -50,7 +49,6 @@ export class Chat extends LitElement {
       <h3>Chat</h3>
       <div id="chatbox">
         ${this.chatLog?.map(entry => {
-          console.log(this.chatLog);
           return html`<div class="chat-entry">
             <div>${entry.userName}:</div>
             <div>${entry.message}</div>

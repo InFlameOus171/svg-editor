@@ -21,13 +21,10 @@ export class ConnectForm extends LitElement {
   };
 
   #handleRoomIdChange = (event: Event) => {
-    console.log((event.target as HTMLInputElement | undefined)?.value);
     this.roomId =
       (event.target as HTMLInputElement | undefined)?.value ?? this.roomId;
   };
   #handleUserNameChange = (event: InputEvent) => {
-    console.log((event.target as HTMLInputElement | undefined)?.value);
-
     this.userName =
       (event.target as HTMLInputElement | undefined)?.value ?? this.userName;
   };
