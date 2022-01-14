@@ -18,6 +18,5 @@ export declare class ConnectionSection extends LitElement {
     }) => void;
     onLeaveRoom?: () => void;
     onSendMessage?: (message?: string) => void;
-    protected updated(_changedProperties: Map<string | number | symbol, unknown>): void;
     render(): import("lit-html").TemplateResult<1>;
 }

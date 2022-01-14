@@ -13,16 +13,14 @@ let ConnectForm = class ConnectForm extends LitElement {
             (_a = this.onJoinRoom) === null || _a === void 0 ? void 0 : _a.call(this, { userName, roomId });
         });
         _ConnectForm_handleRoomIdChange.set(this, (event) => {
-            var _a, _b, _c;
-            console.log((_a = event.target) === null || _a === void 0 ? void 0 : _a.value);
+            var _a, _b;
             this.roomId =
-                (_c = (_b = event.target) === null || _b === void 0 ? void 0 : _b.value) !== null && _c !== void 0 ? _c : this.roomId;
+                (_b = (_a = event.target) === null || _a === void 0 ? void 0 : _a.value) !== null && _b !== void 0 ? _b : this.roomId;
         });
         _ConnectForm_handleUserNameChange.set(this, (event) => {
-            var _a, _b, _c;
-            console.log((_a = event.target) === null || _a === void 0 ? void 0 : _a.value);
+            var _a, _b;
             this.userName =
-                (_c = (_b = event.target) === null || _b === void 0 ? void 0 : _b.value) !== null && _c !== void 0 ? _c : this.userName;
+                (_b = (_a = event.target) === null || _a === void 0 ? void 0 : _a.value) !== null && _b !== void 0 ? _b : this.userName;
         });
     }
     render() {

@@ -25,7 +25,6 @@ let Chat = class Chat extends LitElement {
                 (_h = (_g = this.shadowRoot) === null || _g === void 0 ? void 0 : _g.getElementById('send-message-button')) === null || _h === void 0 ? void 0 : _h.removeAttribute('disabled');
             }
         }
-        console.log(_changedProperties);
     }
     render() {
         var _a;
@@ -33,7 +32,6 @@ let Chat = class Chat extends LitElement {
       <h3>Chat</h3>
       <div id="chatbox">
         ${(_a = this.chatLog) === null || _a === void 0 ? void 0 : _a.map(entry => {
-            console.log(this.chatLog);
             return html `<div class="chat-entry">
             <div>${entry.userName}:</div>
             <div>${entry.message}</div>

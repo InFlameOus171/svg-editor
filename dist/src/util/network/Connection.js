@@ -85,7 +85,6 @@ export class Connection {
         });
         this.sendChatMessage = (message) => {
             var _a;
-            console.log(message);
             if (!message)
                 return;
             const payload = JSON.stringify({

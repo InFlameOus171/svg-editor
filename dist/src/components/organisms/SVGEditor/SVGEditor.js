@@ -100,7 +100,6 @@ let SVGEditor = class SVGEditor extends LitElement {
             const drawZone = (_a = this.shadowRoot) === null || _a === void 0 ? void 0 : _a.getElementById('draw-zone');
             const drawLayer = (_b = drawZone === null || drawZone === void 0 ? void 0 : drawZone.shadowRoot) === null || _b === void 0 ? void 0 : _b.getElementById('draw-layer');
             const previewLayer = (_c = drawZone === null || drawZone === void 0 ? void 0 : drawZone.shadowRoot) === null || _c === void 0 ? void 0 : _c.getElementById('preview-layer');
-            console.log(drawLayer, previewLayer, drawZone === null || drawZone === void 0 ? void 0 : drawZone.shadowRoot);
             if (drawLayer && previewLayer) {
                 new ResizeObserver(this.updateResize).observe(drawLayer);
                 this.editor = new Editor(drawLayer, previewLayer, [previewLayer.offsetLeft, previewLayer.offsetTop], this);
@@ -112,7 +111,6 @@ let SVGEditor = class SVGEditor extends LitElement {
         var _a, _b, _c, _d, _e, _f, _g;
         const tools = getToolboxButtonsProps((tools) => {
             this.handleSelectTool(tools);
-            console.log(tools);
         });
         return html `
       <div id="content">

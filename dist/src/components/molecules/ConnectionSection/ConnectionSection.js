@@ -13,9 +13,6 @@ let ConnectionSection = class ConnectionSection extends LitElement {
         this.roomId = '';
         this.chatLog = [];
     }
-    updated(_changedProperties) {
-        console.log('did antyhing change', _changedProperties);
-    }
     render() {
         return html `
       <h3>Connection</h3>
