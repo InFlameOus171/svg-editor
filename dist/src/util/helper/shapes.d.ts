@@ -1,17 +1,5 @@
-import type { ShapeType } from '../../types/shapes.types';
-import { EllipseSVGParams, FreehandSVGParams, LineSVGParams, PathSVGParams, RectSVGParams, SVGDrawPath } from '../../types/types';
-import { TextShape } from '../Shapes/Text';
-export declare const createRect: (x: number, y: number, height: number, width: number) => Path2D;
-export declare const setSVGStyleParams: (svgShape: Element, lineDash?: number[] | undefined, lineCap?: string | undefined, fill?: string | undefined, stroke?: string | undefined, strokeWidth?: string | undefined, transformMatrix?: DOMMatrix | undefined) => void;
-export declare const setRectSVGParams: (svgShape: Element, rectParams: RectSVGParams) => void;
-export declare const setEllipseSVGParams: (svgShape: Element, ellipseParams: EllipseSVGParams) => void;
-export declare const setCircleSVGParams: (svgShape: Element, circleParams: EllipseSVGParams) => void;
-export declare const setLineSVGParams: (svgShape: Element, lineParams: LineSVGParams) => void;
-export declare const setFreehandSVGParams: (svgShape: Element, freehandParams: FreehandSVGParams) => void;
-export declare const setPathSVGParams: (svgShape: Element, svgParams: PathSVGParams) => void;
-export declare const setTextSVGParams: (svgShape: Element, textObject: TextShape) => void;
-export declare const appendAsSVGShapeGeneratorFunction: (parent?: SVGGraphicsElement | undefined, svgNameSpace?: string | null) => (shape: ShapeType) => void;
-export declare const getPathCommands: (d: string) => SVGDrawPath[];
-export declare const convertMatchesToSVGDrawPath: (match: RegExpMatchArray) => SVGDrawPath;
-export declare const convertSVGDocumentToShapes: (id: string) => ShapeType[];
-export declare const generateSVGURLFromShapes: (shapes: ShapeType[]) => string;
+import { SVGParamsBase } from '../../types/types';
+export declare const measureText: (text: string, params: SVGParamsBase, layer?: HTMLCanvasElement | null | undefined, measureContext?: CanvasRenderingContext2D | null | undefined) => {
+    width: number;
+    height: number;
+} | undefined;

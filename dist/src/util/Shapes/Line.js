@@ -1,6 +1,6 @@
 var _Line_center;
 import { __classPrivateFieldGet, __classPrivateFieldSet } from "tslib";
-import { getLineBoundaries } from '../helper/coordinates';
+import { getLineBoundaries } from './Line.util';
 import { Shape } from './Shape';
 export class Line extends Shape {
     constructor(startPoint, endPoint, svgParams, countShapeCountUp, isLocked = false) {

@@ -3,12 +3,12 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { SVGParamsBase } from '../../../types/types';
 import { getFonts } from '../../../util/helper/availableFonts';
 import { SVGParamFieldID } from '../../../util/helper/constants';
+import { hexToRGBA } from '../../../util/helper/util';
+import { footerFieldsStyles } from './FooterFields.styles';
 import {
-  hexToRGBA,
   updateNextSiblingValue,
   updatePreviousSiblingValue,
-} from '../../../util/helper/util';
-import { footerFieldsStyles } from './FooterFields.styles';
+} from './FooterFields.util';
 
 @customElement('footer-fields')
 export class FooterFields extends LitElement {

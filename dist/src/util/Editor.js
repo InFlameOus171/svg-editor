@@ -1,32 +1,34 @@
-var _Editor_selectedTool, _Editor_drawLayer, _Editor_previewLayer, _Editor_connection, _Editor_self, _Editor_offset, _Editor_shapes, _Editor_currentParams, _Editor_isShapeOnlyBeingSelected, _Editor_setAreFieldsEnabled, _Editor_selectedShape, _Editor_drawContext, _Editor_previewContext, _Editor_createShape, _Editor_handleUpdateShapes, _Editor_onHandleSelectShape, _Editor_onMoveShape, _Editor_openDownloadDialog, _Editor_deleteShapeById;
+var _Editor_selectedTool, _Editor_drawLayer, _Editor_previewLayer, _Editor_connection, _Editor_self, _Editor_footerFieldsRef, _Editor_offset, _Editor_shapes, _Editor_currentParams, _Editor_isShapeOnlyBeingSelected, _Editor_setAreFieldsEnabled, _Editor_selectedShape, _Editor_drawContext, _Editor_previewContext, _Editor_createShape, _Editor_handleUpdateShapes, _Editor_onHandleSelectShape, _Editor_onMoveShape, _Editor_openDownloadDialog, _Editor_deleteShapeById;
 import { __classPrivateFieldGet, __classPrivateFieldSet } from "tslib";
+import { updateStyleInputFields } from '../components/molecules/FooterFields/FooterFields.util';
+import { setIsButtonDisabled, setIsButtonActive, } from '../components/molecules/ToolBox/ToolBox.util';
 import { highlightStyle, SVGParamFieldID, textPlaceHolder, Tools_List, } from './helper/constants';
-import { setIsButtonActive, setIsButtonDisabled, updateStyleInputFields, } from './helper/domUtil';
-import { generateSVGURLFromShapes } from './helper/shapes';
+import { generateSVGURLFromShapes } from './helper/svgUtil';
 import { isMoveTool, isShapeType, isText, typeOfShape, } from './helper/typeguards';
 import { Pen } from './Pen';
-import { Ellipse } from './Shapes/Ellipse';
-import { Freehand } from './Shapes/Freehand';
-import { Line } from './Shapes/Line';
-import { Rectangle } from './Shapes/Rectangle';
-import { TextShape } from './Shapes/Text';
-import { DrawTool } from './Tools/DrawTool';
-import { EllipseTool } from './Tools/EllipseTool';
-import { ImportTool } from './Tools/ImportTool';
-import { LineTool } from './Tools/LineTool';
-import { MoveTool } from './Tools/MoveTool';
-import { RectangleTool } from './Tools/RectangleTool';
-import { SelectTool } from './Tools/SelectTool';
-import { TextTool } from './Tools/TextTool';
-import { paramFieldStateHandler, setTextParamsSourceVisibility, } from './Tools/TextTool.util';
+import { Ellipse } from './shapes/Ellipse/Ellipse';
+import { Freehand } from './shapes/Freehand/Freehand';
+import { Line } from './shapes/Line/Line';
+import { Rectangle } from './shapes/Rectangle/Rectangle';
+import { TextShape } from './shapes/Text/Text';
+import { DrawTool } from './tools/DrawTool/DrawTool';
+import { EllipseTool } from './tools/EllipseTool/EllipseTool';
+import { ImportTool } from './tools/ImportTool/ImportTool';
+import { LineTool } from './tools/LineTool/LineTool';
+import { MoveTool } from './tools/MoveTool/MoveTool';
+import { RectangleTool } from './tools/RectangleTool/RectangleTool';
+import { SelectTool } from './tools/SelectTool/SelectTool';
+import { TextTool } from './tools/TextTool/TextTool';
+import { paramFieldStateHandler, setTextParamsSourceVisibility, } from './tools/TextTool/TextTool.util';
 export class Editor {
-    constructor(drawLayer, previewLayer, offset, self) {
+    constructor(drawLayer, previewLayer, offset, self, footerFieldsRef) {
         var _a, _b;
         _Editor_selectedTool.set(this, null);
         _Editor_drawLayer.set(this, null);
         _Editor_previewLayer.set(this, null);
         _Editor_connection.set(this, void 0);
         _Editor_self.set(this, void 0);
+        _Editor_footerFieldsRef.set(this, void 0);
         _Editor_offset.set(this, void 0);
         _Editor_shapes.set(this, []);
         _Editor_currentParams.set(this, {
@@ -207,7 +209,7 @@ export class Editor {
         };
         this.onUpdateStyleInputFields = () => {
             var _a, _b;
-            updateStyleInputFields(__classPrivateFieldGet(this, _Editor_self, "f"), (_b = (_a = __classPrivateFieldGet(this, _Editor_selectedShape, "f")) === null || _a === void 0 ? void 0 : _a.getSvgParams()) !== null && _b !== void 0 ? _b : __classPrivateFieldGet(this, _Editor_currentParams, "f"));
+            updateStyleInputFields(__classPrivateFieldGet(this, _Editor_footerFieldsRef, "f"), (_b = (_a = __classPrivateFieldGet(this, _Editor_selectedShape, "f")) === null || _a === void 0 ? void 0 : _a.getSvgParams()) !== null && _b !== void 0 ? _b : __classPrivateFieldGet(this, _Editor_currentParams, "f"));
         };
         this.onSave = () => {
             this.onUnselectTool();
@@ -380,6 +382,7 @@ export class Editor {
         __classPrivateFieldSet(this, _Editor_previewLayer, previewLayer, "f");
         __classPrivateFieldSet(this, _Editor_self, self, "f");
         __classPrivateFieldSet(this, _Editor_offset, offset, "f");
+        __classPrivateFieldSet(this, _Editor_footerFieldsRef, footerFieldsRef, "f");
         __classPrivateFieldSet(this, _Editor_currentParams, {
             text: textPlaceHolder,
             strokeWidth: '1',
@@ -390,11 +393,11 @@ export class Editor {
         __classPrivateFieldSet(this, _Editor_previewContext, (_b = __classPrivateFieldGet(this, _Editor_previewLayer, "f")) === null || _b === void 0 ? void 0 : _b.getContext('2d'), "f");
         __classPrivateFieldSet(this, _Editor_setAreFieldsEnabled, paramFieldStateHandler(__classPrivateFieldGet(this, _Editor_self, "f")).setAreFieldsEnabled, "f");
         __classPrivateFieldGet(this, _Editor_setAreFieldsEnabled, "f").call(this, Object.values(SVGParamFieldID), false);
-        updateStyleInputFields(__classPrivateFieldGet(this, _Editor_self, "f"), __classPrivateFieldGet(this, _Editor_currentParams, "f"));
+        updateStyleInputFields(__classPrivateFieldGet(this, _Editor_footerFieldsRef, "f"), __classPrivateFieldGet(this, _Editor_currentParams, "f"));
         window.addEventListener('resize', () => {
             setTimeout(() => this.redrawShapes(), 50);
         });
     }
 }
-_Editor_selectedTool = new WeakMap(), _Editor_drawLayer = new WeakMap(), _Editor_previewLayer = new WeakMap(), _Editor_connection = new WeakMap(), _Editor_self = new WeakMap(), _Editor_offset = new WeakMap(), _Editor_shapes = new WeakMap(), _Editor_currentParams = new WeakMap(), _Editor_isShapeOnlyBeingSelected = new WeakMap(), _Editor_setAreFieldsEnabled = new WeakMap(), _Editor_selectedShape = new WeakMap(), _Editor_drawContext = new WeakMap(), _Editor_previewContext = new WeakMap(), _Editor_createShape = new WeakMap(), _Editor_handleUpdateShapes = new WeakMap(), _Editor_onHandleSelectShape = new WeakMap(), _Editor_onMoveShape = new WeakMap(), _Editor_openDownloadDialog = new WeakMap(), _Editor_deleteShapeById = new WeakMap();
+_Editor_selectedTool = new WeakMap(), _Editor_drawLayer = new WeakMap(), _Editor_previewLayer = new WeakMap(), _Editor_connection = new WeakMap(), _Editor_self = new WeakMap(), _Editor_footerFieldsRef = new WeakMap(), _Editor_offset = new WeakMap(), _Editor_shapes = new WeakMap(), _Editor_currentParams = new WeakMap(), _Editor_isShapeOnlyBeingSelected = new WeakMap(), _Editor_setAreFieldsEnabled = new WeakMap(), _Editor_selectedShape = new WeakMap(), _Editor_drawContext = new WeakMap(), _Editor_previewContext = new WeakMap(), _Editor_createShape = new WeakMap(), _Editor_handleUpdateShapes = new WeakMap(), _Editor_onHandleSelectShape = new WeakMap(), _Editor_onMoveShape = new WeakMap(), _Editor_openDownloadDialog = new WeakMap(), _Editor_deleteShapeById = new WeakMap();
 //# sourceMappingURL=Editor.js.map

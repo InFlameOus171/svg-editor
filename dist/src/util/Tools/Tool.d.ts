@@ -17,8 +17,8 @@ export declare abstract class Tool<T extends ShapeType, V extends ShapeType = T>
     toolName?: Tools_List;
     offset: Coordinates;
     isDrawing: boolean;
-    previousCoordinates: [number, number];
-    currentCoordinates: [number, number];
+    previousCoordinates: Coordinates;
+    currentCoordinates: Coordinates;
     onUpdateEditor: (shape: ShapeType | ShapeType[] | null) => void;
     constructor(drawLayer: HTMLCanvasElement, self: SVGEditor, onUpdateEditor: (shape: ShapeType | ShapeType[] | null) => void, offset?: Coordinates, previewLayer?: HTMLCanvasElement, drawPenConfig?: SVGParamsBase, previewPenConfig?: SVGParamsBase);
     setSVGParam: (field: keyof SVGParamsBase, value: any) => void;
@@ -29,7 +29,7 @@ export declare abstract class Tool<T extends ShapeType, V extends ShapeType = T>
     highlightPreview: () => void;
     unHighlightpreview: () => void;
     updateShapeData: (newCoordinates: Coordinates) => void;
-    getCoords: (e: MouseEvent) => [number, number];
+    getCoords: (e: MouseEvent) => Coordinates;
     executeAction: () => void;
     destroy: () => void;
 }

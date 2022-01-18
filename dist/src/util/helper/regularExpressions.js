@@ -2,6 +2,7 @@
 export const decimalNumberRegExp = new RegExp(/(-?\d*\.?\d+)/);
 const decimalNumber = decimalNumberRegExp.source;
 export const decimalNumberRegExpGlobal = new RegExp(/(-?\d*\.?\d+)/g);
+// Matches comma in combination with/without space
 export const separatorRegExp = new RegExp(/((\s?,\s?)|\s)/);
 const separator = separatorRegExp.source;
 // Reads path string and groups each match in three groups: 1st: path command, 2nd: x coordinate and y coordinates "x,y"

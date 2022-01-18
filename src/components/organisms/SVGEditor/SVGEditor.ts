@@ -2,27 +2,27 @@ import { html, LitElement } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { nanoid } from 'nanoid';
 import { ConnectionStatus } from '../../../types/network.types';
-import type { SVGParamsBase } from '../../../types/types';
 import { Editor } from '../../../util/Editor';
-import { SVGParamFieldID, Tools_List } from '../../../util/helper/constants.js';
-import { hexToRGBA } from '../../../util/helper/util';
+import { Tools_List } from '../../../util/helper/constants.js';
 import { Connection } from '../../../util/network';
-import '../../atoms/MenuButton';
-import '../../atoms/PositionInformation';
-import '../../atoms/ToolboxButton';
 import type { IToolboxButtonProps } from '../../atoms/ToolboxButton/ToolboxButton.types';
-import '../../molecules/ConnectionSection';
-import '../../molecules/DialogSection';
-import '../../molecules/DrawZone';
-import { DrawZone } from '../../molecules/DrawZone';
-import '../../molecules/FooterFields';
-import '../../molecules/ToolBox';
+import type { DrawZone } from '../../molecules/DrawZone';
 import {
   layoutContentStyle,
   layoutHeaderStyle,
   layoutStyle,
 } from './SVGEditor.styles';
 import { getToolboxButtonsProps } from './SVGEditor.util';
+import '../../atoms/MenuButton';
+import '../../atoms/PositionInformation';
+import '../../atoms/ToolboxButton';
+import '../../molecules/ConnectionSection';
+import '../../molecules/DialogSection';
+import '../../molecules/DrawZone';
+import '../../molecules/FooterFields';
+import '../../molecules/ToolBox';
+import { FooterFields } from '../../molecules/FooterFields';
+import { Coordinates } from '../../../types/types';
 
 @customElement('svg-editor')
 export class SVGEditor extends LitElement {
@@ -33,7 +33,7 @@ export class SVGEditor extends LitElement {
   @state()
   editor: Editor | null = null;
   @state()
-  position?: [number, number];
+  position?: Coordinates;
   @state()
   connection?: Connection;
   @state()
@@ -69,11 +69,15 @@ export class SVGEditor extends LitElement {
       ) as HTMLCanvasElement | undefined;
       if (drawLayer && previewLayer) {
         new ResizeObserver(this.updateResize).observe(drawLayer);
+        const footerFields = this.shadowRoot?.querySelector(
+          'footer-fields'
+        ) as FooterFields;
         this.editor = new Editor(
           drawLayer,
           previewLayer,
           [previewLayer.offsetLeft, previewLayer.offsetTop],
-          this
+          this,
+          footerFields
         );
 
         this.connection = new Connection(
@@ -111,6 +115,8 @@ export class SVGEditor extends LitElement {
     this.height = window.innerHeight;
   };
 
+  handlePositionChange = (position?: Coordinates) => (this.position = position);
+
   render() {
     const tools: IToolboxButtonProps[] = getToolboxButtonsProps(
       (tools: Tools_List | null) => {
@@ -123,8 +129,7 @@ export class SVGEditor extends LitElement {
           id="draw-zone"
           .height=${this.height}
           .width=${this.width}
-          .onPositionChange=${(position?: [number, number]) =>
-            (this.position = position)}
+          .onPositionChange=${this.handlePositionChange}
         ></draw-zone>
         <div id="right-main-section">
           <tool-box id="tool-box" .tools=${tools}></tool-box>

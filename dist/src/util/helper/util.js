@@ -1,15 +1,4 @@
 import { hexColorCodeRegExp } from './regularExpressions';
-export const partition = (array, aggregateFunction, applyFunction = value => value) => {
-    return array.reduce((acc, value) => {
-        const result = aggregateFunction(value);
-        if (result) {
-            return [[...acc[0], applyFunction(value)], [...acc[1]]];
-        }
-        else {
-            return [[...acc[0]], [...acc[1], applyFunction(value)]];
-        }
-    }, [[], []]);
-};
 export const getUniqueXandYCoordinatesFromBoundaries = (coordinates) => {
     const uniqueCoordinates = [...new Map(coordinates)];
     const splitXandYCoordinates = uniqueCoordinates.reduce((acc, innerArray) => {
@@ -34,21 +23,6 @@ export const parseFloat = (value) => {
         return value;
     }
     return Number.parseFloat(value);
-};
-export const elementArrayToObject = (elements) => elements.reduce((acc, elem) => {
-    var _a;
-    return Object.assign(Object.assign({}, acc), { [elem.tagName]: [...((_a = acc[elem.tagName]) !== null && _a !== void 0 ? _a : []), elem] });
-}, {});
-// ref: https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/transform
-export const transformCoordinatesByMatrix = (matrix) => (coordinates) => {
-    const [a, b, c, d, e, f] = matrix;
-    const [oldX, oldY] = coordinates;
-    const newX = a * oldX + c * oldX + e;
-    const newY = b * oldY + d * oldY + f;
-    return [newX, newY];
-};
-export const transformAllCoordinatesByMatrix = (matrix, coordinates) => {
-    return coordinates.map(transformCoordinatesByMatrix(matrix));
 };
 export const parseToFixed2HexString = (colorValue) => {
     let codeValue = parseInt(colorValue[0]).toString(16);
@@ -94,17 +68,6 @@ export const normalizeColorCode = (colorCode) => {
         };
     }
     return { colorCode, opacity: '1' };
-};
-export const updateNextSiblingValue = (event) => {
-    var _a, _b;
-    if ((_a = event.target) === null || _a === void 0 ? void 0 : _a.nextElementSibling)
-        event.target.nextElementSibling.value = (_b = event.currentTarget) === null || _b === void 0 ? void 0 : _b.value;
-};
-export const updatePreviousSiblingValue = (event) => {
-    var _a, _b;
-    if ((_a = event.target) === null || _a === void 0 ? void 0 : _a.previousElementSibling)
-        event.target
-            .previousElementSibling.value = (_b = event.currentTarget) === null || _b === void 0 ? void 0 : _b.value;
 };
 export const relativeCoordinatesCommands = [
     'a',

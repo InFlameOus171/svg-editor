@@ -12,9 +12,9 @@
   "scripts": {
     "lint_fix": "eslint ./src/**/*.ts --fix",
     "lint_check": "eslint ./src/**/*.ts",
-    "get_size_of_bundle": "node getSizeOfFile ./build/svg-editor.js",
-    "rename_to_old": "node rename.js ./build/svg-editor.js ./build/svg-editor.old.js",
-    "minify_bundle": "minify ./build/svg-editor.old.js > ./build/svg-editor.js && node removeOldIndex.js ./build/svg-editor.old.js",
+    "get_size_of_bundle": "node getSizeOfFile ./build/index.js",
+    "rename_to_old": "node rename.js ./build/index.js ./build/index.old.js",
+    "minify_bundle": "minify ./build/index.old.js > ./build/index.js && node removeOldIndex.js ./build/index.old.js",
     "start": "npm run check_for_circular_deps && tsc && concurrently -k -r \"tsc --watch --preserveWatchOutput\" \"wds\"",
     "check_for_circular_deps": "madge --extensions ts --circular --exclude \".*\\.types.ts|typeguards.ts\" ./src",
     "build": "tsc && rollup -c && npm run rename_to_old && npm run minify_bundle && npm run get_size_of_bundle",

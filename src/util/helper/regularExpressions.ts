@@ -4,6 +4,7 @@ const decimalNumber = decimalNumberRegExp.source;
 
 export const decimalNumberRegExpGlobal = new RegExp(/(-?\d*\.?\d+)/g);
 
+// Matches comma in combination with/without space
 export const separatorRegExp = new RegExp(/((\s?,\s?)|\s)/);
 const separator = separatorRegExp.source;
 

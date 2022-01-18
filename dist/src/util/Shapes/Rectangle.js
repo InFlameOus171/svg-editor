@@ -1,10 +1,10 @@
 var _Rectangle_startingCorner, _Rectangle_width, _Rectangle_height;
 import { __classPrivateFieldGet, __classPrivateFieldSet } from "tslib";
-import { getRectBoundaries } from '../helper/coordinates';
+import { getRectangleBoundaries } from './Rectangle.util';
 import { Shape } from './Shape';
 export class Rectangle extends Shape {
     constructor(startingCorner, width, height, svgParams = {}, countShapecountUp, isLocked = false) {
-        super(getRectBoundaries(startingCorner, width, height), svgParams, countShapecountUp, isLocked);
+        super(getRectangleBoundaries(startingCorner, width, height), svgParams, countShapecountUp, isLocked);
         _Rectangle_startingCorner.set(this, [-1, -1]);
         _Rectangle_width.set(this, 0);
         _Rectangle_height.set(this, 0);

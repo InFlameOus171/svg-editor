@@ -1,7 +1,7 @@
 import { nanoid } from 'nanoid';
 import type { ConnectionStatus, ParsedData } from '../../types/network.types';
 import type { ShapeType } from '../../types/shapes.types';
-import { Keeper } from './Keeper';
+import { ConnectionMonitor } from './ConnectionMonitor';
 
 export class Connection {
   #userName: string = 'user_' + nanoid(5);
@@ -11,7 +11,7 @@ export class Connection {
   #port: string;
   #roomId: string = '';
   ws: WebSocket | null = null;
-  #keeper?: Keeper;
+  #keeper?: ConnectionMonitor;
   #status?: ConnectionStatus = 'disconnected';
   onDeleteShapes: (ids: string[]) => void;
   onUpdateShapes: (shapes: Record<string, any>[]) => void;
@@ -46,6 +46,7 @@ export class Connection {
 
   disconnect = () => {
     this.ws?.close();
+    this.#keeper?.destroy();
     this.updateStatus('disconnected');
     this.onResetEditor();
   };
@@ -80,7 +81,7 @@ export class Connection {
     if (this.#keeper) {
       this.#keeper.destroy();
     }
-    this.#keeper = new Keeper(ws);
+    this.#keeper = new ConnectionMonitor(ws);
     return this.#keeper;
   };
 

@@ -4,8 +4,9 @@ import { LitElement, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { getFonts } from '../../../util/helper/availableFonts';
 import { SVGParamFieldID } from '../../../util/helper/constants';
-import { hexToRGBA, updateNextSiblingValue, updatePreviousSiblingValue, } from '../../../util/helper/util';
+import { hexToRGBA } from '../../../util/helper/util';
 import { footerFieldsStyles } from './FooterFields.styles';
+import { updateNextSiblingValue, updatePreviousSiblingValue, } from './FooterFields.util';
 let FooterFields = class FooterFields extends LitElement {
     constructor() {
         super();

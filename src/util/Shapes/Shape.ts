@@ -6,7 +6,7 @@ import type {
 } from '../../types/types';
 import { textPlaceHolder } from '../helper/constants';
 import { getTextBoundaries } from '../helper/coordinates';
-import { measureText } from '../helper/domUtil';
+import { measureText } from '../helper/shapes';
 import { isText } from '../helper/typeguards';
 
 export abstract class Shape {

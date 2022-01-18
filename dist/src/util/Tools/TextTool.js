@@ -1,7 +1,7 @@
 var _TextTool_onClick;
 import { __classPrivateFieldGet } from "tslib";
 import { textPlaceHolder, Tools_List } from '../helper/constants';
-import { measureText } from '../helper/domUtil';
+import { measureText } from '../helper/shapes';
 import { TextShape } from '../Shapes/Text';
 import { setTextParamsSourceVisibility } from './TextTool.util';
 import { Tool } from './Tool';

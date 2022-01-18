@@ -1,5 +1,6 @@
 import { html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { Coordinates } from '../../../types/types';
 import { drawZoneStyles } from './DrawZone.styles';
 
 @customElement('draw-zone')
@@ -11,7 +12,7 @@ export class DrawZone extends LitElement {
   width: number = 0;
 
   @property({ type: String })
-  onPositionChange?: (position?: [number, number]) => void;
+  onPositionChange?: (position?: Coordinates) => void;
 
   protected firstUpdated(
     _changedProperties: Map<string | number | symbol, unknown>

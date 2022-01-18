@@ -1,7 +1,8 @@
 var _Path_rawDrawPath, _Path_center;
 import { __classPrivateFieldGet, __classPrivateFieldSet } from "tslib";
-import { getPathBoundaries, sumOfCoordinates } from '../helper/coordinates';
+import { sumOfCoordinates } from '../helper/coordinates';
 import { singleDirectionCommands } from '../helper/util';
+import { getPathBoundaries } from './Path.util';
 import { Shape } from './Shape';
 export class Path extends Shape {
     constructor(drawPath, svgParams, dontCountUp, isLocked = false) {

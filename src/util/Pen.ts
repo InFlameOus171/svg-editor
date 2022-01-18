@@ -1,12 +1,12 @@
 import type { ShapeType } from '../types/shapes.types';
 import type { SVGParamsBase } from '../types/types';
 import { typeOfShape } from './helper/typeguards';
-import { Ellipse } from './Shapes/Ellipse';
-import { Freehand } from './Shapes/Freehand';
-import { Line } from './Shapes/Line';
-import { Path } from './Shapes/Path';
-import { Rectangle } from './Shapes/Rectangle';
-import { TextShape } from './Shapes/Text';
+import { Ellipse } from './shapes/Ellipse/Ellipse';
+import { Freehand } from './shapes/Freehand/Freehand';
+import { Line } from './shapes/Line/Line';
+import { Path } from './shapes/Path/Path';
+import { Rectangle } from './shapes/Rectangle/Rectangle';
+import { TextShape } from './shapes/Text/Text';
 
 const Pen = {
   generatePen: (context?: CanvasRenderingContext2D | null) => {

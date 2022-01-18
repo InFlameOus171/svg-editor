@@ -4,6 +4,8 @@ import { customElement, state } from 'lit/decorators.js';
 import { nanoid } from 'nanoid';
 import { Editor } from '../../../util/Editor';
 import { Connection } from '../../../util/network';
+import { layoutContentStyle, layoutHeaderStyle, layoutStyle, } from './SVGEditor.styles';
+import { getToolboxButtonsProps } from './SVGEditor.util';
 import '../../atoms/MenuButton';
 import '../../atoms/PositionInformation';
 import '../../atoms/ToolboxButton';
@@ -12,8 +14,6 @@ import '../../molecules/DialogSection';
 import '../../molecules/DrawZone';
 import '../../molecules/FooterFields';
 import '../../molecules/ToolBox';
-import { layoutContentStyle, layoutHeaderStyle, layoutStyle, } from './SVGEditor.styles';
-import { getToolboxButtonsProps } from './SVGEditor.util';
 let SVGEditor = class SVGEditor extends LitElement {
     constructor() {
         var _a, _b;
@@ -50,19 +50,21 @@ let SVGEditor = class SVGEditor extends LitElement {
             this.width = window.innerWidth;
             this.height = window.innerHeight;
         };
+        this.handlePositionChange = (position) => (this.position = position);
     }
     firstUpdated() {
         this.updateResize();
     }
     updated(_changedProperties) {
-        var _a, _b, _c;
+        var _a, _b, _c, _d;
         if (!this.editor && this.editor !== _changedProperties.get('editor')) {
             const drawZone = (_a = this.shadowRoot) === null || _a === void 0 ? void 0 : _a.getElementById('draw-zone');
             const drawLayer = (_b = drawZone === null || drawZone === void 0 ? void 0 : drawZone.shadowRoot) === null || _b === void 0 ? void 0 : _b.getElementById('draw-layer');
             const previewLayer = (_c = drawZone === null || drawZone === void 0 ? void 0 : drawZone.shadowRoot) === null || _c === void 0 ? void 0 : _c.getElementById('preview-layer');
             if (drawLayer && previewLayer) {
                 new ResizeObserver(this.updateResize).observe(drawLayer);
-                this.editor = new Editor(drawLayer, previewLayer, [previewLayer.offsetLeft, previewLayer.offsetTop], this);
+                const footerFields = (_d = this.shadowRoot) === null || _d === void 0 ? void 0 : _d.querySelector('footer-fields');
+                this.editor = new Editor(drawLayer, previewLayer, [previewLayer.offsetLeft, previewLayer.offsetTop], this, footerFields);
                 this.connection = new Connection(this.editor.deleteFromShapes, this.editor.updateShapes, this.editor.getAllShapes, this.editor.resetEditor, this.updateConnection, this.updateChatLog);
             }
         }
@@ -78,7 +80,7 @@ let SVGEditor = class SVGEditor extends LitElement {
           id="draw-zone"
           .height=${this.height}
           .width=${this.width}
-          .onPositionChange=${(position) => (this.position = position)}
+          .onPositionChange=${this.handlePositionChange}
         ></draw-zone>
         <div id="right-main-section">
           <tool-box id="tool-box" .tools=${tools}></tool-box>

@@ -1,7 +1,7 @@
 var _Connection_userName, _Connection_chatLog, _Connection_userId, _Connection_url, _Connection_port, _Connection_roomId, _Connection_keeper, _Connection_status, _Connection_parseResponse, _Connection_startKeepingConnectionAlive, _Connection_createNewWebSocket, _Connection_sendShapeWithLock;
 import { __classPrivateFieldGet, __classPrivateFieldSet, __rest } from "tslib";
 import { nanoid } from 'nanoid';
-import { Keeper } from './Keeper';
+import { ConnectionMonitor } from './ConnectionMonitor';
 export class Connection {
     constructor(onDeleteShapes, onUpdateShapes, onGetAllShapes, onResetEditor, onUpdateConnectionStatus, onNewMessage, url = 'localhost', port = '8080') {
         _Connection_userName.set(this, 'user_' + nanoid(5));
@@ -14,8 +14,9 @@ export class Connection {
         _Connection_keeper.set(this, void 0);
         _Connection_status.set(this, 'disconnected');
         this.disconnect = () => {
-            var _a;
+            var _a, _b;
             (_a = this.ws) === null || _a === void 0 ? void 0 : _a.close();
+            (_b = __classPrivateFieldGet(this, _Connection_keeper, "f")) === null || _b === void 0 ? void 0 : _b.destroy();
             this.updateStatus('disconnected');
             this.onResetEditor();
         };
@@ -43,7 +44,7 @@ export class Connection {
             if (__classPrivateFieldGet(this, _Connection_keeper, "f")) {
                 __classPrivateFieldGet(this, _Connection_keeper, "f").destroy();
             }
-            __classPrivateFieldSet(this, _Connection_keeper, new Keeper(ws), "f");
+            __classPrivateFieldSet(this, _Connection_keeper, new ConnectionMonitor(ws), "f");
             return __classPrivateFieldGet(this, _Connection_keeper, "f");
         });
         _Connection_createNewWebSocket.set(this, () => {

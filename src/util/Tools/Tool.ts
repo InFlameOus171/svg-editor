@@ -22,8 +22,8 @@ export abstract class Tool<T extends ShapeType, V extends ShapeType = T> {
   toolName?: Tools_List;
   offset: Coordinates;
   isDrawing: boolean = false;
-  previousCoordinates: [number, number] = [0, 0];
-  currentCoordinates: [number, number] = [0, 0];
+  previousCoordinates: Coordinates = [0, 0];
+  currentCoordinates: Coordinates = [0, 0];
   onUpdateEditor: (shape: ShapeType | ShapeType[] | null) => void;
   constructor(
     drawLayer: HTMLCanvasElement,
@@ -88,7 +88,7 @@ export abstract class Tool<T extends ShapeType, V extends ShapeType = T> {
     throw new Error('not implemented');
   };
 
-  getCoords = (e: MouseEvent): [number, number] => {
+  getCoords = (e: MouseEvent): Coordinates => {
     return [e.offsetX - this.offset[0], e.offsetY - this.offset[1]];
   };
 

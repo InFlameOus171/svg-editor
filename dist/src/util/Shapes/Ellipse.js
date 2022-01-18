@@ -1,6 +1,6 @@
 var _Ellipse_center;
 import { __classPrivateFieldGet, __classPrivateFieldSet } from "tslib";
-import { getCircleBoundaries } from '../helper/coordinates';
+import { getCircleBoundaries } from './Ellipse.util';
 import { Shape } from './Shape';
 export class Ellipse extends Shape {
     constructor(center, radiusX, radiusY, svgParams, countShapeCountUp, isLocked = false) {

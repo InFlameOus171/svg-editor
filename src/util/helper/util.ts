@@ -1,24 +1,5 @@
 import type { Coordinates, Matrix } from '../../types/types';
-import type { Partition } from '../../types/util.types';
 import { hexColorCodeRegExp } from './regularExpressions';
-
-export const partition = <T>(
-  array: Array<T>,
-  aggregateFunction: (value: T) => boolean,
-  applyFunction: (value: T) => T = value => value
-): Partition<T> => {
-  return array.reduce(
-    (acc: Partition<T>, value) => {
-      const result = aggregateFunction(value);
-      if (result) {
-        return [[...acc[0], applyFunction(value)], [...acc[1]]];
-      } else {
-        return [[...acc[0]], [...acc[1], applyFunction(value)]];
-      }
-    },
-    [[], []]
-  );
-};
 
 export const getUniqueXandYCoordinatesFromBoundaries = (
   coordinates: Coordinates[]
@@ -52,29 +33,6 @@ export const parseFloat = (value?: string | number | null) => {
     return value;
   }
   return Number.parseFloat(value);
-};
-
-export const elementArrayToObject = (elements: Element[]) =>
-  elements.reduce((acc: Record<string, Element[]>, elem) => {
-    return { ...acc, [elem.tagName]: [...(acc[elem.tagName] ?? []), elem] };
-  }, {});
-
-// ref: https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/transform
-export const transformCoordinatesByMatrix =
-  (matrix: Matrix) =>
-  (coordinates: Coordinates): Coordinates => {
-    const [a, b, c, d, e, f] = matrix;
-    const [oldX, oldY] = coordinates;
-    const newX = a * oldX + c * oldX + e;
-    const newY = b * oldY + d * oldY + f;
-    return [newX, newY];
-  };
-
-export const transformAllCoordinatesByMatrix = (
-  matrix: Matrix,
-  coordinates: Coordinates[]
-) => {
-  return coordinates.map(transformCoordinatesByMatrix(matrix));
 };
 
 export const parseToFixed2HexString = (colorValue: RegExpMatchArray) => {
@@ -130,21 +88,6 @@ export const normalizeColorCode = (
     };
   }
   return { colorCode, opacity: '1' };
-};
-
-export const updateNextSiblingValue = (event: InputEvent) => {
-  if ((event.target as HTMLInputElement)?.nextElementSibling)
-    (
-      (event.target as HTMLInputElement).nextElementSibling as HTMLInputElement
-    ).value = (event.currentTarget as HTMLInputElement)?.value;
-};
-
-export const updatePreviousSiblingValue = (event: InputEvent) => {
-  if ((event.target as HTMLInputElement)?.previousElementSibling)
-    (
-      (event.target as HTMLInputElement)
-        .previousElementSibling as HTMLInputElement
-    ).value = (event.currentTarget as HTMLInputElement)?.value;
 };
 
 export const relativeCoordinatesCommands = [

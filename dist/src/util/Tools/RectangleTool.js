@@ -1,7 +1,8 @@
 import { Tools_List } from '../helper/constants';
-import { getCanvasRectangleValuesFromPoints, getFormattedRectangleValuesFromPoints, } from '../helper/coordinates';
+import { getCanvasRectangleValuesFromPoints } from '../helper/coordinates';
 import { Pen } from '../Pen';
 import { Rectangle } from '../Shapes/Rectangle';
+import { getFormattedRectangleValuesFromPoints } from './RectangleTool.util';
 import { Tool } from './Tool';
 export class RectangleTool extends Tool {
     constructor(drawLayer, previewLayer, self, onCreate, styles, offset) {

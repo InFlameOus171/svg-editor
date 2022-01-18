@@ -11,11 +11,12 @@ import '../../molecules/DialogSection';
 import '../../molecules/DrawZone';
 import '../../molecules/FooterFields';
 import '../../molecules/ToolBox';
+import { Coordinates } from '../../../types/types';
 export declare class SVGEditor extends LitElement {
     width: number;
     height: number;
     editor: Editor | null;
-    position?: [number, number];
+    position?: Coordinates;
     connection?: Connection;
     chatLog: Array<{
         userName: string;
@@ -37,5 +38,6 @@ export declare class SVGEditor extends LitElement {
     }) => void;
     handleLeaveRoom: () => void;
     updateResize: () => void;
+    handlePositionChange: (position?: Coordinates | undefined) => Coordinates | undefined;
     render(): import("lit-html").TemplateResult<1>;
 }

@@ -1,3 +1,9 @@
+import { FooterFields } from '../components/molecules/FooterFields';
+import { updateStyleInputFields } from '../components/molecules/FooterFields/FooterFields.util';
+import {
+  setIsButtonDisabled,
+  setIsButtonActive,
+} from '../components/molecules/ToolBox/ToolBox.util';
 import { SVGEditor } from '../components/organisms/SVGEditor';
 import type { ShapeType } from '../types/shapes.types';
 import type { Coordinates, SVGParamsBase } from '../types/types';
@@ -7,12 +13,7 @@ import {
   textPlaceHolder,
   Tools_List,
 } from './helper/constants';
-import {
-  setIsButtonActive,
-  setIsButtonDisabled,
-  updateStyleInputFields,
-} from './helper/domUtil';
-import { generateSVGURLFromShapes } from './helper/shapes';
+import { generateSVGURLFromShapes } from './helper/svgUtil';
 import {
   isMoveTool,
   isShapeType,
@@ -21,24 +22,24 @@ import {
 } from './helper/typeguards';
 import { Connection } from './network';
 import { Pen } from './Pen';
-import { Ellipse } from './Shapes/Ellipse';
-import { Freehand } from './Shapes/Freehand';
-import { Line } from './Shapes/Line';
-import { Rectangle } from './Shapes/Rectangle';
-import { TextShape } from './Shapes/Text';
-import { DrawTool } from './Tools/DrawTool';
-import { EllipseTool } from './Tools/EllipseTool';
-import { ImportTool } from './Tools/ImportTool';
-import { LineTool } from './Tools/LineTool';
-import { MoveTool } from './Tools/MoveTool';
-import { RectangleTool } from './Tools/RectangleTool';
-import { SelectTool } from './Tools/SelectTool';
-import { TextTool } from './Tools/TextTool';
+import { Ellipse } from './shapes/Ellipse/Ellipse';
+import { Freehand } from './shapes/Freehand/Freehand';
+import { Line } from './shapes/Line/Line';
+import { Rectangle } from './shapes/Rectangle/Rectangle';
+import { TextShape } from './shapes/Text/Text';
+import { DrawTool } from './tools/DrawTool/DrawTool';
+import { EllipseTool } from './tools/EllipseTool/EllipseTool';
+import { ImportTool } from './tools/ImportTool/ImportTool';
+import { LineTool } from './tools/LineTool/LineTool';
+import { MoveTool } from './tools/MoveTool/MoveTool';
+import { RectangleTool } from './tools/RectangleTool/RectangleTool';
+import { SelectTool } from './tools/SelectTool/SelectTool';
+import { TextTool } from './tools/TextTool/TextTool';
 import {
   paramFieldStateHandler,
   setTextParamsSourceVisibility,
-} from './Tools/TextTool.util';
-import { Tool } from './Tools/Tool';
+} from './tools/TextTool/TextTool.util';
+import { Tool } from './tools/Tool';
 
 export class Editor {
   #selectedTool: Tool<ShapeType> | null = null;
@@ -46,6 +47,7 @@ export class Editor {
   #previewLayer: HTMLCanvasElement | null = null;
   #connection?: Connection;
   #self: SVGEditor;
+  #footerFieldsRef: FooterFields;
   #offset: Coordinates;
   #shapes: ShapeType[] = [];
   #currentParams: SVGParamsBase = {
@@ -67,12 +69,14 @@ export class Editor {
     drawLayer: HTMLCanvasElement,
     previewLayer: HTMLCanvasElement,
     offset: Coordinates,
-    self: SVGEditor
+    self: SVGEditor,
+    footerFieldsRef: FooterFields
   ) {
     this.#drawLayer = drawLayer;
     this.#previewLayer = previewLayer;
     this.#self = self;
     this.#offset = offset;
+    this.#footerFieldsRef = footerFieldsRef;
     this.#currentParams = {
       text: textPlaceHolder,
       strokeWidth: '1',
@@ -85,7 +89,7 @@ export class Editor {
       this.#self
     ).setAreFieldsEnabled;
     this.#setAreFieldsEnabled(Object.values(SVGParamFieldID), false);
-    updateStyleInputFields(this.#self, this.#currentParams);
+    updateStyleInputFields(this.#footerFieldsRef, this.#currentParams);
 
     window.addEventListener('resize', () => {
       setTimeout(() => this.redrawShapes(), 50);
@@ -313,7 +317,7 @@ export class Editor {
 
   onUpdateStyleInputFields = () => {
     updateStyleInputFields(
-      this.#self,
+      this.#footerFieldsRef,
       this.#selectedShape?.getSvgParams() ?? this.#currentParams
     );
   };
