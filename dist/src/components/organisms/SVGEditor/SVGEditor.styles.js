@@ -31,8 +31,6 @@ export const layoutContentStyle = css `
     left: 0;
     background-color: rgba(255, 255, 255, 1);
     flex: 1 1 auto;
-    /* max-height: 80vh; */
-    /* width: 100%; */
     overflow: auto;
     display: flex;
     position: relative;
