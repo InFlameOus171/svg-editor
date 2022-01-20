@@ -10,16 +10,12 @@ export const footerFieldsStyles = css`
     background-color: rgba(255, 255, 255, 0.8);
   }
 
-  :host #footer-fields {
+  :host #footer-input {
     border: none;
     flex: 2 1 auto;
     display: flex;
-    flex-direction: column;
-  }
-
-  #footer-fields > #footer-input {
     width: 100%;
-    justify-content: space-between;
+    gap: 20px;
     display: flex;
   }
 
@@ -31,7 +27,6 @@ export const footerFieldsStyles = css`
   :host #footer-input #right-input-section {
     visibility: hidden;
     border: none;
-    padding: 0 20px 20px;
     background-color: inherit;
     border-left: 1px solid rgba(0, 0, 0, 0.3);
     display: flex;
