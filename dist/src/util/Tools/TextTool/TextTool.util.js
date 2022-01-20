@@ -1,5 +1,5 @@
 import { SVGParamFieldID, textPlaceHolder } from '../../helper/constants';
-export const paramFieldStateHandler = (svgEditor) => ({
+export const paramFieldStateHandler = (footerFields) => ({
     setAreFieldsEnabled: (fieldNames, isEnabled = true) => {
         fieldNames.forEach(fieldName => {
             var _a, _b, _c, _d;
@@ -7,7 +7,7 @@ export const paramFieldStateHandler = (svgEditor) => ({
                 SVGParamFieldID.STROKE_OPACITY,
                 SVGParamFieldID.FILL_OPACITY,
             ].includes(fieldName);
-            const paramField = (_b = (_a = svgEditor === null || svgEditor === void 0 ? void 0 : svgEditor.shadowRoot) === null || _a === void 0 ? void 0 : _a.getElementById('footer-input')) === null || _b === void 0 ? void 0 : _b.querySelector('#' + fieldName);
+            const paramField = (_b = (_a = footerFields === null || footerFields === void 0 ? void 0 : footerFields.shadowRoot) === null || _a === void 0 ? void 0 : _a.getElementById('footer-input')) === null || _b === void 0 ? void 0 : _b.querySelector('#' + fieldName);
             if (isEnabled) {
                 paramField === null || paramField === void 0 ? void 0 : paramField.removeAttribute('disabled');
                 if (doesInputRangeTwoFields) {
@@ -23,9 +23,9 @@ export const paramFieldStateHandler = (svgEditor) => ({
         });
     },
 });
-export const setTextParamsSourceVisibility = (svgEditor, isVisible) => {
+export const setTextParamsSourceVisibility = (footerFields, isVisible) => {
     var _a;
-    const source = (_a = svgEditor === null || svgEditor === void 0 ? void 0 : svgEditor.shadowRoot) === null || _a === void 0 ? void 0 : _a.getElementById('right-input-section');
+    const source = (_a = footerFields === null || footerFields === void 0 ? void 0 : footerFields.shadowRoot) === null || _a === void 0 ? void 0 : _a.getElementById('right-input-section');
     if (source) {
         source.style.visibility = isVisible ? 'visible' : 'hidden';
         isVisible

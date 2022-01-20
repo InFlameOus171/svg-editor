@@ -1,3 +1,4 @@
+import { FooterFields } from '../../components/molecules/FooterFields';
 import { SVGEditor } from '../../components/organisms/SVGEditor';
 import type { ShapeType } from '../../types/shapes.types';
 import type { Coordinates, SVGParamsBase } from '../../types/types';
@@ -12,6 +13,7 @@ export abstract class Tool<T extends ShapeType, V extends ShapeType = T> {
   drawLayer: HTMLCanvasElement;
   previewLayer?: HTMLCanvasElement;
   self: SVGEditor;
+  footerFields?: FooterFields;
   currentShape?: V;
   allShapes: T[] = [];
   shallWait: boolean = false;
@@ -32,11 +34,13 @@ export abstract class Tool<T extends ShapeType, V extends ShapeType = T> {
     offset: Coordinates = [0, 0],
     previewLayer?: HTMLCanvasElement,
     drawPenConfig: SVGParamsBase = { text: textPlaceHolder },
-    previewPenConfig?: SVGParamsBase
+    previewPenConfig?: SVGParamsBase,
+    footerFields?: FooterFields
   ) {
     this.drawLayer = drawLayer;
     this.onUpdateEditor = onUpdateEditor;
     this.self = self;
+    this.footerFields = footerFields;
     this.offset = offset ?? [drawLayer.offsetLeft, drawLayer.offsetTop];
     this.previewLayer = previewLayer;
     this.previewPenConfig = previewPenConfig ?? highlightStyle;

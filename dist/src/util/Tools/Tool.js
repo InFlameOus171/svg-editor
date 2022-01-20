@@ -2,7 +2,7 @@ var _Tool_draw;
 import { highlightStyle, textPlaceHolder, } from '../helper/constants';
 import { Pen } from '../Pen';
 export class Tool {
-    constructor(drawLayer, self, onUpdateEditor, offset = [0, 0], previewLayer, drawPenConfig = { text: textPlaceHolder }, previewPenConfig) {
+    constructor(drawLayer, self, onUpdateEditor, offset = [0, 0], previewLayer, drawPenConfig = { text: textPlaceHolder }, previewPenConfig, footerFields) {
         var _a, _b;
         this.allShapes = [];
         this.shallWait = false;
@@ -59,6 +59,7 @@ export class Tool {
         this.drawLayer = drawLayer;
         this.onUpdateEditor = onUpdateEditor;
         this.self = self;
+        this.footerFields = footerFields;
         this.offset = offset !== null && offset !== void 0 ? offset : [drawLayer.offsetLeft, drawLayer.offsetTop];
         this.previewLayer = previewLayer;
         this.previewPenConfig = previewPenConfig !== null && previewPenConfig !== void 0 ? previewPenConfig : highlightStyle;

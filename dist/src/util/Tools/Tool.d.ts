@@ -1,3 +1,4 @@
+import { FooterFields } from '../../components/molecules/FooterFields';
 import { SVGEditor } from '../../components/organisms/SVGEditor';
 import type { ShapeType } from '../../types/shapes.types';
 import type { Coordinates, SVGParamsBase } from '../../types/types';
@@ -7,6 +8,7 @@ export declare abstract class Tool<T extends ShapeType, V extends ShapeType = T>
     drawLayer: HTMLCanvasElement;
     previewLayer?: HTMLCanvasElement;
     self: SVGEditor;
+    footerFields?: FooterFields;
     currentShape?: V;
     allShapes: T[];
     shallWait: boolean;
@@ -20,7 +22,7 @@ export declare abstract class Tool<T extends ShapeType, V extends ShapeType = T>
     previousCoordinates: Coordinates;
     currentCoordinates: Coordinates;
     onUpdateEditor: (shape: ShapeType | ShapeType[] | null) => void;
-    constructor(drawLayer: HTMLCanvasElement, self: SVGEditor, onUpdateEditor: (shape: ShapeType | ShapeType[] | null) => void, offset?: Coordinates, previewLayer?: HTMLCanvasElement, drawPenConfig?: SVGParamsBase, previewPenConfig?: SVGParamsBase);
+    constructor(drawLayer: HTMLCanvasElement, self: SVGEditor, onUpdateEditor: (shape: ShapeType | ShapeType[] | null) => void, offset?: Coordinates, previewLayer?: HTMLCanvasElement, drawPenConfig?: SVGParamsBase, previewPenConfig?: SVGParamsBase, footerFields?: FooterFields);
     setSVGParam: (field: keyof SVGParamsBase, value: any) => void;
     setSVGParams: (drawPenConfig: SVGParamsBase) => void;
     resetPreview: () => void;

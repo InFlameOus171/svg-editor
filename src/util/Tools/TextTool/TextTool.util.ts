@@ -1,7 +1,8 @@
+import { FooterFields } from '../../../components/molecules/FooterFields';
 import { SVGEditor } from '../../../components/organisms/SVGEditor';
 import { SVGParamFieldID, textPlaceHolder } from '../../helper/constants';
 
-export const paramFieldStateHandler = (svgEditor: SVGEditor) => ({
+export const paramFieldStateHandler = (footerFields: FooterFields) => ({
   setAreFieldsEnabled: (
     fieldNames: SVGParamFieldID[],
     isEnabled: boolean = true
@@ -11,7 +12,7 @@ export const paramFieldStateHandler = (svgEditor: SVGEditor) => ({
         SVGParamFieldID.STROKE_OPACITY,
         SVGParamFieldID.FILL_OPACITY,
       ].includes(fieldName);
-      const paramField = svgEditor?.shadowRoot
+      const paramField = footerFields?.shadowRoot
         ?.getElementById('footer-input')
         ?.querySelector('#' + fieldName);
       if (isEnabled) {
@@ -30,10 +31,12 @@ export const paramFieldStateHandler = (svgEditor: SVGEditor) => ({
 });
 
 export const setTextParamsSourceVisibility = (
-  svgEditor?: SVGEditor,
+  footerFields?: FooterFields,
   isVisible?: boolean
 ) => {
-  const source = svgEditor?.shadowRoot?.getElementById('right-input-section');
+  const source = footerFields?.shadowRoot?.getElementById(
+    'right-input-section'
+  );
   if (source) {
     source.style.visibility = isVisible ? 'visible' : 'hidden';
     isVisible

@@ -6,8 +6,8 @@ import { TextShape } from '../../shapes/Text/Text';
 import { setTextParamsSourceVisibility } from './TextTool.util';
 import { Tool } from '../Tool';
 export class TextTool extends Tool {
-    constructor(drawLayer, previewLayer, self, onCreate, currentStyles, offset) {
-        super(drawLayer, self, onCreate, offset, previewLayer, currentStyles);
+    constructor(drawLayer, previewLayer, self, onCreate, currentStyles, offset, footerFields) {
+        super(drawLayer, self, onCreate, offset, previewLayer, currentStyles, undefined, footerFields);
         _TextTool_onClick.set(this, (event) => {
             var _a;
             if (event.button !== 0)
@@ -34,10 +34,10 @@ export class TextTool extends Tool {
             this.drawLayer.addEventListener('click', __classPrivateFieldGet(this, _TextTool_onClick, "f"));
         };
         this.destroy = () => {
-            setTextParamsSourceVisibility(this.self, false);
+            setTextParamsSourceVisibility(this.footerFields, false);
             this.drawLayer.removeEventListener('click', __classPrivateFieldGet(this, _TextTool_onClick, "f"));
         };
-        setTextParamsSourceVisibility(self, true);
+        setTextParamsSourceVisibility(footerFields, true);
         if (!this.drawPenConfig.text) {
             this.drawPenConfig.text = textPlaceHolder;
         }

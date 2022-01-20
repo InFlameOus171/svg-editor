@@ -144,7 +144,7 @@ export class Editor {
                     __classPrivateFieldSet(this, _Editor_currentParams, __classPrivateFieldGet(this, _Editor_selectedShape, "f").getSvgParams(), "f");
                     this.onUpdateStyleInputFields();
                     if (isText(__classPrivateFieldGet(this, _Editor_selectedShape, "f"))) {
-                        setTextParamsSourceVisibility(__classPrivateFieldGet(this, _Editor_self, "f"), true);
+                        setTextParamsSourceVisibility(__classPrivateFieldGet(this, _Editor_footerFieldsRef, "f"), true);
                     }
                 }
                 __classPrivateFieldSet(this, _Editor_isShapeOnlyBeingSelected, false, "f");
@@ -287,16 +287,16 @@ export class Editor {
                         break;
                     }
                     case Tools_List.SELECT: {
-                        __classPrivateFieldSet(this, _Editor_selectedTool, new SelectTool(__classPrivateFieldGet(this, _Editor_drawLayer, "f"), __classPrivateFieldGet(this, _Editor_previewLayer, "f"), __classPrivateFieldGet(this, _Editor_self, "f"), __classPrivateFieldGet(this, _Editor_onHandleSelectShape, "f"), __classPrivateFieldGet(this, _Editor_shapes, "f"), __classPrivateFieldGet(this, _Editor_offset, "f")), "f");
+                        __classPrivateFieldSet(this, _Editor_selectedTool, new SelectTool(__classPrivateFieldGet(this, _Editor_drawLayer, "f"), __classPrivateFieldGet(this, _Editor_previewLayer, "f"), __classPrivateFieldGet(this, _Editor_self, "f"), __classPrivateFieldGet(this, _Editor_onHandleSelectShape, "f"), __classPrivateFieldGet(this, _Editor_shapes, "f"), __classPrivateFieldGet(this, _Editor_offset, "f"), __classPrivateFieldGet(this, _Editor_footerFieldsRef, "f")), "f");
                         break;
                     }
                     case Tools_List.TEXT: {
-                        __classPrivateFieldSet(this, _Editor_selectedTool, new TextTool(__classPrivateFieldGet(this, _Editor_drawLayer, "f"), __classPrivateFieldGet(this, _Editor_previewLayer, "f"), __classPrivateFieldGet(this, _Editor_self, "f"), __classPrivateFieldGet(this, _Editor_handleUpdateShapes, "f"), __classPrivateFieldGet(this, _Editor_currentParams, "f")), "f");
+                        __classPrivateFieldSet(this, _Editor_selectedTool, new TextTool(__classPrivateFieldGet(this, _Editor_drawLayer, "f"), __classPrivateFieldGet(this, _Editor_previewLayer, "f"), __classPrivateFieldGet(this, _Editor_self, "f"), __classPrivateFieldGet(this, _Editor_handleUpdateShapes, "f"), __classPrivateFieldGet(this, _Editor_currentParams, "f"), __classPrivateFieldGet(this, _Editor_offset, "f"), __classPrivateFieldGet(this, _Editor_footerFieldsRef, "f")), "f");
                         break;
                     }
                     case Tools_List.MOVE: {
                         if (__classPrivateFieldGet(this, _Editor_selectedShape, "f")) {
-                            __classPrivateFieldSet(this, _Editor_selectedTool, new MoveTool(__classPrivateFieldGet(this, _Editor_drawLayer, "f"), __classPrivateFieldGet(this, _Editor_previewLayer, "f"), __classPrivateFieldGet(this, _Editor_self, "f"), __classPrivateFieldGet(this, _Editor_onMoveShape, "f"), __classPrivateFieldGet(this, _Editor_offset, "f"), __classPrivateFieldGet(this, _Editor_selectedShape, "f")), "f");
+                            __classPrivateFieldSet(this, _Editor_selectedTool, new MoveTool(__classPrivateFieldGet(this, _Editor_drawLayer, "f"), __classPrivateFieldGet(this, _Editor_previewLayer, "f"), __classPrivateFieldGet(this, _Editor_self, "f"), __classPrivateFieldGet(this, _Editor_onMoveShape, "f"), __classPrivateFieldGet(this, _Editor_offset, "f"), __classPrivateFieldGet(this, _Editor_selectedShape, "f"), __classPrivateFieldGet(this, _Editor_footerFieldsRef, "f")), "f");
                         }
                         else {
                             return;
@@ -374,7 +374,7 @@ export class Editor {
             __classPrivateFieldSet(this, _Editor_selectedShape, null, "f");
             (_b = __classPrivateFieldGet(this, _Editor_selectedTool, "f")) === null || _b === void 0 ? void 0 : _b.destroy();
             __classPrivateFieldGet(this, _Editor_setAreFieldsEnabled, "f").call(this, Object.values(SVGParamFieldID), false);
-            setTextParamsSourceVisibility(__classPrivateFieldGet(this, _Editor_self, "f"), false);
+            setTextParamsSourceVisibility(__classPrivateFieldGet(this, _Editor_footerFieldsRef, "f"), false);
             this.resetPreview();
             this.redrawShapes();
         };
@@ -391,7 +391,7 @@ export class Editor {
         }, "f");
         __classPrivateFieldSet(this, _Editor_drawContext, (_a = __classPrivateFieldGet(this, _Editor_drawLayer, "f")) === null || _a === void 0 ? void 0 : _a.getContext('2d'), "f");
         __classPrivateFieldSet(this, _Editor_previewContext, (_b = __classPrivateFieldGet(this, _Editor_previewLayer, "f")) === null || _b === void 0 ? void 0 : _b.getContext('2d'), "f");
-        __classPrivateFieldSet(this, _Editor_setAreFieldsEnabled, paramFieldStateHandler(__classPrivateFieldGet(this, _Editor_self, "f")).setAreFieldsEnabled, "f");
+        __classPrivateFieldSet(this, _Editor_setAreFieldsEnabled, paramFieldStateHandler(__classPrivateFieldGet(this, _Editor_footerFieldsRef, "f")).setAreFieldsEnabled, "f");
         __classPrivateFieldGet(this, _Editor_setAreFieldsEnabled, "f").call(this, Object.values(SVGParamFieldID), false);
         updateStyleInputFields(__classPrivateFieldGet(this, _Editor_footerFieldsRef, "f"), __classPrivateFieldGet(this, _Editor_currentParams, "f"));
         window.addEventListener('resize', () => {

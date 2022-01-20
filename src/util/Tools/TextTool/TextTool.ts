@@ -6,6 +6,7 @@ import { measureText } from '../../helper/shapes';
 import { TextShape } from '../../shapes/Text/Text';
 import { setTextParamsSourceVisibility } from './TextTool.util';
 import { Tool } from '../Tool';
+import { FooterFields } from '../../../components/molecules/FooterFields';
 
 export class TextTool extends Tool<TextShape> {
   constructor(
@@ -14,10 +15,20 @@ export class TextTool extends Tool<TextShape> {
     self: SVGEditor,
     onCreate: (shape: ShapeType | ShapeType[] | null) => void,
     currentStyles: SVGParamsBase,
-    offset?: Coordinates
+    offset?: Coordinates,
+    footerFields?: FooterFields
   ) {
-    super(drawLayer, self, onCreate, offset, previewLayer, currentStyles);
-    setTextParamsSourceVisibility(self, true);
+    super(
+      drawLayer,
+      self,
+      onCreate,
+      offset,
+      previewLayer,
+      currentStyles,
+      undefined,
+      footerFields
+    );
+    setTextParamsSourceVisibility(footerFields, true);
     if (!this.drawPenConfig.text) {
       this.drawPenConfig.text = textPlaceHolder;
     }
@@ -61,7 +72,7 @@ export class TextTool extends Tool<TextShape> {
   };
 
   destroy = () => {
-    setTextParamsSourceVisibility(this.self, false);
+    setTextParamsSourceVisibility(this.footerFields, false);
     this.drawLayer.removeEventListener('click', this.#onClick);
   };
 }

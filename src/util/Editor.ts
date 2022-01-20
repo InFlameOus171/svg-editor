@@ -86,7 +86,7 @@ export class Editor {
     this.#drawContext = this.#drawLayer?.getContext('2d');
     this.#previewContext = this.#previewLayer?.getContext('2d');
     this.#setAreFieldsEnabled = paramFieldStateHandler(
-      this.#self
+      this.#footerFieldsRef
     ).setAreFieldsEnabled;
     this.#setAreFieldsEnabled(Object.values(SVGParamFieldID), false);
     updateStyleInputFields(this.#footerFieldsRef, this.#currentParams);
@@ -230,7 +230,7 @@ export class Editor {
         this.#currentParams = this.#selectedShape.getSvgParams();
         this.onUpdateStyleInputFields();
         if (isText(this.#selectedShape)) {
-          setTextParamsSourceVisibility(this.#self, true);
+          setTextParamsSourceVisibility(this.#footerFieldsRef, true);
         }
       }
       this.#isShapeOnlyBeingSelected = false;
@@ -439,7 +439,8 @@ export class Editor {
             this.#self,
             this.#onHandleSelectShape,
             this.#shapes,
-            this.#offset
+            this.#offset,
+            this.#footerFieldsRef
           );
           break;
         }
@@ -449,7 +450,9 @@ export class Editor {
             this.#previewLayer,
             this.#self,
             this.#handleUpdateShapes,
-            this.#currentParams
+            this.#currentParams,
+            this.#offset,
+            this.#footerFieldsRef
           );
           break;
         }
@@ -461,7 +464,8 @@ export class Editor {
               this.#self,
               this.#onMoveShape,
               this.#offset,
-              this.#selectedShape
+              this.#selectedShape,
+              this.#footerFieldsRef
             );
           } else {
             return;
@@ -552,7 +556,7 @@ export class Editor {
     this.#selectedShape = null;
     this.#selectedTool?.destroy();
     this.#setAreFieldsEnabled(Object.values(SVGParamFieldID), false);
-    setTextParamsSourceVisibility(this.#self, false);
+    setTextParamsSourceVisibility(this.#footerFieldsRef, false);
     this.resetPreview();
     this.redrawShapes();
   };

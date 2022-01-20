@@ -8,8 +8,8 @@ import { Rectangle } from '../../shapes/Rectangle/Rectangle';
 import { setTextParamsSourceVisibility } from '../TextTool/TextTool.util';
 import { Tool } from '../Tool';
 export class MoveTool extends Tool {
-    constructor(drawLayer, previewLayer, self, onMove, offset, selectedShape) {
-        super(drawLayer, self, onMove, offset, previewLayer);
+    constructor(drawLayer, previewLayer, self, onMove, offset, selectedShape, footerFields) {
+        super(drawLayer, self, onMove, offset, previewLayer, undefined, undefined, footerFields);
         _MoveTool_dCenter.set(this, void 0);
         _MoveTool_drawOnPreview.set(this, void 0);
         _MoveTool_onDown.set(this, (event) => {
@@ -35,7 +35,7 @@ export class MoveTool extends Tool {
                 this.resetPreview();
                 const { startingCorner, width, height } = rectangleParamsFromBoundaries(this.currentShape.boundaries);
                 if (isText(this.currentShape)) {
-                    setTextParamsSourceVisibility(this.self, true);
+                    setTextParamsSourceVisibility(this.footerFields, true);
                     __classPrivateFieldGet(this, _MoveTool_drawOnPreview, "f").call(this, this.currentShape, Object.assign(Object.assign(Object.assign({}, this.currentShape.getSvgParams()), highlightStyle), { lineDash: [0] }));
                 }
                 else {

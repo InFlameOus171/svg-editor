@@ -1,3 +1,4 @@
+import { FooterFields } from '../../../components/molecules/FooterFields';
 import { SVGEditor } from '../../../components/organisms/SVGEditor';
 import type { ShapeType } from '../../../types/shapes.types';
 import type { Coordinates, SVGParamsBase } from '../../../types/types';
@@ -21,9 +22,19 @@ export class SelectTool extends Tool<ShapeType> {
     self: SVGEditor,
     onSelect: (shape: ShapeType | ShapeType[] | null) => void,
     shapes: ShapeType[],
-    offset?: Coordinates
+    offset?: Coordinates,
+    footerFields?: FooterFields
   ) {
-    super(drawLayer, self, onSelect, offset, previewLayer);
+    super(
+      drawLayer,
+      self,
+      onSelect,
+      offset,
+      previewLayer,
+      undefined,
+      undefined,
+      footerFields
+    );
     this.allShapes = shapes;
     this.previewContext && this.previewContext.setLineDash([10, 10]);
     this.#drawOnPreview = Pen.generatePen(this.previewContext).draw;
@@ -73,7 +84,7 @@ export class SelectTool extends Tool<ShapeType> {
       );
 
       if (isText(this.currentShape)) {
-        setTextParamsSourceVisibility(this.self, true);
+        setTextParamsSourceVisibility(this.footerFields, true);
         this.#drawOnPreview(this.currentShape, {
           ...this.currentShape.getSvgParams(),
           ...highlightStyle,

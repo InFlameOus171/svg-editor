@@ -1,3 +1,4 @@
+import { FooterFields } from '../../../components/molecules/FooterFields';
 import { SVGEditor } from '../../../components/organisms/SVGEditor';
 import type { ShapeType } from '../../../types/shapes.types';
 import type { Coordinates, SVGParamsBase } from '../../../types/types';
@@ -19,9 +20,19 @@ export class MoveTool extends Tool<ShapeType> {
     self: SVGEditor,
     onMove: (shape: ShapeType | ShapeType[] | null) => void,
     offset: Coordinates,
-    selectedShape: ShapeType
+    selectedShape: ShapeType,
+    footerFields: FooterFields
   ) {
-    super(drawLayer, self, onMove, offset, previewLayer);
+    super(
+      drawLayer,
+      self,
+      onMove,
+      offset,
+      previewLayer,
+      undefined,
+      undefined,
+      footerFields
+    );
     const renderingContext = this.drawLayer.getContext('2d');
     if (renderingContext) {
       this.drawContext = renderingContext;
@@ -61,7 +72,7 @@ export class MoveTool extends Tool<ShapeType> {
       );
 
       if (isText(this.currentShape)) {
-        setTextParamsSourceVisibility(this.self, true);
+        setTextParamsSourceVisibility(this.footerFields, true);
         this.#drawOnPreview(this.currentShape, {
           ...this.currentShape.getSvgParams(),
           ...highlightStyle,
