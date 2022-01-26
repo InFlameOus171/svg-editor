@@ -317,7 +317,7 @@ export class Editor {
                         __classPrivateFieldSet(this, _Editor_selectedTool, null, "f");
                     }
                 }
-                if (tool) {
+                if (tool && tool !== Tools_List.DELETE) {
                     setIsButtonActive(__classPrivateFieldGet(this, _Editor_self, "f"), tool, true);
                 }
                 if (!isMoveTool(__classPrivateFieldGet(this, _Editor_selectedTool, "f"))) {

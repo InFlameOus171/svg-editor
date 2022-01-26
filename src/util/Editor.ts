@@ -486,7 +486,7 @@ export class Editor {
           this.#selectedTool = null;
         }
       }
-      if (tool) {
+      if (tool && tool !== Tools_List.DELETE) {
         setIsButtonActive(this.#self, tool, true);
       }
       if (!isMoveTool(this.#selectedTool)) {

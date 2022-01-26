@@ -33,7 +33,7 @@ export const footerFieldsStyles = css `
     gap: 5px;
   }
 
-  :host #footer-input-fields {
+  :host #footer-input-column {
     display: flex;
     flex-direction: column;
   }

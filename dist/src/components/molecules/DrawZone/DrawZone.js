@@ -9,9 +9,8 @@ let DrawZone = class DrawZone extends LitElement {
         this.width = 0;
     }
     firstUpdated(_changedProperties) {
-        var _a, _b;
+        var _a;
         const drawLayer = (_a = this === null || this === void 0 ? void 0 : this.shadowRoot) === null || _a === void 0 ? void 0 : _a.getElementById('draw-layer');
-        const previewLayer = (_b = this === null || this === void 0 ? void 0 : this.shadowRoot) === null || _b === void 0 ? void 0 : _b.getElementById('preview-layer');
         drawLayer.addEventListener('mousemove', (event) => {
             var _a;
             const rect = drawLayer.getBoundingClientRect();
@@ -22,7 +21,6 @@ let DrawZone = class DrawZone extends LitElement {
         });
         drawLayer.addEventListener('mouseout', (event) => {
             var _a;
-            const rect = drawLayer.getBoundingClientRect();
             (_a = this.onPositionChange) === null || _a === void 0 ? void 0 : _a.call(this, [0, 0]);
         });
     }

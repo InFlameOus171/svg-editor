@@ -133,7 +133,7 @@ export class FooterFields extends LitElement {
             </select>
           </label>
         </div>
-        <div id="footer-input-fields">
+        <div id="footer-input-column">
           <div>
             <label>
               Color:

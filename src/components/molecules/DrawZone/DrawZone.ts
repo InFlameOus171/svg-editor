@@ -21,10 +21,6 @@ export class DrawZone extends LitElement {
       'draw-layer'
     ) as HTMLCanvasElement;
 
-    const previewLayer = this?.shadowRoot?.getElementById('preview-layer') as
-      | HTMLCanvasElement
-      | undefined;
-
     drawLayer.addEventListener('mousemove', (event: MouseEvent) => {
       const rect = drawLayer.getBoundingClientRect();
       this.onPositionChange?.([
@@ -34,7 +30,6 @@ export class DrawZone extends LitElement {
     });
 
     drawLayer.addEventListener('mouseout', (event: MouseEvent) => {
-      const rect = drawLayer.getBoundingClientRect();
       this.onPositionChange?.([0, 0]);
     });
   }
