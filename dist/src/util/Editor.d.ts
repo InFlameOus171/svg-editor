@@ -1,12 +1,12 @@
 import { FooterFields } from '../components/molecules/FooterFields';
-import { SVGEditor } from '../components/organisms/SVGEditor';
-import type { ShapeType } from '../types/shapes.types';
+import { EditorTemplate } from '../components/templates/EditorTemplate';
+import type { ShapeType } from '../types/typeGuards.types';
 import type { Coordinates, SVGParamsBase } from '../types/types';
 import { Tools_List } from './helper/constants';
 import { Connection } from './network';
 export declare class Editor {
     #private;
-    constructor(drawLayer: HTMLCanvasElement, previewLayer: HTMLCanvasElement, offset: Coordinates, self: SVGEditor, footerFieldsRef: FooterFields);
+    constructor(drawLayer: HTMLCanvasElement, previewLayer: HTMLCanvasElement, offset: Coordinates, self: EditorTemplate, footerFieldsRef: FooterFields);
     getSVGParams: () => {
         fill?: string | undefined;
         stroke?: string | undefined;
@@ -25,7 +25,7 @@ export declare class Editor {
     redrawShapes: () => void;
     onUpdateStyleInputFields: () => void;
     onSave: () => void;
-    importSVG: (data: Document) => void;
+    onImportSVG: (data: Document) => void;
     getAllShapes: () => ShapeType[];
     deleteFromShapes: (shapeIdData: string | string[]) => void;
     onDeleteSelectedShape: () => void;

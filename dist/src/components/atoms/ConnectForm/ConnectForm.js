@@ -1,6 +1,6 @@
 var _ConnectForm_handleJoinRoom, _ConnectForm_handleRoomIdChange, _ConnectForm_handleUserNameChange;
 import { __classPrivateFieldGet, __decorate } from "tslib";
-import { LitElement, html } from 'lit';
+import { html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { connectFormStyles } from './ConnectForm.styles';
 let ConnectForm = class ConnectForm extends LitElement {

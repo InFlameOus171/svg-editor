@@ -12,29 +12,7 @@ import type { MoveTool } from '../util/tools/MoveTool/MoveTool';
 import type { RectangleTool } from '../util/tools/RectangleTool/RectangleTool';
 import type { SelectTool } from '../util/tools/SelectTool/SelectTool';
 import type { TextTool } from '../util/tools/TextTool/TextTool';
-
-export type Shapes =
-  | 'Ellipse'
-  | 'Rectangle'
-  | 'Line'
-  | 'Freehand'
-  | 'Path'
-  | 'TextShape';
-
-export type ShapeType =
-  | Shape
-  | Ellipse
-  | Rectangle
-  | Line
-  | Freehand
-  | Path
-  | TextShape;
-
-export type ToolType =
-  | RectangleTool
-  | LineTool
-  | DrawTool
-  | EllipseTool
-  | SelectTool
-  | MoveTool
-  | TextTool;
+import { Tool } from '../util/tools/Tool';
+export declare type Shapes = 'Ellipse' | 'Rectangle' | 'Line' | 'Freehand' | 'Path' | 'TextShape';
+export declare type ShapeType = Shape | Ellipse | Rectangle | Line | Freehand | Path | TextShape;
+export declare type ToolType = Tool<any, any> | RectangleTool | LineTool | DrawTool | EllipseTool | SelectTool | MoveTool | TextTool;

@@ -1,13 +1,6 @@
 import { __rest } from "tslib";
 import { typeOfShape } from './helper/typeguards';
 const Pen = {
-    generatePen: (context) => {
-        return {
-            draw: (shape, svgParams) => {
-                Pen.draw(shape, svgParams, context);
-            },
-        };
-    },
     draw: (shape, svgParams, context) => {
         const shapeType = typeOfShape(shape);
         switch (shapeType) {
@@ -31,37 +24,7 @@ const Pen = {
                 break;
         }
     },
-    setStyles: (pathConstructor, context, svgParams) => {
-        const { fill, stroke, strokeWidth, transformMatrix } = svgParams;
-        if (fill) {
-            context.fillStyle = fill;
-        }
-        if (stroke) {
-            context.strokeStyle = stroke;
-        }
-        if (strokeWidth) {
-            context.lineWidth = parseFloat(strokeWidth);
-        }
-        if (transformMatrix) {
-            pathConstructor.addPath(new Path2D(), transformMatrix);
-        }
-        context.lineWidth = strokeWidth ? parseFloat(strokeWidth) : 1;
-        if (stroke && stroke !== 'null') {
-            context.strokeStyle = stroke;
-        }
-        if (fill && fill !== 'none') {
-            context.fillStyle = fill;
-            context.fill(pathConstructor);
-        }
-        if (stroke || strokeWidth) {
-            context.stroke(pathConstructor);
-        }
-        if (!stroke && !fill && !strokeWidth) {
-            context.stroke(pathConstructor);
-            context.fill(pathConstructor);
-        }
-    },
-    applyStyles: (pathConstructor, styles, context) => {
+    setStyles: (pathConstructor, styles, context) => {
         const { fill, stroke, strokeWidth, transformMatrix, lineCap, lineDash } = styles;
         if (transformMatrix) {
             const newPath = new Path2D();
@@ -94,7 +57,7 @@ const Pen = {
         let pathConstructor = new Path2D(path.toString());
         if (context) {
             const params = Object.assign(Object.assign({}, path.getSvgParams()), svgParams);
-            pathConstructor = Pen.applyStyles(pathConstructor, params, context);
+            pathConstructor = Pen.setStyles(pathConstructor, params, context);
             params.stroke && context.stroke(pathConstructor);
             params.fill && context.fill(pathConstructor);
             context.closePath();
@@ -102,9 +65,8 @@ const Pen = {
     },
     drawText: (textShape, context, svgParams) => {
         var _a, _b;
-        const { position } = textShape.toPathParams();
-        const params = svgParams !== null && svgParams !== void 0 ? svgParams : textShape.getSvgParams();
-        const { text, fontSize, fontFamily } = params, rest = __rest(params, ["text", "fontSize", "fontFamily"]);
+        const _c = textShape.toSVGTextParams(), { position } = _c, params = __rest(_c, ["position"]);
+        const _d = svgParams !== null && svgParams !== void 0 ? svgParams : params, { text, fontSize, fontFamily } = _d, rest = __rest(_d, ["text", "fontSize", "fontFamily"]);
         if (context && text) {
             if (rest.stroke) {
                 context.strokeStyle = rest.stroke;
@@ -132,7 +94,7 @@ const Pen = {
         const rest = points.slice(1);
         const params = svgParams !== null && svgParams !== void 0 ? svgParams : freehand.getSvgParams();
         if (context) {
-            Pen.applyStyles(pathConstructor, params, context);
+            Pen.setStyles(pathConstructor, params, context);
             pathConstructor.moveTo(...start);
             rest.forEach(point => {
                 pathConstructor.lineTo(...point);
@@ -145,7 +107,7 @@ const Pen = {
         let pathConstructor = new Path2D();
         if (context) {
             const params = svgParams !== null && svgParams !== void 0 ? svgParams : line.getSvgParams();
-            Pen.applyStyles(pathConstructor, params, context);
+            Pen.setStyles(pathConstructor, params, context);
             const { fill, stroke } = params;
             pathConstructor.moveTo(...line.points[0]);
             pathConstructor.lineTo(...line.points[1]);
@@ -156,10 +118,11 @@ const Pen = {
     },
     drawRectangle: (rectangle, context, svgParams) => {
         let path = new Path2D();
-        const values = Object.values(rectangle.toPathParams());
+        const _a = rectangle.toSvgRectParams(), { x, y, width, height } = _a, rest = __rest(_a, ["x", "y", "width", "height"]);
+        const values = [x, y, width, height].map(parseFloat);
         if (context) {
-            const params = svgParams !== null && svgParams !== void 0 ? svgParams : rectangle.getSvgParams();
-            path = Pen.applyStyles(path, params, context);
+            const params = svgParams !== null && svgParams !== void 0 ? svgParams : rest;
+            path = Pen.setStyles(path, params, context);
             const { fill, stroke } = params;
             path.rect(...values);
             stroke && context.stroke(path);
@@ -169,10 +132,11 @@ const Pen = {
     },
     drawEllipse: (ellipse, context, svgParams) => {
         const path = new Path2D();
-        const values = Object.values(ellipse.toPathParams());
+        const _a = ellipse.toSVGEllipseParams(), { cx, cy, rx, ry } = _a, rest = __rest(_a, ["cx", "cy", "rx", "ry"]);
+        const values = [cx, cy, rx, ry].map(parseFloat);
         if (context) {
-            const params = svgParams !== null && svgParams !== void 0 ? svgParams : ellipse.getSvgParams();
-            Pen.applyStyles(path, params, context);
+            const params = svgParams !== null && svgParams !== void 0 ? svgParams : rest;
+            Pen.setStyles(path, params, context);
             const { fill, stroke } = params;
             path.ellipse(...values, 0, 0, 2 * Math.PI);
             stroke && context.stroke(path);

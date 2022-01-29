@@ -1,5 +1,3 @@
-export declare type NullableString = null | string;
-export declare type NullableNumber = null | number;
 export declare type Coordinates = [number, number];
 export declare type VectorCoordinates = [Coordinates, Coordinates];
 export declare type BoundaryCoordinates = [
@@ -26,11 +24,6 @@ export declare type EllipseSVGParams = SVGParamsBase & {
     rx: string;
     ry: string;
 };
-export declare type CircleSVGParams = SVGParamsBase & {
-    cx: string;
-    cy: string;
-    r: string;
-};
 export declare type RectSVGParams = SVGParamsBase & {
     x: string;
     y: string;
@@ -56,4 +49,4 @@ export declare type SVGDrawPath = {
     command: string;
     points?: Coordinates[] | string;
 };
-export declare type Matrix = [number, number, number, number, number, number];
+export declare type Partition<T> = [T[], T[]];

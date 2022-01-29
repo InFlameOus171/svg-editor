@@ -50,10 +50,6 @@ export class TextShape extends Shape {
     this.moveBoundaries([dx, dy]);
   };
 
-  toPathParams = () => ({
-    position: this.#position,
-  });
-
   getCenter = (): Coordinates => this.#position;
 
   getDeconstructedShapeData = () => ({

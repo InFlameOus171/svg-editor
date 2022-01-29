@@ -5,7 +5,10 @@ import '../../atoms/Chat';
 import '../../atoms/RoomInformation';
 import '../../atoms/ConnectForm';
 import { nanoid } from 'nanoid';
-import { ConnectionStatus } from '../../../types/network.types';
+import {
+  ConnectionStatus,
+  RoomConnectionData,
+} from '../../../types/network.types';
 
 @customElement('connection-section')
 export class ConnectionSection extends LitElement {
@@ -23,7 +26,7 @@ export class ConnectionSection extends LitElement {
   chatLog: Array<{ userName: string; message: string }> = [];
 
   @property()
-  onJoinRoom?: (data: { userName?: string; roomId?: string }) => void;
+  onJoinRoom?: (data: RoomConnectionData) => void;
   @property()
   onLeaveRoom?: () => void;
   @property()

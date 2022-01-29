@@ -1,12 +1,10 @@
 import { LitElement } from 'lit';
+import { RoomData } from './ConnectForm.types';
 export declare class ConnectForm extends LitElement {
     #private;
-    onJoinRoom?: (data: {
-        userName?: string;
-        roomId?: string;
-    }) => void;
+    onJoinRoom?: (data: RoomData) => void;
     userName?: string;
     roomId?: string;
     static styles: import("lit").CSSResult[];
-    render(): import("lit-html").TemplateResult<1>;
+    protected render(): import("lit-html").TemplateResult<1>;
 }

@@ -1,6 +1,6 @@
 import { FooterFields } from '../../components/molecules/FooterFields';
-import { SVGEditor } from '../../components/organisms/SVGEditor';
-import type { ShapeType } from '../../types/shapes.types';
+import { EditorTemplate } from '../../components/templates/EditorTemplate';
+import type { ShapeType } from '../../types/typeGuards.types';
 import type { Coordinates, SVGParamsBase } from '../../types/types';
 import {
   highlightStyle,
@@ -12,7 +12,7 @@ import { Pen } from '../Pen';
 export abstract class Tool<T extends ShapeType, V extends ShapeType = T> {
   drawLayer: HTMLCanvasElement;
   previewLayer?: HTMLCanvasElement;
-  self: SVGEditor;
+  self: EditorTemplate;
   footerFields?: FooterFields;
   currentShape?: V;
   allShapes: T[] = [];
@@ -29,10 +29,10 @@ export abstract class Tool<T extends ShapeType, V extends ShapeType = T> {
   onUpdateEditor: (shape: ShapeType | ShapeType[] | null) => void;
   constructor(
     drawLayer: HTMLCanvasElement,
-    self: SVGEditor,
+    self: EditorTemplate,
     onUpdateEditor: (shape: ShapeType | ShapeType[] | null) => void,
     offset: Coordinates = [0, 0],
-    previewLayer?: HTMLCanvasElement,
+    previewLayer: HTMLCanvasElement,
     drawPenConfig: SVGParamsBase = { text: textPlaceHolder },
     previewPenConfig?: SVGParamsBase,
     footerFields?: FooterFields
@@ -88,15 +88,11 @@ export abstract class Tool<T extends ShapeType, V extends ShapeType = T> {
     }
   };
 
-  updateShapeData = (newCoordinates: Coordinates): void => {
-    throw new Error('not implemented');
-  };
-
   getCoords = (e: MouseEvent): Coordinates => {
     return [e.offsetX - this.offset[0], e.offsetY - this.offset[1]];
   };
 
-  #draw = (): void => {
+  updateShapeData = (newCoordinates: Coordinates): void => {
     throw new Error('not implemented');
   };
 

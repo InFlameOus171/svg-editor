@@ -7,12 +7,6 @@ export declare class Ellipse extends Shape {
     constructor(center: Coordinates, radiusX: number, radiusY: number, svgParams?: Partial<SVGParamsBase>, countShapeCountUp?: boolean, isLocked?: boolean);
     moveTo: (coordinates: Coordinates) => void;
     getCenter: () => Coordinates;
-    toPathParams: () => {
-        cx: number;
-        cy: number;
-        rx: number;
-        ry: number;
-    };
     toSVGEllipseParams: () => EllipseSVGParams;
     getDeconstructedShapeData: () => {
         type: string;

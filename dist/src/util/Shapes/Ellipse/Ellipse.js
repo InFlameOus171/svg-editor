@@ -15,12 +15,6 @@ export class Ellipse extends Shape {
         this.getCenter = () => {
             return __classPrivateFieldGet(this, _Ellipse_center, "f");
         };
-        this.toPathParams = () => ({
-            cx: __classPrivateFieldGet(this, _Ellipse_center, "f")[0],
-            cy: __classPrivateFieldGet(this, _Ellipse_center, "f")[1],
-            rx: this.radiusX,
-            ry: this.radiusY,
-        });
         this.toSVGEllipseParams = () => (Object.assign({ cx: __classPrivateFieldGet(this, _Ellipse_center, "f")[0].toString(), cy: __classPrivateFieldGet(this, _Ellipse_center, "f")[1].toString(), rx: this.radiusX.toString(), ry: this.radiusY.toString() }, this.getSvgParams()));
         this.getDeconstructedShapeData = () => ({
             type: 'Ellipse',

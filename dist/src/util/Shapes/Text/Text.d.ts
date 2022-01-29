@@ -7,9 +7,6 @@ export declare class TextShape extends Shape {
     getHeight: () => number;
     getWidth: () => number;
     moveTo: (coordinates: Coordinates) => void;
-    toPathParams: () => {
-        position: Coordinates;
-    };
     getCenter: () => Coordinates;
     getDeconstructedShapeData: () => {
         id: string;

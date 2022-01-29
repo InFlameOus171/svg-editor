@@ -1,4 +1,4 @@
-import './components/organisms/SVGEditor';
+import './components/pages/SVGEditor';
 
 declare global {
   namespace JSX {

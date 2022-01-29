@@ -218,7 +218,7 @@ export class FooterFields extends LitElement {
           </div>
         </div>
       </div>
-      <fieldset id="right-input-section">
+      <div id="right-input-section">
         <label
           >Font size:<input
             type="number"
@@ -254,7 +254,7 @@ export class FooterFields extends LitElement {
               this.#handleSVGParamChange?.('text', SVGParamFieldID.TEXT)}
           />
         </label>
-      </fieldset>
+      </div>
     </fieldset>`;
   }
 }

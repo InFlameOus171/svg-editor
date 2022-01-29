@@ -54,13 +54,6 @@ export class Rectangle extends Shape {
     return this.#height;
   };
 
-  toPathParams = () => ({
-    x: this.#startingCorner[0],
-    y: this.#startingCorner[1],
-    width: this.#width,
-    height: this.#height,
-  });
-
   toSvgRectParams = (): RectSVGParams => ({
     x: this.#startingCorner[0].toString(),
     y: this.#startingCorner[1].toString(),

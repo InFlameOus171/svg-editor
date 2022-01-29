@@ -1,5 +1,5 @@
-import { SVGEditor } from '../../../components/organisms/SVGEditor';
-import type { ShapeType } from '../../../types/shapes.types';
+import { EditorTemplate } from '../../../components/templates/EditorTemplate';
+import type { ShapeType } from '../../../types/typeGuards.types';
 import type { Coordinates, SVGParamsBase } from '../../../types/types';
 import { Tools_List } from '../../helper/constants';
 import { Pen } from '../../Pen';
@@ -13,7 +13,7 @@ export class DrawTool extends Tool<Freehand, Line> {
   constructor(
     drawLayer: HTMLCanvasElement,
     previewLayer: HTMLCanvasElement,
-    self: SVGEditor,
+    self: EditorTemplate,
     onCreate: (shape: ShapeType | ShapeType[] | null) => void,
     currentStyles: SVGParamsBase,
     offset: Coordinates
@@ -50,7 +50,6 @@ export class DrawTool extends Tool<Freehand, Line> {
       );
       this.onUpdateEditor(completeShape);
     }
-
     this.currentShapeComponents = [];
     this.isDrawing = false;
   };

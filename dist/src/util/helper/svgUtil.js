@@ -305,4 +305,16 @@ export const convertSVGDocumentToShapes = (id) => {
     }
     return [];
 };
+export const importSVG = (svg) => {
+    if (svg.firstChild) {
+        const createdSVG = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        const elementId = '#imported-svg#';
+        createdSVG.setAttribute('id', elementId);
+        createdSVG.appendChild(svg.firstChild);
+        const appendedSvg = document.body.appendChild(createdSVG);
+        const shapes = convertSVGDocumentToShapes(elementId);
+        document.body.removeChild(appendedSvg);
+        return shapes;
+    }
+};
 //# sourceMappingURL=svgUtil.js.map

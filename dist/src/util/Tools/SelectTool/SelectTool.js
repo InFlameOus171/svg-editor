@@ -1,5 +1,5 @@
-var _SelectTool_drawOnPreview, _SelectTool_onClick, _SelectTool_onDown, _SelectTool_onZoneSelection, _SelectTool_onUp, _SelectTool_onMove;
-import { __classPrivateFieldGet, __classPrivateFieldSet } from "tslib";
+var _SelectTool_onClick, _SelectTool_onDown, _SelectTool_onZoneSelection, _SelectTool_onUp, _SelectTool_onMove;
+import { __classPrivateFieldGet } from "tslib";
 import { highlightStyle, Tools_List } from '../../helper/constants';
 import { getCanvasRectangleValuesFromPoints, isPointInsideAnotherShape, isShapeInsideAnotherShape, rectangleParamsFromBoundaries, } from '../../helper/coordinates';
 import { isText, typeOfShape } from '../../helper/typeguards';
@@ -10,7 +10,6 @@ import { Tool } from '../Tool';
 export class SelectTool extends Tool {
     constructor(drawLayer, previewLayer, self, onSelect, shapes, offset, footerFields) {
         super(drawLayer, self, onSelect, offset, previewLayer, undefined, undefined, footerFields);
-        _SelectTool_drawOnPreview.set(this, void 0);
         this.updateAllShapes = (shapes = []) => {
             this.allShapes = shapes;
         };
@@ -39,16 +38,16 @@ export class SelectTool extends Tool {
             this.isDrawing = true;
         });
         this.updatePreview = () => {
-            if (this.currentShape) {
+            if (this.currentShape && this.previewContext) {
                 this.resetPreview();
                 const { startingCorner, width, height } = rectangleParamsFromBoundaries(this.currentShape.boundaries);
                 if (isText(this.currentShape)) {
                     setTextParamsSourceVisibility(this.footerFields, true);
-                    __classPrivateFieldGet(this, _SelectTool_drawOnPreview, "f").call(this, this.currentShape, Object.assign(Object.assign(Object.assign({}, this.currentShape.getSvgParams()), highlightStyle), { lineDash: [0] }));
+                    Pen.draw(this.currentShape, Object.assign(Object.assign(Object.assign({}, this.currentShape.getSvgParams()), highlightStyle), { lineDash: [0] }), this.previewContext);
                 }
                 else {
-                    __classPrivateFieldGet(this, _SelectTool_drawOnPreview, "f").call(this, this.currentShape, highlightStyle);
-                    __classPrivateFieldGet(this, _SelectTool_drawOnPreview, "f").call(this, new Rectangle(startingCorner, width, height, highlightStyle, false));
+                    Pen.draw(this.currentShape, highlightStyle, this.previewContext);
+                    Pen.draw(new Rectangle(startingCorner, width, height, highlightStyle, false), undefined, this.previewContext);
                 }
             }
             else {
@@ -114,9 +113,8 @@ export class SelectTool extends Tool {
         };
         this.allShapes = shapes;
         this.previewContext && this.previewContext.setLineDash([10, 10]);
-        __classPrivateFieldSet(this, _SelectTool_drawOnPreview, Pen.generatePen(this.previewContext).draw, "f");
         this.toolName = Tools_List.SELECT;
     }
 }
-_SelectTool_drawOnPreview = new WeakMap(), _SelectTool_onClick = new WeakMap(), _SelectTool_onDown = new WeakMap(), _SelectTool_onZoneSelection = new WeakMap(), _SelectTool_onUp = new WeakMap(), _SelectTool_onMove = new WeakMap();
+_SelectTool_onClick = new WeakMap(), _SelectTool_onDown = new WeakMap(), _SelectTool_onZoneSelection = new WeakMap(), _SelectTool_onUp = new WeakMap(), _SelectTool_onMove = new WeakMap();
 //# sourceMappingURL=SelectTool.js.map

@@ -27,12 +27,6 @@ export class Rectangle extends Shape {
         this.getHeight = () => {
             return __classPrivateFieldGet(this, _Rectangle_height, "f");
         };
-        this.toPathParams = () => ({
-            x: __classPrivateFieldGet(this, _Rectangle_startingCorner, "f")[0],
-            y: __classPrivateFieldGet(this, _Rectangle_startingCorner, "f")[1],
-            width: __classPrivateFieldGet(this, _Rectangle_width, "f"),
-            height: __classPrivateFieldGet(this, _Rectangle_height, "f"),
-        });
         this.toSvgRectParams = () => (Object.assign({ x: __classPrivateFieldGet(this, _Rectangle_startingCorner, "f")[0].toString(), y: __classPrivateFieldGet(this, _Rectangle_startingCorner, "f")[1].toString(), width: __classPrivateFieldGet(this, _Rectangle_width, "f").toString(), height: __classPrivateFieldGet(this, _Rectangle_height, "f").toString() }, this.getSvgParams()));
         this.getDeconstructedShapeData = () => ({
             id: this.getId(),

@@ -8,12 +8,6 @@ export declare class Rectangle extends Shape {
     getCenter: () => Coordinates;
     getWidth: () => number;
     getHeight: () => number;
-    toPathParams: () => {
-        x: number;
-        y: number;
-        width: number;
-        height: number;
-    };
     toSvgRectParams: () => RectSVGParams;
     getDeconstructedShapeData: () => {
         id: string;

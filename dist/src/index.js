@@ -1,2 +1,2 @@
-import './components/organisms/SVGEditor';
+import './components/pages/SVGEditor';
 //# sourceMappingURL=index.js.map

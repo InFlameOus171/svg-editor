@@ -1,0 +1,1 @@
+{"version":3,"file":"ConnectForm.types.js","sourceRoot":"","sources":["../../../../../src/components/atoms/ConnectForm/ConnectForm.types.ts"],"names":[],"mappings":"","sourcesContent":["export type RoomData = { userName?: string; roomId?: string };\n"]}

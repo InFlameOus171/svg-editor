@@ -3,7 +3,7 @@ import { Shape } from '../Shape';
 export declare class Path extends Shape {
     #private;
     drawPath: SVGDrawPath[];
-    constructor(drawPath: SVGDrawPath[], svgParams?: Partial<SVGParamsBase>, dontCountUp?: boolean, isLocked?: boolean);
+    constructor(drawPath: SVGDrawPath[], svgParams?: Partial<SVGParamsBase>, countShapeCountUp?: boolean, isLocked?: boolean);
     getCenter: () => Coordinates;
     toSVGPathParams: () => {
         fill?: string | undefined;

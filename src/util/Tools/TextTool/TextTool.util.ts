@@ -1,5 +1,5 @@
 import { FooterFields } from '../../../components/molecules/FooterFields';
-import { SVGEditor } from '../../../components/organisms/SVGEditor';
+import { EditorTemplate } from '../../../components/templates/EditorTemplate';
 import { SVGParamFieldID, textPlaceHolder } from '../../helper/constants';
 
 export const paramFieldStateHandler = (footerFields: FooterFields) => ({
@@ -45,7 +45,7 @@ export const setTextParamsSourceVisibility = (
   }
 };
 
-export const getTextFromSource = (svgEditor?: SVGEditor) => {
+export const getTextFromSource = (svgEditor?: EditorTemplate) => {
   const source = svgEditor?.shadowRoot?.getElementById('right-input-section');
   const text =
     source?.querySelector('#text-input')?.getAttribute('value') ??

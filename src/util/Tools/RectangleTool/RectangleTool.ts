@@ -1,5 +1,5 @@
-import { SVGEditor } from '../../../components/organisms/SVGEditor';
-import type { ShapeType } from '../../../types/shapes.types';
+import { EditorTemplate } from '../../../components/templates/EditorTemplate';
+import type { ShapeType } from '../../../types/typeGuards.types';
 import type { Coordinates, SVGParamsBase } from '../../../types/types';
 import { Tools_List } from '../../helper/constants';
 import { getCanvasRectangleValuesFromPoints } from '../../helper/coordinates';
@@ -12,7 +12,7 @@ export class RectangleTool extends Tool<Rectangle> {
   constructor(
     drawLayer: HTMLCanvasElement,
     previewLayer: HTMLCanvasElement,
-    self: SVGEditor,
+    self: EditorTemplate,
     onCreate: (shape: ShapeType | ShapeType[] | null) => void,
     styles: SVGParamsBase,
     offset: Coordinates
@@ -25,18 +25,6 @@ export class RectangleTool extends Tool<Rectangle> {
     }
     this.toolName = Tools_List.RECT;
   }
-
-  executeAction = () => {
-    this.drawLayer.addEventListener('mousemove', this.onMove);
-    this.drawLayer.addEventListener('mousedown', this.onDown);
-    this.drawLayer.addEventListener('mouseup', this.onUp);
-  };
-
-  destroy = () => {
-    this.drawLayer.removeEventListener('mousemove', this.onMove);
-    this.drawLayer.removeEventListener('mousedown', this.onDown);
-    this.drawLayer.removeEventListener('mouseup', this.onUp);
-  };
 
   onDown = (event: MouseEvent) => {
     if (event.button !== 0) return;
@@ -100,5 +88,22 @@ export class RectangleTool extends Tool<Rectangle> {
         );
       }
     }
+  };
+  #onOut = () => {
+    this.isDrawing = false;
+  };
+
+  executeAction = () => {
+    this.drawLayer.addEventListener('mousemove', this.onMove);
+    this.drawLayer.addEventListener('mousedown', this.onDown);
+    this.drawLayer.addEventListener('mouseout', this.#onOut);
+    this.drawLayer.addEventListener('mouseup', this.onUp);
+  };
+
+  destroy = () => {
+    this.drawLayer.removeEventListener('mousemove', this.onMove);
+    this.drawLayer.removeEventListener('mousedown', this.onDown);
+    this.drawLayer.removeEventListener('mouseout', this.#onOut);
+    this.drawLayer.removeEventListener('mouseup', this.onUp);
   };
 }

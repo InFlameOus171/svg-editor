@@ -1,4 +1,4 @@
-import { ShapeType } from '../../types/shapes.types';
+import { ShapeType } from '../../types/typeGuards.types';
 import {
   RectSVGParams,
   EllipseSVGParams,
@@ -450,4 +450,19 @@ export const convertSVGDocumentToShapes = (id: string): ShapeType[] => {
       .flat();
   }
   return [];
+};
+export const importSVG = (svg: Document) => {
+  if (svg.firstChild) {
+    const createdSVG = document.createElementNS(
+      'http://www.w3.org/2000/svg',
+      'svg'
+    );
+    const elementId = '#imported-svg#';
+    createdSVG.setAttribute('id', elementId);
+    createdSVG.appendChild(svg.firstChild);
+    const appendedSvg = document.body.appendChild(createdSVG);
+    const shapes = convertSVGDocumentToShapes(elementId);
+    document.body.removeChild(appendedSvg);
+    return shapes;
+  }
 };

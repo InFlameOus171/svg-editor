@@ -1,31 +1,43 @@
 import { html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { nanoid } from 'nanoid';
 import { Tools_List } from '../../../util/helper/constants';
 import { toolBoxButtonStyles } from './ToolboxButton.styles';
-
+import {
+  ToolboxButtonClickFunction,
+  ToolboxButtonPropsType,
+} from './ToolboxButton.types';
 @customElement('toolbox-button')
 export class ToolboxButton extends LitElement {
   @property({ type: String })
-  toolName: string = 'tool';
+  buttonId?: Tools_List;
+
+  @property()
+  onClick?: ToolboxButtonClickFunction;
+
+  @property({ type: String })
+  toolName?: string;
 
   @property({ type: Array })
   icon?: [string, string];
 
-  @property({ type: String })
-  class?: string;
-
-  @property({ type: String })
-  buttonId?: Tools_List;
-
   @property({ type: Boolean })
   disabled?: boolean;
 
-  @property()
-  onClick?: (id: Tools_List) => void;
-
   static styles = [toolBoxButtonStyles];
 
-  async firstUpdated() {
+  constructor(props: ToolboxButtonPropsType) {
+    super();
+    if (props) {
+      this.buttonId = props.buttonId;
+      this.onClick = props.onClick;
+      this.toolName = props.toolName;
+      this.icon = props.icon;
+      this.disabled = props.disabled;
+    }
+  }
+
+  firstUpdated() {
     const tooltip = this.shadowRoot?.getElementById('button-tooltip');
 
     if (tooltip) {
@@ -45,24 +57,18 @@ export class ToolboxButton extends LitElement {
     }
   }
 
-  #handleClick() {
-    if (this.buttonId) {
-      this.onClick?.(this.buttonId);
-    }
-  }
-
   render() {
     return html` <div class="tooltip" id="button-tooltip">
       <button
         id=${this.buttonId ?? this.toolName + Date.now().toString()}
-        @click=${this.#handleClick}
+        @click=${() => this.buttonId && this.onClick?.(this.buttonId)}
         .disabled=${this.disabled ?? false}
       >
         ${this.icon
           ? html`
           <img
-          alt=${this.toolName}
-          class=${(this.class ?? '') + 'tool-icon'}
+          alt=${this.toolName ?? 'tool'}
+          class=${(this.className ?? '') + 'tool-icon'}
           onerror=${`this.onerror = null; this.src="public/images/${this.icon[1]}"`}
           src=${this.icon[0] + this.icon[1]}>
           </img>`

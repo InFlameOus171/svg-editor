@@ -1,4 +1,4 @@
-import { ShapeType } from '../../types/shapes.types';
+import { ShapeType } from '../../types/typeGuards.types';
 import { RectSVGParams, EllipseSVGParams, LineSVGParams, FreehandSVGParams, PathSVGParams, SVGDrawPath, SVGParamsBase } from '../../types/types';
 import { TextShape } from '../shapes/Text/Text';
 export declare const setSVGStyleParams: (svgShape: Element, lineDash?: number[] | undefined, lineCap?: string | undefined, fill?: string | undefined, stroke?: string | undefined, strokeWidth?: string | undefined, transformMatrix?: DOMMatrix | undefined) => void;
@@ -15,3 +15,4 @@ export declare const getPathCommands: (d: string) => SVGDrawPath[];
 export declare const generateSVGURLFromShapes: (shapes: ShapeType[]) => string;
 export declare const getSVGParamsFromSVG: (element: SVGGraphicsElement) => SVGParamsBase;
 export declare const convertSVGDocumentToShapes: (id: string) => ShapeType[];
+export declare const importSVG: (svg: Document) => ShapeType[] | undefined;

@@ -25,9 +25,6 @@ export class TextShape extends Shape {
             __classPrivateFieldSet(this, _TextShape_position, coordinates, "f");
             this.moveBoundaries([dx, dy]);
         };
-        this.toPathParams = () => ({
-            position: __classPrivateFieldGet(this, _TextShape_position, "f"),
-        });
         this.getCenter = () => __classPrivateFieldGet(this, _TextShape_position, "f");
         this.getDeconstructedShapeData = () => ({
             id: this.getId(),

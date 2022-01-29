@@ -1,4 +1,4 @@
-var _EllipseTool_draw, _EllipseTool_onKeyDown, _EllipseTool_onKeyUp, _EllipseTool_onDown, _EllipseTool_onUp, _EllipseTool_onMove;
+var _EllipseTool_draw, _EllipseTool_onKeyDown, _EllipseTool_onKeyUp, _EllipseTool_onDown, _EllipseTool_onUp, _EllipseTool_onMove, _EllipseTool_onOut;
 import { __classPrivateFieldGet } from "tslib";
 import { highlightStyle, Tools_List } from '../../helper/constants';
 import { Pen } from '../../Pen';
@@ -55,10 +55,14 @@ export class EllipseTool extends Tool {
                 }
             }
         });
+        _EllipseTool_onOut.set(this, () => {
+            this.isDrawing = false;
+        });
         this.executeAction = () => {
             this.drawLayer.addEventListener('mousemove', __classPrivateFieldGet(this, _EllipseTool_onMove, "f"));
             this.drawLayer.addEventListener('mousedown', __classPrivateFieldGet(this, _EllipseTool_onDown, "f"));
             this.drawLayer.addEventListener('mouseup', __classPrivateFieldGet(this, _EllipseTool_onUp, "f"));
+            this.drawLayer.addEventListener('mouseout', __classPrivateFieldGet(this, _EllipseTool_onOut, "f"));
             window.addEventListener('keydown', __classPrivateFieldGet(this, _EllipseTool_onKeyDown, "f"));
             window.addEventListener('keyup', __classPrivateFieldGet(this, _EllipseTool_onKeyUp, "f"));
         };
@@ -66,6 +70,7 @@ export class EllipseTool extends Tool {
             this.drawLayer.removeEventListener('mousemove', __classPrivateFieldGet(this, _EllipseTool_onMove, "f"));
             this.drawLayer.removeEventListener('mousedown', __classPrivateFieldGet(this, _EllipseTool_onDown, "f"));
             this.drawLayer.removeEventListener('mouseup', __classPrivateFieldGet(this, _EllipseTool_onUp, "f"));
+            this.drawLayer.removeEventListener('mouseout', __classPrivateFieldGet(this, _EllipseTool_onOut, "f"));
             window.removeEventListener('keydown', __classPrivateFieldGet(this, _EllipseTool_onKeyDown, "f"));
             window.removeEventListener('keyup', __classPrivateFieldGet(this, _EllipseTool_onKeyUp, "f"));
         };
@@ -77,5 +82,5 @@ export class EllipseTool extends Tool {
         this.toolName = Tools_List.ELLIPSE;
     }
 }
-_EllipseTool_draw = new WeakMap(), _EllipseTool_onKeyDown = new WeakMap(), _EllipseTool_onKeyUp = new WeakMap(), _EllipseTool_onDown = new WeakMap(), _EllipseTool_onUp = new WeakMap(), _EllipseTool_onMove = new WeakMap();
+_EllipseTool_draw = new WeakMap(), _EllipseTool_onKeyDown = new WeakMap(), _EllipseTool_onKeyUp = new WeakMap(), _EllipseTool_onDown = new WeakMap(), _EllipseTool_onUp = new WeakMap(), _EllipseTool_onMove = new WeakMap(), _EllipseTool_onOut = new WeakMap();
 //# sourceMappingURL=EllipseTool.js.map

@@ -1,5 +1,5 @@
-import { SVGEditor } from '../../../components/organisms/SVGEditor';
-import type { ShapeType } from '../../../types/shapes.types';
+import { EditorTemplate } from '../../../components/templates/EditorTemplate';
+import type { ShapeType } from '../../../types/typeGuards.types';
 import type { Coordinates, SVGParamsBase } from '../../../types/types';
 import { textPlaceHolder, Tools_List } from '../../helper/constants';
 import { measureText } from '../../helper/shapes';
@@ -12,7 +12,7 @@ export class TextTool extends Tool<TextShape> {
   constructor(
     drawLayer: HTMLCanvasElement,
     previewLayer: HTMLCanvasElement,
-    self: SVGEditor,
+    self: EditorTemplate,
     onCreate: (shape: ShapeType | ShapeType[] | null) => void,
     currentStyles: SVGParamsBase,
     offset?: Coordinates,

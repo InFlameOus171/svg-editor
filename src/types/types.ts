@@ -1,5 +1,3 @@
-export type NullableString = null | string;
-export type NullableNumber = null | number;
 export type Coordinates = [number, number];
 export type VectorCoordinates = [Coordinates, Coordinates];
 export type BoundaryCoordinates = [
@@ -28,11 +26,7 @@ export type EllipseSVGParams = SVGParamsBase & {
   rx: string;
   ry: string;
 };
-export type CircleSVGParams = SVGParamsBase & {
-  cx: string;
-  cy: string;
-  r: string;
-};
+
 export type RectSVGParams = SVGParamsBase & {
   x: string;
   y: string;
@@ -64,4 +58,4 @@ export type SVGDrawPath = {
   points?: Coordinates[] | string;
 };
 
-export type Matrix = [number, number, number, number, number, number];
+export type Partition<T> = [T[], T[]];

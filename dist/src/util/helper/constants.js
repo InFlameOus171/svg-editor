@@ -13,6 +13,17 @@ export const highlightStyle = {
     strokeWidth: '5',
 };
 export const textPlaceHolder = 'Input text...';
+/**
+   DRAW
+  LINE
+  RECT
+  ELLIPSE
+  SELECT
+  TEXT
+  MOVE
+  DELETE
+  UNSELECT
+*/
 export var Tools_List;
 (function (Tools_List) {
     Tools_List["DRAW"] = "draw-tool";

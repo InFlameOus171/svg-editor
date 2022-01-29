@@ -1,5 +1,5 @@
-import type { ConnectionStatus } from '../../types/network.types';
-import type { ShapeType } from '../../types/shapes.types';
+import { ConnectionStatus } from '../../types/network.types';
+import type { ShapeType } from '../../types/typeGuards.types';
 export declare class Connection {
     #private;
     ws: WebSocket | null;
@@ -15,7 +15,7 @@ export declare class Connection {
     constructor(onDeleteShapes: (ids: string[]) => void, onUpdateShapes: (shape: Record<string, any>[]) => void, onGetAllShapes: () => ShapeType[], onResetEditor: () => void, onUpdateConnectionStatus: (status: ConnectionStatus) => void, onNewMessage: (chatLog: Array<{
         userName: string;
         message: string;
-    }>) => void, url?: string, port?: string);
+    }>) => void, onConnected: (connection: Connection) => void, url?: string, port?: string);
     disconnect: () => void;
     getRoom: () => string;
     getChatLog: () => {
@@ -24,7 +24,6 @@ export declare class Connection {
     }[];
     getUserName: () => string;
     sendChatMessage: (message?: string | undefined) => void;
-    sendShapes: (shapes: ShapeType[]) => void;
     lockShapes: (shape: ShapeType | ShapeType[]) => void;
     unlockShapes: (shape: ShapeType | ShapeType[]) => void;
     updateStatus: (status: ConnectionStatus) => void;

@@ -1,9 +1,10 @@
-var _Connection_userName, _Connection_chatLog, _Connection_userId, _Connection_url, _Connection_port, _Connection_roomId, _Connection_keeper, _Connection_status, _Connection_parseResponse, _Connection_startKeepingConnectionAlive, _Connection_createNewWebSocket, _Connection_sendShapeWithLock;
+var _Connection_userName, _Connection_chatLog, _Connection_userId, _Connection_url, _Connection_port, _Connection_roomId, _Connection_keeper, _Connection_status, _Connection_onConnected, _Connection_parseResponse, _Connection_startKeepingConnectionAlive, _Connection_createNewWebSocket, _Connection_sendShapeWithLock;
 import { __classPrivateFieldGet, __classPrivateFieldSet, __rest } from "tslib";
 import { nanoid } from 'nanoid';
+import { WS_EVENTS, } from '../../types/network.types';
 import { ConnectionMonitor } from './ConnectionMonitor';
 export class Connection {
-    constructor(onDeleteShapes, onUpdateShapes, onGetAllShapes, onResetEditor, onUpdateConnectionStatus, onNewMessage, url = 'localhost', port = '8080') {
+    constructor(onDeleteShapes, onUpdateShapes, onGetAllShapes, onResetEditor, onUpdateConnectionStatus, onNewMessage, onConnected, url = 'localhost', port = '8080') {
         _Connection_userName.set(this, 'user_' + nanoid(5));
         _Connection_chatLog.set(this, []);
         _Connection_userId.set(this, void 0);
@@ -13,6 +14,7 @@ export class Connection {
         this.ws = null;
         _Connection_keeper.set(this, void 0);
         _Connection_status.set(this, 'disconnected');
+        _Connection_onConnected.set(this, void 0);
         this.disconnect = () => {
             var _a, _b;
             (_a = this.ws) === null || _a === void 0 ? void 0 : _a.close();
@@ -32,7 +34,8 @@ export class Connection {
         _Connection_parseResponse.set(this, (response) => {
             var _a;
             const allParsedData = JSON.parse(response.data);
-            if (allParsedData.event === 'ping' || allParsedData.event === 'pong')
+            if (allParsedData.event === WS_EVENTS.PING ||
+                allParsedData.event === WS_EVENTS.PONG)
                 return allParsedData;
             const { value } = allParsedData, parsedData = __rest(allParsedData, ["value"]);
             const parsedValue = typeof value === 'string'
@@ -48,16 +51,18 @@ export class Connection {
             return __classPrivateFieldGet(this, _Connection_keeper, "f");
         });
         _Connection_createNewWebSocket.set(this, () => {
+            const self = this;
             const ws = new WebSocket(`ws://${__classPrivateFieldGet(this, _Connection_url, "f")}:${__classPrivateFieldGet(this, _Connection_port, "f")}`);
             this.ws = ws;
             ws.onopen = () => {
                 const payload = {
-                    event: 'join-room',
-                    roomId: __classPrivateFieldGet(this, _Connection_roomId, "f"),
-                    value: JSON.stringify(this.onGetAllShapes().map(shape => shape.getDeconstructedShapeData())),
-                    user: __classPrivateFieldGet(this, _Connection_userName, "f"),
+                    event: WS_EVENTS.JOIN_ROOM,
+                    roomId: __classPrivateFieldGet(self, _Connection_roomId, "f"),
+                    value: JSON.stringify(self.onGetAllShapes().map(shape => shape.getDeconstructedShapeData())),
+                    user: __classPrivateFieldGet(self, _Connection_userName, "f"),
                 };
-                this.updateStatus('connected');
+                __classPrivateFieldGet(self, _Connection_onConnected, "f").call(self, self);
+                self.updateStatus('connected');
                 ws.send(JSON.stringify(payload));
             };
             ws.addEventListener('message', msg => {
@@ -65,19 +70,17 @@ export class Connection {
                 const data = __classPrivateFieldGet(this, _Connection_parseResponse, "f").call(this, msg);
                 const { value, event, user } = data;
                 switch (event) {
-                    case 'message':
+                    case WS_EVENTS.MESSAGE:
                         {
                             if (user && value) {
-                                (_a = __classPrivateFieldGet(this, _Connection_chatLog, "f")) === null || _a === void 0 ? void 0 : _a.push({ userName: user, message: value });
-                                this.onNewMessage(__classPrivateFieldGet(this, _Connection_chatLog, "f"));
+                                (_a = __classPrivateFieldGet(self, _Connection_chatLog, "f")) === null || _a === void 0 ? void 0 : _a.push({ userName: user, message: value });
+                                self.onNewMessage(__classPrivateFieldGet(self, _Connection_chatLog, "f"));
                             }
                         }
                         break;
-                    case 'get-shapes': {
-                        this.onUpdateShapes((_b = JSON.parse(value)) !== null && _b !== void 0 ? _b : []);
+                    case WS_EVENTS.GET_SHAPES: {
+                        self.onUpdateShapes((_b = JSON.parse(value)) !== null && _b !== void 0 ? _b : []);
                         break;
-                    }
-                    case 'ping': {
                     }
                 }
             });
@@ -89,7 +92,7 @@ export class Connection {
             if (!message)
                 return;
             const payload = JSON.stringify({
-                event: 'message',
+                event: WS_EVENTS.MESSAGE,
                 roomId: __classPrivateFieldGet(this, _Connection_roomId, "f"),
                 user: __classPrivateFieldGet(this, _Connection_userName, "f"),
                 userId: __classPrivateFieldGet(this, _Connection_userId, "f"),
@@ -97,26 +100,19 @@ export class Connection {
             });
             (_a = this.ws) === null || _a === void 0 ? void 0 : _a.send(payload);
         };
-        this.sendShapes = (shapes) => {
-            if (!shapes.length)
-                return;
-            const payload = JSON.stringify({
-                event: '',
-            });
-        };
-        _Connection_sendShapeWithLock.set(this, (shape, isLocked = true) => {
+        _Connection_sendShapeWithLock.set(this, (shapes, isLocked = true) => {
             var _a;
             let _shapes = [];
-            if (!Array.isArray(shape)) {
-                shape.isLocked = isLocked;
-                _shapes = [shape];
+            if (!Array.isArray(shapes)) {
+                shapes.isLocked = isLocked;
+                _shapes = [shapes];
             }
             else {
-                shape.forEach(shape => (shape.isLocked = isLocked));
-                _shapes = shape;
+                shapes.forEach(shape => (shape.isLocked = isLocked));
+                _shapes = shapes;
             }
             const payload = JSON.stringify({
-                event: isLocked ? 'lock-shapes' : 'unlock-shapes',
+                event: isLocked ? WS_EVENTS.LOCK_SHAPES : WS_EVENTS.UNLOCK_SHAPES,
                 roomId: __classPrivateFieldGet(this, _Connection_roomId, "f"),
                 user: __classPrivateFieldGet(this, _Connection_userName, "f"),
                 userId: __classPrivateFieldGet(this, _Connection_userId, "f"),
@@ -138,7 +134,7 @@ export class Connection {
         this.deleteShapes = (ids) => {
             var _a;
             const payload = JSON.stringify({
-                event: 'delete-shapes',
+                event: WS_EVENTS.DELETE_SHAPES,
                 roomId: __classPrivateFieldGet(this, _Connection_roomId, "f"),
                 user: __classPrivateFieldGet(this, _Connection_userName, "f"),
                 userId: __classPrivateFieldGet(this, _Connection_userId, "f"),
@@ -156,7 +152,7 @@ export class Connection {
                 _shapes = shapes;
             }
             const payload = JSON.stringify({
-                event: 'update-shapes',
+                event: WS_EVENTS.UPDATE_SHAPES,
                 roomId: __classPrivateFieldGet(this, _Connection_roomId, "f"),
                 user: __classPrivateFieldGet(this, _Connection_userName, "f"),
                 userId: __classPrivateFieldGet(this, _Connection_userId, "f"),
@@ -181,9 +177,10 @@ export class Connection {
         this.onGetAllShapes = onGetAllShapes;
         this.onResetEditor = onResetEditor;
         this.onNewMessage = onNewMessage;
+        __classPrivateFieldSet(this, _Connection_onConnected, onConnected, "f");
         this.onUpdateConnectionStatus = onUpdateConnectionStatus;
         this.updateStatus('disconnected');
     }
 }
-_Connection_userName = new WeakMap(), _Connection_chatLog = new WeakMap(), _Connection_userId = new WeakMap(), _Connection_url = new WeakMap(), _Connection_port = new WeakMap(), _Connection_roomId = new WeakMap(), _Connection_keeper = new WeakMap(), _Connection_status = new WeakMap(), _Connection_parseResponse = new WeakMap(), _Connection_startKeepingConnectionAlive = new WeakMap(), _Connection_createNewWebSocket = new WeakMap(), _Connection_sendShapeWithLock = new WeakMap();
+_Connection_userName = new WeakMap(), _Connection_chatLog = new WeakMap(), _Connection_userId = new WeakMap(), _Connection_url = new WeakMap(), _Connection_port = new WeakMap(), _Connection_roomId = new WeakMap(), _Connection_keeper = new WeakMap(), _Connection_status = new WeakMap(), _Connection_onConnected = new WeakMap(), _Connection_parseResponse = new WeakMap(), _Connection_startKeepingConnectionAlive = new WeakMap(), _Connection_createNewWebSocket = new WeakMap(), _Connection_sendShapeWithLock = new WeakMap();
 //# sourceMappingURL=Connection.js.map

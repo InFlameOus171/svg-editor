@@ -1,5 +1,5 @@
-import { SVGEditor } from '../../../components/organisms/SVGEditor';
-import type { ShapeType } from '../../../types/shapes.types';
+import { EditorTemplate } from '../../../components/templates/EditorTemplate';
+import type { ShapeType } from '../../../types/typeGuards.types';
 import { Coordinates, SVGParamsBase } from '../../../types/types';
 import { highlightStyle, Tools_List } from '../../helper/constants';
 import { Pen } from '../../Pen';
@@ -13,7 +13,7 @@ export class EllipseTool extends Tool<Ellipse> {
   constructor(
     drawLayer: HTMLCanvasElement,
     previewLayer: HTMLCanvasElement,
-    self: SVGEditor,
+    self: EditorTemplate,
     onCreate: (shape: ShapeType | ShapeType[] | null) => void,
     drawPenConfig: SVGParamsBase,
     offset: Coordinates
@@ -103,11 +103,15 @@ export class EllipseTool extends Tool<Ellipse> {
       }
     }
   };
+  #onOut = () => {
+    this.isDrawing = false;
+  };
 
   executeAction = () => {
     this.drawLayer.addEventListener('mousemove', this.#onMove);
     this.drawLayer.addEventListener('mousedown', this.#onDown);
     this.drawLayer.addEventListener('mouseup', this.#onUp);
+    this.drawLayer.addEventListener('mouseout', this.#onOut);
     window.addEventListener('keydown', this.#onKeyDown);
     window.addEventListener('keyup', this.#onKeyUp);
   };
@@ -116,6 +120,7 @@ export class EllipseTool extends Tool<Ellipse> {
     this.drawLayer.removeEventListener('mousemove', this.#onMove);
     this.drawLayer.removeEventListener('mousedown', this.#onDown);
     this.drawLayer.removeEventListener('mouseup', this.#onUp);
+    this.drawLayer.removeEventListener('mouseout', this.#onOut);
     window.removeEventListener('keydown', this.#onKeyDown);
     window.removeEventListener('keyup', this.#onKeyUp);
   };

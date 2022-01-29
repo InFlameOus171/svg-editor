@@ -1,3 +1,5 @@
+var _RectangleTool_onOut;
+import { __classPrivateFieldGet } from "tslib";
 import { Tools_List } from '../../helper/constants';
 import { getCanvasRectangleValuesFromPoints } from '../../helper/coordinates';
 import { Pen } from '../../Pen';
@@ -7,16 +9,6 @@ import { getFormattedRectangleValuesFromPoints } from './RectangleTool.util';
 export class RectangleTool extends Tool {
     constructor(drawLayer, previewLayer, self, onCreate, styles, offset) {
         super(drawLayer, self, onCreate, offset, previewLayer, styles);
-        this.executeAction = () => {
-            this.drawLayer.addEventListener('mousemove', this.onMove);
-            this.drawLayer.addEventListener('mousedown', this.onDown);
-            this.drawLayer.addEventListener('mouseup', this.onUp);
-        };
-        this.destroy = () => {
-            this.drawLayer.removeEventListener('mousemove', this.onMove);
-            this.drawLayer.removeEventListener('mousedown', this.onDown);
-            this.drawLayer.removeEventListener('mouseup', this.onUp);
-        };
         this.onDown = (event) => {
             if (event.button !== 0)
                 return;
@@ -54,6 +46,21 @@ export class RectangleTool extends Tool {
                 }
             }
         };
+        _RectangleTool_onOut.set(this, () => {
+            this.isDrawing = false;
+        });
+        this.executeAction = () => {
+            this.drawLayer.addEventListener('mousemove', this.onMove);
+            this.drawLayer.addEventListener('mousedown', this.onDown);
+            this.drawLayer.addEventListener('mouseout', __classPrivateFieldGet(this, _RectangleTool_onOut, "f"));
+            this.drawLayer.addEventListener('mouseup', this.onUp);
+        };
+        this.destroy = () => {
+            this.drawLayer.removeEventListener('mousemove', this.onMove);
+            this.drawLayer.removeEventListener('mousedown', this.onDown);
+            this.drawLayer.removeEventListener('mouseout', __classPrivateFieldGet(this, _RectangleTool_onOut, "f"));
+            this.drawLayer.removeEventListener('mouseup', this.onUp);
+        };
         this.resetPreview();
         const renderingContext = this.drawLayer.getContext('2d');
         if (renderingContext) {
@@ -62,4 +69,5 @@ export class RectangleTool extends Tool {
         this.toolName = Tools_List.RECT;
     }
 }
+_RectangleTool_onOut = new WeakMap();
 //# sourceMappingURL=RectangleTool.js.map

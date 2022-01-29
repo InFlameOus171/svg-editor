@@ -15,12 +15,12 @@ export const toolBoxStyles = css`
     justify-content: center;
     transition: width 1s, height 1s;
   }
-  span[class^='row-'] {
+  .row {
     display: flex;
     justify-content: center;
     width: 30%;
   }
-  span[class^='row-'] > toolbox-button {
+  .row > toolbox-button {
     display: flex;
     aspect-ratio: 1;
     max-height: 50px;

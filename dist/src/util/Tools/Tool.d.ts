@@ -1,13 +1,12 @@
 import { FooterFields } from '../../components/molecules/FooterFields';
-import { SVGEditor } from '../../components/organisms/SVGEditor';
-import type { ShapeType } from '../../types/shapes.types';
+import { EditorTemplate } from '../../components/templates/EditorTemplate';
+import type { ShapeType } from '../../types/typeGuards.types';
 import type { Coordinates, SVGParamsBase } from '../../types/types';
 import { Tools_List } from '../helper/constants';
 export declare abstract class Tool<T extends ShapeType, V extends ShapeType = T> {
-    #private;
     drawLayer: HTMLCanvasElement;
     previewLayer?: HTMLCanvasElement;
-    self: SVGEditor;
+    self: EditorTemplate;
     footerFields?: FooterFields;
     currentShape?: V;
     allShapes: T[];
@@ -22,7 +21,7 @@ export declare abstract class Tool<T extends ShapeType, V extends ShapeType = T>
     previousCoordinates: Coordinates;
     currentCoordinates: Coordinates;
     onUpdateEditor: (shape: ShapeType | ShapeType[] | null) => void;
-    constructor(drawLayer: HTMLCanvasElement, self: SVGEditor, onUpdateEditor: (shape: ShapeType | ShapeType[] | null) => void, offset?: Coordinates, previewLayer?: HTMLCanvasElement, drawPenConfig?: SVGParamsBase, previewPenConfig?: SVGParamsBase, footerFields?: FooterFields);
+    constructor(drawLayer: HTMLCanvasElement, self: EditorTemplate, onUpdateEditor: (shape: ShapeType | ShapeType[] | null) => void, offset: Coordinates | undefined, previewLayer: HTMLCanvasElement, drawPenConfig?: SVGParamsBase, previewPenConfig?: SVGParamsBase, footerFields?: FooterFields);
     setSVGParam: (field: keyof SVGParamsBase, value: any) => void;
     setSVGParams: (drawPenConfig: SVGParamsBase) => void;
     resetPreview: () => void;
@@ -30,8 +29,8 @@ export declare abstract class Tool<T extends ShapeType, V extends ShapeType = T>
     resetCoordinates: () => void;
     highlightPreview: () => void;
     unHighlightpreview: () => void;
-    updateShapeData: (newCoordinates: Coordinates) => void;
     getCoords: (e: MouseEvent) => Coordinates;
+    updateShapeData: (newCoordinates: Coordinates) => void;
     executeAction: () => void;
     destroy: () => void;
 }

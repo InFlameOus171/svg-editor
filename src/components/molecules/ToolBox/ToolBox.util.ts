@@ -1,29 +1,7 @@
-import { html } from 'lit';
 import { Tools_List } from '../../../util/helper/constants';
-import { IToolboxButtonProps } from '../../atoms/ToolboxButton/ToolboxButton.types';
-import { SVGEditor } from '../../organisms/SVGEditor';
+import { EditorTemplate } from '../../templates/EditorTemplate';
 
-export const getButtonColumn = (tools?: Array<IToolboxButtonProps>) => {
-  let counter = 0;
-  return tools?.map((tool, index) => {
-    index % 3 == 0 && ++counter;
-    return html`
-      <span class="row-${counter}">
-        <toolbox-button
-          id=${'tool-box-button-' + tool.id}
-          .onClick=${tool.onClick}
-          .buttonId=${tool.id}
-          .toolName=${tool.toolName}
-          .icon=${tool.icon}
-          .disabled=${tool.disabled}
-        >
-        </toolbox-button>
-      </span>
-    `;
-  });
-};
-
-export const getToolButton = (editor: SVGEditor, tool: Tools_List) => {
+export const getToolButton = (editor: EditorTemplate, tool: Tools_List) => {
   const toolBox = editor.shadowRoot?.getElementById('tool-box');
   const toolBoxButton = toolBox?.shadowRoot?.getElementById(
     'tool-box-button-' + tool
@@ -32,7 +10,7 @@ export const getToolButton = (editor: SVGEditor, tool: Tools_List) => {
 };
 
 export const setIsButtonActive = (
-  editor: SVGEditor,
+  editor: EditorTemplate,
   tool: Tools_List,
   isActive: boolean = true
 ) => {
@@ -41,7 +19,7 @@ export const setIsButtonActive = (
 };
 
 export const setIsButtonDisabled = (
-  editor: SVGEditor,
+  editor: EditorTemplate,
   tool: Tools_List,
   isDisabled: boolean = true
 ) => {

@@ -2,6 +2,17 @@ import type { SVGParamsBase } from '../../types/types';
 export declare const acceptedTags: string[];
 export declare const highlightStyle: SVGParamsBase;
 export declare const textPlaceHolder: string;
+/**
+   DRAW
+  LINE
+  RECT
+  ELLIPSE
+  SELECT
+  TEXT
+  MOVE
+  DELETE
+  UNSELECT
+*/
 export declare enum Tools_List {
     DRAW = "draw-tool",
     LINE = "line-tool",

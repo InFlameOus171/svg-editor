@@ -1,12 +1,12 @@
-import { LitElement, html } from 'lit';
+import { html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { nanoid } from 'nanoid';
 import { connectFormStyles } from './ConnectForm.styles';
+import { RoomData } from './ConnectForm.types';
 
 @customElement('connect-form')
 export class ConnectForm extends LitElement {
   @property()
-  onJoinRoom?: (data: { userName?: string; roomId?: string }) => void;
+  onJoinRoom?: (data: RoomData) => void;
 
   @property({ type: String })
   userName?: string;
@@ -29,7 +29,7 @@ export class ConnectForm extends LitElement {
       (event.target as HTMLInputElement | undefined)?.value ?? this.userName;
   };
 
-  render() {
+  protected render() {
     return html`<div>
         <label
           ><div id="username-form-label">Username:</div>

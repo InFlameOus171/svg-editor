@@ -2,7 +2,7 @@ import { LitElement } from 'lit';
 import '../../atoms/Chat';
 import '../../atoms/RoomInformation';
 import '../../atoms/ConnectForm';
-import { ConnectionStatus } from '../../../types/network.types';
+import { ConnectionStatus, RoomConnectionData } from '../../../types/network.types';
 export declare class ConnectionSection extends LitElement {
     static styles: import("lit").CSSResult[];
     userName?: string;
@@ -12,10 +12,7 @@ export declare class ConnectionSection extends LitElement {
         userName: string;
         message: string;
     }>;
-    onJoinRoom?: (data: {
-        userName?: string;
-        roomId?: string;
-    }) => void;
+    onJoinRoom?: (data: RoomConnectionData) => void;
     onLeaveRoom?: () => void;
     onSendMessage?: (message?: string) => void;
     render(): import("lit-html").TemplateResult<1>;

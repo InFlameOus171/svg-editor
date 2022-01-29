@@ -1,6 +1,10 @@
 import { nanoid } from 'nanoid';
-import type { ConnectionStatus, ParsedData } from '../../types/network.types';
-import type { ShapeType } from '../../types/shapes.types';
+import {
+  ConnectionStatus,
+  ParsedData,
+  WS_EVENTS,
+} from '../../types/network.types';
+import type { ShapeType } from '../../types/typeGuards.types';
 import { ConnectionMonitor } from './ConnectionMonitor';
 
 export class Connection {
@@ -13,6 +17,7 @@ export class Connection {
   ws: WebSocket | null = null;
   #keeper?: ConnectionMonitor;
   #status?: ConnectionStatus = 'disconnected';
+  #onConnected: (connection: Connection) => void;
   onDeleteShapes: (ids: string[]) => void;
   onUpdateShapes: (shapes: Record<string, any>[]) => void;
   onGetAllShapes: () => ShapeType[];
@@ -29,6 +34,7 @@ export class Connection {
     onNewMessage: (
       chatLog: Array<{ userName: string; message: string }>
     ) => void,
+    onConnected: (connection: Connection) => void,
     url: string = 'localhost',
     port: string = '8080'
   ) {
@@ -40,6 +46,7 @@ export class Connection {
     this.onGetAllShapes = onGetAllShapes;
     this.onResetEditor = onResetEditor;
     this.onNewMessage = onNewMessage;
+    this.#onConnected = onConnected;
     this.onUpdateConnectionStatus = onUpdateConnectionStatus;
     this.updateStatus('disconnected');
   }
@@ -65,7 +72,10 @@ export class Connection {
 
   #parseResponse = (response: any): ParsedData => {
     const allParsedData = JSON.parse(response.data);
-    if (allParsedData.event === 'ping' || allParsedData.event === 'pong')
+    if (
+      allParsedData.event === WS_EVENTS.PING ||
+      allParsedData.event === WS_EVENTS.PONG
+    )
       return allParsedData;
     const { value, ...parsedData } = allParsedData;
     const parsedValue =
@@ -86,18 +96,20 @@ export class Connection {
   };
 
   #createNewWebSocket = () => {
+    const self = this;
     const ws = new WebSocket(`ws://${this.#url}:${this.#port}`);
     this.ws = ws;
     ws.onopen = () => {
       const payload = {
-        event: 'join-room',
-        roomId: this.#roomId,
+        event: WS_EVENTS.JOIN_ROOM,
+        roomId: self.#roomId,
         value: JSON.stringify(
-          this.onGetAllShapes().map(shape => shape.getDeconstructedShapeData())
+          self.onGetAllShapes().map(shape => shape.getDeconstructedShapeData())
         ),
-        user: this.#userName,
+        user: self.#userName,
       };
-      this.updateStatus('connected');
+      self.#onConnected(self);
+      self.updateStatus('connected');
       ws.send(JSON.stringify(payload));
     };
 
@@ -105,19 +117,17 @@ export class Connection {
       const data: ParsedData = this.#parseResponse(msg);
       const { value, event, user } = data;
       switch (event) {
-        case 'message':
+        case WS_EVENTS.MESSAGE:
           {
             if (user && value) {
-              this.#chatLog?.push({ userName: user, message: value as string });
-              this.onNewMessage(this.#chatLog);
+              self.#chatLog?.push({ userName: user, message: value as string });
+              self.onNewMessage(self.#chatLog);
             }
           }
           break;
-        case 'get-shapes': {
-          this.onUpdateShapes(JSON.parse(value as string) ?? []);
+        case WS_EVENTS.GET_SHAPES: {
+          self.onUpdateShapes(JSON.parse(value as string) ?? []);
           break;
-        }
-        case 'ping': {
         }
       }
     });
@@ -128,7 +138,7 @@ export class Connection {
   sendChatMessage = (message?: string) => {
     if (!message) return;
     const payload = JSON.stringify({
-      event: 'message',
+      event: WS_EVENTS.MESSAGE,
       roomId: this.#roomId,
       user: this.#userName,
       userId: this.#userId,
@@ -137,27 +147,20 @@ export class Connection {
     this.ws?.send(payload);
   };
 
-  sendShapes = (shapes: ShapeType[]) => {
-    if (!shapes.length) return;
-    const payload = JSON.stringify({
-      event: '',
-    });
-  };
-
   #sendShapeWithLock = (
-    shape: ShapeType | ShapeType[],
+    shapes: ShapeType | ShapeType[],
     isLocked: boolean = true
   ) => {
     let _shapes: ShapeType[] = [];
-    if (!Array.isArray(shape)) {
-      shape.isLocked = isLocked;
-      _shapes = [shape];
+    if (!Array.isArray(shapes)) {
+      shapes.isLocked = isLocked;
+      _shapes = [shapes];
     } else {
-      shape.forEach(shape => (shape.isLocked = isLocked));
-      _shapes = shape;
+      shapes.forEach(shape => (shape.isLocked = isLocked));
+      _shapes = shapes;
     }
     const payload = JSON.stringify({
-      event: isLocked ? 'lock-shapes' : 'unlock-shapes',
+      event: isLocked ? WS_EVENTS.LOCK_SHAPES : WS_EVENTS.UNLOCK_SHAPES,
       roomId: this.#roomId,
       user: this.#userName,
       userId: this.#userId,
@@ -185,7 +188,7 @@ export class Connection {
 
   deleteShapes = (ids: string[]) => {
     const payload = JSON.stringify({
-      event: 'delete-shapes',
+      event: WS_EVENTS.DELETE_SHAPES,
       roomId: this.#roomId,
       user: this.#userName,
       userId: this.#userId,
@@ -202,7 +205,7 @@ export class Connection {
       _shapes = shapes;
     }
     const payload = JSON.stringify({
-      event: 'update-shapes',
+      event: WS_EVENTS.UPDATE_SHAPES,
       roomId: this.#roomId,
       user: this.#userName,
       userId: this.#userId,

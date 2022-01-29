@@ -1,4 +1,4 @@
-import type { Shapes, ShapeType } from '../../types/shapes.types';
+import type { Shapes, ShapeType } from '../../types/typeGuards.types';
 import type { Ellipse } from '../shapes/Ellipse/Ellipse';
 import type { Freehand } from '../shapes/Freehand/Freehand';
 import type { Line } from '../shapes/Line/Line';

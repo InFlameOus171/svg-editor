@@ -166,7 +166,7 @@ let FooterFields = class FooterFields extends LitElement {
           </div>
         </div>
       </div>
-      <fieldset id="right-input-section">
+      <div id="right-input-section">
         <label
           >Font size:<input
             type="number"
@@ -197,7 +197,7 @@ let FooterFields = class FooterFields extends LitElement {
             @input=${() => { var _a; return (_a = __classPrivateFieldGet(this, _FooterFields_handleSVGParamChange, "f")) === null || _a === void 0 ? void 0 : _a.call(this, 'text', SVGParamFieldID.TEXT); }}
           />
         </label>
-      </fieldset>
+      </div>
     </fieldset>`;
     }
 };

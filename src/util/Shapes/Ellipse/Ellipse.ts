@@ -40,13 +40,6 @@ export class Ellipse extends Shape {
     return this.#center;
   };
 
-  toPathParams = () => ({
-    cx: this.#center[0],
-    cy: this.#center[1],
-    rx: this.radiusX,
-    ry: this.radiusY,
-  });
-
   toSVGEllipseParams = (): EllipseSVGParams => ({
     cx: this.#center[0].toString(),
     cy: this.#center[1].toString(),

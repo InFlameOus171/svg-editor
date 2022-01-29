@@ -1,4 +1,4 @@
-var _LineTool_draw, _LineTool_onDown, _LineTool_onUp, _LineTool_onMove;
+var _LineTool_draw, _LineTool_onDown, _LineTool_onUp, _LineTool_onMove, _LineTool_onOut;
 import { __classPrivateFieldGet } from "tslib";
 import { Tools_List } from '../../helper/constants';
 import { Pen } from '../../Pen';
@@ -34,14 +34,19 @@ export class LineTool extends Tool {
                 Pen.drawLine(this.currentShape, this.previewContext);
             }
         });
+        _LineTool_onOut.set(this, () => {
+            this.isDrawing = false;
+        });
         this.executeAction = () => {
             this.drawLayer.addEventListener('mousemove', __classPrivateFieldGet(this, _LineTool_onMove, "f"));
             this.drawLayer.addEventListener('mousedown', __classPrivateFieldGet(this, _LineTool_onDown, "f"));
+            this.drawLayer.addEventListener('mouseout', __classPrivateFieldGet(this, _LineTool_onOut, "f"));
             this.drawLayer.addEventListener('mouseup', __classPrivateFieldGet(this, _LineTool_onUp, "f"));
         };
         this.destroy = () => {
             this.drawLayer.removeEventListener('mousemove', __classPrivateFieldGet(this, _LineTool_onMove, "f"));
             this.drawLayer.removeEventListener('mousedown', __classPrivateFieldGet(this, _LineTool_onDown, "f"));
+            this.drawLayer.removeEventListener('mouseout', __classPrivateFieldGet(this, _LineTool_onOut, "f"));
             this.drawLayer.removeEventListener('mouseup', __classPrivateFieldGet(this, _LineTool_onUp, "f"));
         };
         this.resetPreview();
@@ -52,5 +57,5 @@ export class LineTool extends Tool {
         this.toolName = Tools_List.LINE;
     }
 }
-_LineTool_draw = new WeakMap(), _LineTool_onDown = new WeakMap(), _LineTool_onUp = new WeakMap(), _LineTool_onMove = new WeakMap();
+_LineTool_draw = new WeakMap(), _LineTool_onDown = new WeakMap(), _LineTool_onUp = new WeakMap(), _LineTool_onMove = new WeakMap(), _LineTool_onOut = new WeakMap();
 //# sourceMappingURL=LineTool.js.map

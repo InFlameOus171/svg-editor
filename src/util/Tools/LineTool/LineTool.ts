@@ -1,5 +1,5 @@
-import { SVGEditor } from '../../../components/organisms/SVGEditor';
-import type { ShapeType } from '../../../types/shapes.types';
+import { EditorTemplate } from '../../../components/templates/EditorTemplate';
+import type { ShapeType } from '../../../types/typeGuards.types';
 import type { Coordinates, SVGParamsBase } from '../../../types/types';
 import { Tools_List } from '../../helper/constants';
 import { Pen } from '../../Pen';
@@ -10,7 +10,7 @@ export class LineTool extends Tool<Line> {
   constructor(
     drawLayer: HTMLCanvasElement,
     previewLayer: HTMLCanvasElement,
-    self: SVGEditor,
+    self: EditorTemplate,
     onCreate: (shape: ShapeType | ShapeType[] | null) => void,
     drawPenConfig?: SVGParamsBase,
     offset?: Coordinates
@@ -62,16 +62,21 @@ export class LineTool extends Tool<Line> {
       Pen.drawLine(this.currentShape, this.previewContext);
     }
   };
+  #onOut = () => {
+    this.isDrawing = false;
+  };
 
   executeAction = () => {
     this.drawLayer.addEventListener('mousemove', this.#onMove);
     this.drawLayer.addEventListener('mousedown', this.#onDown);
+    this.drawLayer.addEventListener('mouseout', this.#onOut);
     this.drawLayer.addEventListener('mouseup', this.#onUp);
   };
 
   destroy = () => {
     this.drawLayer.removeEventListener('mousemove', this.#onMove);
     this.drawLayer.removeEventListener('mousedown', this.#onDown);
+    this.drawLayer.removeEventListener('mouseout', this.#onOut);
     this.drawLayer.removeEventListener('mouseup', this.#onUp);
   };
 }

@@ -1,6 +1,6 @@
 import { FooterFields } from '../../../components/molecules/FooterFields';
-import { SVGEditor } from '../../../components/organisms/SVGEditor';
-import type { ShapeType } from '../../../types/shapes.types';
+import { EditorTemplate } from '../../../components/templates/EditorTemplate';
+import type { ShapeType } from '../../../types/typeGuards.types';
 import type { Coordinates, SVGParamsBase } from '../../../types/types';
 import { highlightStyle, Tools_List } from '../../helper/constants';
 import {
@@ -19,7 +19,7 @@ export class SelectTool extends Tool<ShapeType> {
   constructor(
     drawLayer: HTMLCanvasElement,
     previewLayer: HTMLCanvasElement,
-    self: SVGEditor,
+    self: EditorTemplate,
     onSelect: (shape: ShapeType | ShapeType[] | null) => void,
     shapes: ShapeType[],
     offset?: Coordinates,
@@ -37,10 +37,8 @@ export class SelectTool extends Tool<ShapeType> {
     );
     this.allShapes = shapes;
     this.previewContext && this.previewContext.setLineDash([10, 10]);
-    this.#drawOnPreview = Pen.generatePen(this.previewContext).draw;
     this.toolName = Tools_List.SELECT;
   }
-  #drawOnPreview: (shape: ShapeType, svgParams?: SVGParamsBase) => void;
 
   updateAllShapes = (shapes: ShapeType[] = []) => {
     this.allShapes = shapes;
@@ -77,7 +75,7 @@ export class SelectTool extends Tool<ShapeType> {
   };
 
   updatePreview = () => {
-    if (this.currentShape) {
+    if (this.currentShape && this.previewContext) {
       this.resetPreview();
       const { startingCorner, width, height } = rectangleParamsFromBoundaries(
         this.currentShape.boundaries
@@ -85,15 +83,21 @@ export class SelectTool extends Tool<ShapeType> {
 
       if (isText(this.currentShape)) {
         setTextParamsSourceVisibility(this.footerFields, true);
-        this.#drawOnPreview(this.currentShape, {
-          ...this.currentShape.getSvgParams(),
-          ...highlightStyle,
-          lineDash: [0],
-        });
+        Pen.draw(
+          this.currentShape,
+          {
+            ...this.currentShape.getSvgParams(),
+            ...highlightStyle,
+            lineDash: [0],
+          },
+          this.previewContext
+        );
       } else {
-        this.#drawOnPreview(this.currentShape, highlightStyle);
-        this.#drawOnPreview(
-          new Rectangle(startingCorner, width, height, highlightStyle, false)
+        Pen.draw(this.currentShape, highlightStyle, this.previewContext);
+        Pen.draw(
+          new Rectangle(startingCorner, width, height, highlightStyle, false),
+          undefined,
+          this.previewContext
         );
       }
     } else {

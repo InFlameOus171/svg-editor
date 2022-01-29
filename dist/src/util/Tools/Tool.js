@@ -1,4 +1,3 @@
-var _Tool_draw;
 import { highlightStyle, textPlaceHolder, } from '../helper/constants';
 import { Pen } from '../Pen';
 export class Tool {
@@ -41,15 +40,12 @@ export class Tool {
                 this.previewContext.clearRect(0, 0, this.self.width, this.self.height);
             }
         };
-        this.updateShapeData = (newCoordinates) => {
-            throw new Error('not implemented');
-        };
         this.getCoords = (e) => {
             return [e.offsetX - this.offset[0], e.offsetY - this.offset[1]];
         };
-        _Tool_draw.set(this, () => {
+        this.updateShapeData = (newCoordinates) => {
             throw new Error('not implemented');
-        });
+        };
         this.executeAction = () => {
             throw new Error('not implemented');
         };
@@ -68,5 +64,4 @@ export class Tool {
         this.drawContext = this.drawLayer.getContext('2d');
     }
 }
-_Tool_draw = new WeakMap();
 //# sourceMappingURL=Tool.js.map

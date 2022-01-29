@@ -1,6 +1,5 @@
-import type { ShapeType } from '../../types/shapes.types';
-import type { BoundaryCoordinates, Coordinates } from '../../types/types';
-import type { Partition } from '../../types/util.types';
+import type { ShapeType } from '../../types/typeGuards.types';
+import type { BoundaryCoordinates, Coordinates, Partition } from '../../types/types';
 export declare const getCanvasRectangleValuesFromPoints: (startPoint: Coordinates, endPoint: Coordinates) => {
     startingCorner: Coordinates;
     width: number;

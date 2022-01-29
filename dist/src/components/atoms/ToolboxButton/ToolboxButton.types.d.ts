@@ -1,9 +1,10 @@
 import { Tools_List } from '../../../util/helper/constants';
-export interface IToolboxButtonProps {
-    onClick?: (id: Tools_List) => void;
-    toolName: string;
+export declare type ToolboxButtonPropsType = {
+    onClick: (buttonId: Tools_List) => void;
+    buttonId: Tools_List;
     icon?: [string, string];
-    id: Tools_List;
+    toolName?: string;
     class?: string;
     disabled?: boolean;
-}
+};
+export declare type ToolboxButtonClickFunction = (buttonId: Tools_List) => void;

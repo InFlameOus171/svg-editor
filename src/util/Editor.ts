@@ -4,8 +4,8 @@ import {
   setIsButtonDisabled,
   setIsButtonActive,
 } from '../components/molecules/ToolBox/ToolBox.util';
-import { SVGEditor } from '../components/organisms/SVGEditor';
-import type { ShapeType } from '../types/shapes.types';
+import { EditorTemplate } from '../components/templates/EditorTemplate';
+import type { ShapeType } from '../types/typeGuards.types';
 import type { Coordinates, SVGParamsBase } from '../types/types';
 import {
   highlightStyle,
@@ -13,7 +13,7 @@ import {
   textPlaceHolder,
   Tools_List,
 } from './helper/constants';
-import { generateSVGURLFromShapes } from './helper/svgUtil';
+import { generateSVGURLFromShapes, importSVG } from './helper/svgUtil';
 import {
   isMoveTool,
   isShapeType,
@@ -29,7 +29,6 @@ import { Rectangle } from './shapes/Rectangle/Rectangle';
 import { TextShape } from './shapes/Text/Text';
 import { DrawTool } from './tools/DrawTool/DrawTool';
 import { EllipseTool } from './tools/EllipseTool/EllipseTool';
-import { ImportTool } from './tools/ImportTool/ImportTool';
 import { LineTool } from './tools/LineTool/LineTool';
 import { MoveTool } from './tools/MoveTool/MoveTool';
 import { RectangleTool } from './tools/RectangleTool/RectangleTool';
@@ -46,7 +45,7 @@ export class Editor {
   #drawLayer: HTMLCanvasElement | null = null;
   #previewLayer: HTMLCanvasElement | null = null;
   #connection?: Connection;
-  #self: SVGEditor;
+  #self: EditorTemplate;
   #footerFieldsRef: FooterFields;
   #offset: Coordinates;
   #shapes: ShapeType[] = [];
@@ -69,7 +68,7 @@ export class Editor {
     drawLayer: HTMLCanvasElement,
     previewLayer: HTMLCanvasElement,
     offset: Coordinates,
-    self: SVGEditor,
+    self: EditorTemplate,
     footerFieldsRef: FooterFields
   ) {
     this.#drawLayer = drawLayer;
@@ -157,30 +156,32 @@ export class Editor {
   };
 
   updateShapes = (shapes: Array<Record<string, any>>) => {
+    console.log(shapes);
     if (!shapes.length) {
       this.#shapes = [];
       this.#selectedShape = null;
     } else {
-      shapes.forEach((shape: Record<string, any>) => {
-        let shapeAsShapeType: ShapeType | undefined;
-        if (isShapeType(shape)) {
-          shapeAsShapeType = shape;
-        } else {
-          shapeAsShapeType = this.#createShape(shape);
+      if (!isShapeType(shapes[0])) {
+        const newShapes = shapes
+          .map(this.#createShape)
+          .filter(shape => !!shape) as ShapeType[];
+        this.#shapes = newShapes;
+        console.log(this.#shapes);
+      } else {
+        (shapes as ShapeType[]).forEach(shape => {
+          const index = this.#shapes.findIndex(
+            innerShape => innerShape.getId() === shape?.getId()
+          );
+          if (index >= 0) {
+            this.#shapes[index] = shape;
+          } else {
+            this.#shapes.push(shape);
+          }
+          this.#currentParams = shape.getSvgParams();
+        });
+        if (this.#selectedTool?.toolName === Tools_List.SELECT) {
+          (this.#selectedTool as SelectTool).updateAllShapes(this.#shapes);
         }
-        if (!shapeAsShapeType) return;
-        const index = this.#shapes.findIndex(
-          innerShape => innerShape.getId() === shapeAsShapeType?.getId()
-        );
-        if (index >= 0) {
-          this.#shapes[index] = shapeAsShapeType;
-        } else {
-          this.#shapes.push(shapeAsShapeType);
-        }
-        this.#currentParams = shapeAsShapeType.getSvgParams();
-      });
-      if (this.#selectedTool?.toolName === Tools_List.SELECT) {
-        (this.#selectedTool as SelectTool).updateAllShapes(this.#shapes);
       }
     }
     this.redrawShapes();
@@ -309,9 +310,11 @@ export class Editor {
           );
         }
       }
-      this.#shapes.forEach(shape => {
-        Pen.draw(shape, undefined, this.#drawContext);
-      });
+      this.#drawContext &&
+        this.#shapes.forEach(shape => {
+          // Impossible to be null here when in line 281 drawContext is checked
+          Pen.draw(shape, undefined, this.#drawContext!);
+        });
     }
   };
 
@@ -327,17 +330,8 @@ export class Editor {
     this.#openDownloadDialog(generateSVGURLFromShapes(this.#shapes));
   };
 
-  importSVG = (data: Document) => {
-    if (this.#drawLayer) {
-      const importTool = new ImportTool(
-        this.#drawLayer,
-        this.#self,
-        this.#handleUpdateShapes,
-        this.#offset
-      );
-      importTool.drawSvg(data);
-      importTool.destroy();
-    }
+  onImportSVG = (data: Document) => {
+    this.#handleUpdateShapes(importSVG(data));
   };
 
   getAllShapes = () => this.#shapes;

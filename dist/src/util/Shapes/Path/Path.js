@@ -5,8 +5,8 @@ import { singleDirectionCommands } from '../../helper/util';
 import { getPathBoundaries } from './Path.util';
 import { Shape } from '../Shape';
 export class Path extends Shape {
-    constructor(drawPath, svgParams, dontCountUp, isLocked = false) {
-        super(undefined, svgParams, dontCountUp, isLocked);
+    constructor(drawPath, svgParams, countShapeCountUp, isLocked = false) {
+        super(undefined, svgParams, countShapeCountUp, isLocked);
         _Path_rawDrawPath.set(this, void 0);
         _Path_center.set(this, [-1, -1]);
         this.getCenter = () => {

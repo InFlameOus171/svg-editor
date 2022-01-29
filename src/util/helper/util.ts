@@ -1,4 +1,4 @@
-import type { Coordinates, Matrix } from '../../types/types';
+import type { Coordinates } from '../../types/types';
 import { hexColorCodeRegExp } from './regularExpressions';
 
 export const getUniqueXandYCoordinatesFromBoundaries = (

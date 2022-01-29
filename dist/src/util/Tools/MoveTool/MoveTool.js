@@ -1,17 +1,15 @@
-var _MoveTool_dCenter, _MoveTool_drawOnPreview, _MoveTool_onDown, _MoveTool_onMove, _MoveTool_onUp;
+var _MoveTool_dCenter, _MoveTool_onDown, _MoveTool_onMove, _MoveTool_onUp, _MoveTool_onOut;
 import { __classPrivateFieldGet, __classPrivateFieldSet } from "tslib";
 import { highlightStyle, Tools_List } from '../../helper/constants';
 import { isPointInsideAnotherShape, rectangleParamsFromBoundaries, } from '../../helper/coordinates';
 import { isText } from '../../helper/typeguards';
 import { Pen } from '../../Pen';
-import { Rectangle } from '../../shapes/Rectangle/Rectangle';
 import { setTextParamsSourceVisibility } from '../TextTool/TextTool.util';
 import { Tool } from '../Tool';
 export class MoveTool extends Tool {
     constructor(drawLayer, previewLayer, self, onMove, offset, selectedShape, footerFields) {
         super(drawLayer, self, onMove, offset, previewLayer, undefined, undefined, footerFields);
         _MoveTool_dCenter.set(this, void 0);
-        _MoveTool_drawOnPreview.set(this, void 0);
         _MoveTool_onDown.set(this, (event) => {
             var _a, _b;
             if (event.button !== 0)
@@ -31,16 +29,15 @@ export class MoveTool extends Tool {
             this.isDrawing = true;
         });
         this.updatePreview = () => {
-            if (this.currentShape) {
+            if (this.currentShape && this.previewContext) {
                 this.resetPreview();
                 const { startingCorner, width, height } = rectangleParamsFromBoundaries(this.currentShape.boundaries);
                 if (isText(this.currentShape)) {
                     setTextParamsSourceVisibility(this.footerFields, true);
-                    __classPrivateFieldGet(this, _MoveTool_drawOnPreview, "f").call(this, this.currentShape, Object.assign(Object.assign(Object.assign({}, this.currentShape.getSvgParams()), highlightStyle), { lineDash: [0] }));
+                    Pen.draw(this.currentShape, Object.assign(Object.assign(Object.assign({}, this.currentShape.getSvgParams()), highlightStyle), { lineDash: [0] }), this.previewContext);
                 }
                 else {
-                    __classPrivateFieldGet(this, _MoveTool_drawOnPreview, "f").call(this, this.currentShape, highlightStyle);
-                    __classPrivateFieldGet(this, _MoveTool_drawOnPreview, "f").call(this, new Rectangle(startingCorner, width, height, highlightStyle));
+                    Pen.draw(this.currentShape, highlightStyle, this.previewContext);
                 }
             }
             else {
@@ -73,14 +70,19 @@ export class MoveTool extends Tool {
                 this.updatePreview();
             }
         };
+        _MoveTool_onOut.set(this, () => {
+            this.isDrawing = false;
+        });
         this.executeAction = () => {
             this.drawLayer.addEventListener('mousedown', __classPrivateFieldGet(this, _MoveTool_onDown, "f"));
             this.drawLayer.addEventListener('mousemove', __classPrivateFieldGet(this, _MoveTool_onMove, "f"));
+            this.drawLayer.addEventListener('mouseout', __classPrivateFieldGet(this, _MoveTool_onOut, "f"));
             this.drawLayer.addEventListener('mouseup', __classPrivateFieldGet(this, _MoveTool_onUp, "f"));
         };
         this.destroy = () => {
             this.drawLayer.removeEventListener('mousedown', __classPrivateFieldGet(this, _MoveTool_onDown, "f"));
             this.drawLayer.removeEventListener('mousemove', __classPrivateFieldGet(this, _MoveTool_onMove, "f"));
+            this.drawLayer.removeEventListener('mouseout', __classPrivateFieldGet(this, _MoveTool_onOut, "f"));
             this.drawLayer.removeEventListener('mouseup', __classPrivateFieldGet(this, _MoveTool_onUp, "f"));
         };
         const renderingContext = this.drawLayer.getContext('2d');
@@ -88,10 +90,9 @@ export class MoveTool extends Tool {
             this.drawContext = renderingContext;
         }
         this.currentShape = selectedShape;
-        __classPrivateFieldSet(this, _MoveTool_drawOnPreview, Pen.generatePen(this.previewContext).draw, "f");
         this.updatePreview();
         this.toolName = Tools_List.MOVE;
     }
 }
-_MoveTool_dCenter = new WeakMap(), _MoveTool_drawOnPreview = new WeakMap(), _MoveTool_onDown = new WeakMap(), _MoveTool_onMove = new WeakMap(), _MoveTool_onUp = new WeakMap();
+_MoveTool_dCenter = new WeakMap(), _MoveTool_onDown = new WeakMap(), _MoveTool_onMove = new WeakMap(), _MoveTool_onUp = new WeakMap(), _MoveTool_onOut = new WeakMap();
 //# sourceMappingURL=MoveTool.js.map

@@ -1,6 +1,6 @@
 import { FooterFields } from '../../../components/molecules/FooterFields';
-import { SVGEditor } from '../../../components/organisms/SVGEditor';
-import type { ShapeType } from '../../../types/shapes.types';
+import { EditorTemplate } from '../../../components/templates/EditorTemplate';
+import type { ShapeType } from '../../../types/typeGuards.types';
 import type { Coordinates, SVGParamsBase } from '../../../types/types';
 import { highlightStyle, Tools_List } from '../../helper/constants';
 import {
@@ -17,7 +17,7 @@ export class MoveTool extends Tool<ShapeType> {
   constructor(
     drawLayer: HTMLCanvasElement,
     previewLayer: HTMLCanvasElement,
-    self: SVGEditor,
+    self: EditorTemplate,
     onMove: (shape: ShapeType | ShapeType[] | null) => void,
     offset: Coordinates,
     selectedShape: ShapeType,
@@ -38,12 +38,10 @@ export class MoveTool extends Tool<ShapeType> {
       this.drawContext = renderingContext;
     }
     this.currentShape = selectedShape;
-    this.#drawOnPreview = Pen.generatePen(this.previewContext).draw;
     this.updatePreview();
     this.toolName = Tools_List.MOVE;
   }
   #dCenter?: Coordinates;
-  #drawOnPreview: (shape: ShapeType, svgParams?: SVGParamsBase) => void;
 
   #onDown = (event: MouseEvent) => {
     if (event.button !== 0) return;
@@ -65,7 +63,7 @@ export class MoveTool extends Tool<ShapeType> {
   };
 
   updatePreview = () => {
-    if (this.currentShape) {
+    if (this.currentShape && this.previewContext) {
       this.resetPreview();
       const { startingCorner, width, height } = rectangleParamsFromBoundaries(
         this.currentShape.boundaries
@@ -73,16 +71,17 @@ export class MoveTool extends Tool<ShapeType> {
 
       if (isText(this.currentShape)) {
         setTextParamsSourceVisibility(this.footerFields, true);
-        this.#drawOnPreview(this.currentShape, {
-          ...this.currentShape.getSvgParams(),
-          ...highlightStyle,
-          lineDash: [0],
-        });
-      } else {
-        this.#drawOnPreview(this.currentShape, highlightStyle);
-        this.#drawOnPreview(
-          new Rectangle(startingCorner, width, height, highlightStyle)
+        Pen.draw(
+          this.currentShape,
+          {
+            ...this.currentShape.getSvgParams(),
+            ...highlightStyle,
+            lineDash: [0],
+          },
+          this.previewContext
         );
+      } else {
+        Pen.draw(this.currentShape, highlightStyle, this.previewContext);
       }
     } else {
       this.resetPreview();
@@ -115,16 +114,21 @@ export class MoveTool extends Tool<ShapeType> {
       this.updatePreview();
     }
   };
+  #onOut = () => {
+    this.isDrawing = false;
+  };
 
   executeAction = () => {
     this.drawLayer.addEventListener('mousedown', this.#onDown);
     this.drawLayer.addEventListener('mousemove', this.#onMove);
+    this.drawLayer.addEventListener('mouseout', this.#onOut);
     this.drawLayer.addEventListener('mouseup', this.#onUp);
   };
 
   destroy = () => {
     this.drawLayer.removeEventListener('mousedown', this.#onDown);
     this.drawLayer.removeEventListener('mousemove', this.#onMove);
+    this.drawLayer.removeEventListener('mouseout', this.#onOut);
     this.drawLayer.removeEventListener('mouseup', this.#onUp);
   };
 }

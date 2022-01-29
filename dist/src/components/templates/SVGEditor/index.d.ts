@@ -1,0 +1,1 @@
+export { SVGEditor } from './SVGEditor';
