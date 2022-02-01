@@ -1,6 +1,7 @@
 import './components/pages/SVGEditor';
+import { SVGEditor as SVGEditorComponent } from './components/pages/SVGEditor';
 import './components/templates/EditorTemplate';
-import { EditorTemplateProps } from './components/templates/EditorTemplate/EditorTemplate.types';
+import { EditorTemplate as EditorTemplateComponent } from './components/templates/EditorTemplate';
 
 declare global {
   namespace JSX {
@@ -8,8 +9,7 @@ declare global {
       'svg-editor': SVGEditor;
       'editor-template': EditorTemplate;
     }
-
-    interface SVGEditor {}
-    interface EditorTemplate extends EditorTemplateProps {}
+    interface SVGEditor extends SVGEditorComponent {}
+    interface EditorTemplate extends EditorTemplateComponent {}
   }
 }

@@ -1,1 +1,0 @@
-{"version":3,"file":"globalStyles.types.js","sourceRoot":"","sources":["../../../src/types/globalStyles.types.ts"],"names":[],"mappings":"","sourcesContent":["export interface IBreakpoints {\n  xs: number;\n  sm: number;\n  md: number;\n  lg: number;\n  xl: number;\n}\n"]}

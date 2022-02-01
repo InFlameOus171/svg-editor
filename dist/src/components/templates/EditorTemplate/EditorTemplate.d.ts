@@ -5,7 +5,6 @@ import { Editor } from '../../../util/Editor';
 import { Tools_List } from '../../../util/helper/constants.js';
 import { Connection } from '../../../util/network';
 import '../../atoms/DrawZone';
-import '../../atoms/MenuButton';
 import '../../atoms/PositionInformation';
 import '../../atoms/ToolboxButton';
 import '../../molecules/ConnectionSection';

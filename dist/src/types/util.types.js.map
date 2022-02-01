@@ -1,1 +1,0 @@
-{"version":3,"file":"util.types.js","sourceRoot":"","sources":["../../../src/types/util.types.ts"],"names":[],"mappings":"","sourcesContent":["import { Coordinates } from './types';\n\nexport type Partition<T> = [T[], T[]];\n"]}

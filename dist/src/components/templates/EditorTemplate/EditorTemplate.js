@@ -3,7 +3,6 @@ import { html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { nanoid } from 'nanoid';
 import '../../atoms/DrawZone';
-import '../../atoms/MenuButton';
 import '../../atoms/PositionInformation';
 import '../../atoms/ToolboxButton';
 import '../../molecules/ConnectionSection';
