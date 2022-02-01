@@ -59,3 +59,9 @@ export type SVGDrawPath = {
 };
 
 export type Partition<T> = [T[], T[]];
+
+export type ChatEntry = { userName: string; message: string };
+
+export type CallbackFunction<ArgumentType extends any[], ReturnType = void> = (
+  ...args: ArgumentType
+) => ReturnType;

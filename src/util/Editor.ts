@@ -8,6 +8,7 @@ import { EditorTemplate } from '../components/templates/EditorTemplate';
 import type { ShapeType } from '../types/typeGuards.types';
 import type { Coordinates, SVGParamsBase } from '../types/types';
 import {
+  defaultSVGParams,
   highlightStyle,
   SVGParamFieldID,
   textPlaceHolder,
@@ -49,13 +50,7 @@ export class Editor {
   #footerFieldsRef: FooterFields;
   #offset: Coordinates;
   #shapes: ShapeType[] = [];
-  #currentParams: SVGParamsBase = {
-    strokeWidth: '1',
-    stroke: 'rgba(0,0,0,1)',
-    fill: 'rgba(0,0,0,0)',
-    lineDash: [0],
-    text: textPlaceHolder,
-  };
+  #currentParams: SVGParamsBase = defaultSVGParams;
   #isShapeOnlyBeingSelected: boolean = false;
   #setAreFieldsEnabled: (
     fieldName: SVGParamFieldID[],
@@ -94,10 +89,6 @@ export class Editor {
       setTimeout(() => this.redrawShapes(), 50);
     });
   }
-
-  getSVGParams = () => ({
-    ...this.#currentParams,
-  });
 
   #createShape = (shapeRecord: Record<string, any>): ShapeType | undefined => {
     switch (shapeRecord.type) {
@@ -155,45 +146,10 @@ export class Editor {
     }
   };
 
-  updateShapes = (shapes: Array<Record<string, any>>) => {
-    console.log(shapes);
-    if (!shapes.length) {
-      this.#shapes = [];
-      this.#selectedShape = null;
-    } else {
-      if (!isShapeType(shapes[0])) {
-        const newShapes = shapes
-          .map(this.#createShape)
-          .filter(shape => !!shape) as ShapeType[];
-        this.#shapes = newShapes;
-        console.log(this.#shapes);
-      } else {
-        (shapes as ShapeType[]).forEach(shape => {
-          const index = this.#shapes.findIndex(
-            innerShape => innerShape.getId() === shape?.getId()
-          );
-          if (index >= 0) {
-            this.#shapes[index] = shape;
-          } else {
-            this.#shapes.push(shape);
-          }
-          this.#currentParams = shape.getSvgParams();
-        });
-        if (this.#selectedTool?.toolName === Tools_List.SELECT) {
-          (this.#selectedTool as SelectTool).updateAllShapes(this.#shapes);
-        }
-      }
-    }
-    this.redrawShapes();
-  };
-
-  resetEditor = () => {
-    if (this.#drawLayer) {
-      Pen.clearCanvas(this.#drawLayer);
-    }
-    if (this.#previewLayer) {
-      Pen.clearCanvas(this.#previewLayer);
-    }
+  #deleteShapeById = (shapeId: string) => {
+    const index = this.#shapes.findIndex(shape => shape.getId() === shapeId);
+    this.#shapes.splice(index, 1);
+    this.#connection?.deleteShapes([shapeId]);
   };
 
   #handleUpdateShapes = (toBeAppended?: ShapeType | ShapeType[] | null) => {
@@ -270,76 +226,11 @@ export class Editor {
     document.body.removeChild(downloadLink);
   };
 
-  resetPreview = () => {
-    const renderingContext = this.#previewLayer?.getContext('2d');
-    if (this.#previewLayer && renderingContext) {
-      Pen.clearCanvas(this.#previewLayer, renderingContext);
+  applyStyles = () => {
+    if (this.#selectedShape && this.#drawLayer) {
+      this.redrawShapes();
+      this.#connection?.updateShapes(this.#shapes);
     }
-  };
-  redrawShapes = () => {
-    if (
-      this.#drawContext &&
-      this.#drawLayer &&
-      this.#previewLayer &&
-      this.#previewContext
-    ) {
-      Pen.clearCanvas(this.#drawLayer, this.#drawContext);
-      Pen.clearCanvas(this.#previewLayer, this.#previewContext);
-
-      if (this.#selectedShape) {
-        if (typeOfShape(this.#selectedShape) === 'TextShape') {
-          Pen.draw(
-            this.#selectedShape,
-            {
-              ...this.#selectedShape.getSvgParams(),
-              ...this.#currentParams,
-              ...highlightStyle,
-              lineDash: [0],
-            },
-            this.#previewContext
-          );
-        } else {
-          Pen.draw(
-            this.#selectedShape,
-            {
-              ...this.#selectedShape.getSvgParams(),
-              ...this.#currentParams,
-              ...highlightStyle,
-            },
-            this.#previewContext
-          );
-        }
-      }
-      this.#drawContext &&
-        this.#shapes.forEach(shape => {
-          // Impossible to be null here when in line 281 drawContext is checked
-          Pen.draw(shape, undefined, this.#drawContext!);
-        });
-    }
-  };
-
-  onUpdateStyleInputFields = () => {
-    updateStyleInputFields(
-      this.#footerFieldsRef,
-      this.#selectedShape?.getSvgParams() ?? this.#currentParams
-    );
-  };
-
-  onSave = () => {
-    this.onUnselectTool();
-    this.#openDownloadDialog(generateSVGURLFromShapes(this.#shapes));
-  };
-
-  onImportSVG = (data: Document) => {
-    this.#handleUpdateShapes(importSVG(data));
-  };
-
-  getAllShapes = () => this.#shapes;
-
-  #deleteShapeById = (shapeId: string) => {
-    const index = this.#shapes.findIndex(shape => shape.getId() === shapeId);
-    this.#shapes.splice(index, 1);
-    this.#connection?.deleteShapes([shapeId]);
   };
 
   deleteFromShapes = (shapeIdData: string | string[]) => {
@@ -350,11 +241,31 @@ export class Editor {
     }
   };
 
+  getAllShapes = (): ShapeType[] => this.#shapes;
+
+  getSVGParams = (): SVGParamsBase => this.#currentParams;
+
+  onUpdateStyleInputFields = () => {
+    updateStyleInputFields(
+      this.#footerFieldsRef,
+      this.#selectedShape?.getSvgParams() ?? this.#currentParams
+    );
+  };
+
   onDeleteSelectedShape = () => {
     if (this.#selectedShape) {
       this.deleteFromShapes(this.#selectedShape.getId());
       this.#selectedShape = null;
     }
+  };
+
+  onImportSVG = (data: Document) => {
+    this.#handleUpdateShapes(importSVG(data));
+  };
+
+  onSave = () => {
+    this.onUnselectTool();
+    this.#openDownloadDialog(generateSVGURLFromShapes(this.#shapes));
   };
 
   onSelectTool = (tool: Tools_List | null) => {
@@ -492,11 +403,82 @@ export class Editor {
     }
   };
 
-  applyStyles = () => {
-    if (this.#selectedShape && this.#drawLayer) {
-      this.redrawShapes();
-      this.#connection?.updateShapes(this.#shapes);
+  onUnselectTool = () => {
+    if (this.#selectedShape) {
+      this.#connection?.unlockShapes(this.#selectedShape);
     }
+    setIsButtonDisabled(this.#self, Tools_List.MOVE, true);
+    this.#selectedShape = null;
+    this.#selectedTool?.destroy();
+    this.#setAreFieldsEnabled(Object.values(SVGParamFieldID), false);
+    setTextParamsSourceVisibility(this.#footerFieldsRef, false);
+    this.resetPreview();
+    this.redrawShapes();
+  };
+
+  redrawShapes = () => {
+    if (
+      this.#drawContext &&
+      this.#drawLayer &&
+      this.#previewLayer &&
+      this.#previewContext
+    ) {
+      Pen.clearCanvas(this.#drawLayer, this.#drawContext);
+      Pen.clearCanvas(this.#previewLayer, this.#previewContext);
+
+      if (this.#selectedShape) {
+        if (typeOfShape(this.#selectedShape) === 'TextShape') {
+          Pen.draw(
+            this.#selectedShape,
+            {
+              ...this.#selectedShape.getSvgParams(),
+              ...this.#currentParams,
+              ...highlightStyle,
+              lineDash: [0],
+            },
+            this.#previewContext
+          );
+        } else {
+          Pen.draw(
+            this.#selectedShape,
+            {
+              ...this.#selectedShape.getSvgParams(),
+              ...this.#currentParams,
+              ...highlightStyle,
+            },
+            this.#previewContext
+          );
+        }
+      }
+      this.#drawContext &&
+        this.#shapes.forEach(shape => {
+          // Impossible to be null here when in line 281 drawContext is checked
+          Pen.draw(shape, undefined, this.#drawContext!);
+        });
+    }
+  };
+
+  resetEditor = () => {
+    this.onUnselectTool();
+    this.#shapes = [];
+    this.#currentParams = defaultSVGParams;
+    if (this.#drawLayer) {
+      Pen.clearCanvas(this.#drawLayer);
+    }
+    if (this.#previewLayer) {
+      Pen.clearCanvas(this.#previewLayer);
+    }
+  };
+
+  resetPreview = () => {
+    const renderingContext = this.#previewLayer?.getContext('2d');
+    if (this.#previewLayer && renderingContext) {
+      Pen.clearCanvas(this.#previewLayer, renderingContext);
+    }
+  };
+
+  setConnection = (newConnection: Connection) => {
+    this.#connection = newConnection;
   };
 
   setShapeParam = (field: keyof SVGParamsBase, value: any) => {
@@ -538,20 +520,33 @@ export class Editor {
     this.#selectedTool?.setSVGParams(this.#currentParams);
   };
 
-  setConnection = (newConnection: Connection) => {
-    this.#connection = newConnection;
-  };
-
-  onUnselectTool = () => {
-    if (this.#selectedShape) {
-      this.#connection?.unlockShapes(this.#selectedShape);
+  updateShapes = (shapes: Array<Record<string, any>>) => {
+    if (!shapes.length) {
+      this.#shapes = [];
+      this.#selectedShape = null;
+    } else {
+      if (!isShapeType(shapes[0])) {
+        const newShapes = shapes
+          .map(this.#createShape)
+          .filter(shape => !!shape) as ShapeType[];
+        this.#shapes = newShapes;
+      } else {
+        (shapes as ShapeType[]).forEach(shape => {
+          const index = this.#shapes.findIndex(
+            innerShape => innerShape.getId() === shape?.getId()
+          );
+          if (index >= 0) {
+            this.#shapes[index] = shape;
+          } else {
+            this.#shapes.push(shape);
+          }
+          this.#currentParams = shape.getSvgParams();
+        });
+        if (this.#selectedTool?.toolName === Tools_List.SELECT) {
+          (this.#selectedTool as SelectTool).updateAllShapes(this.#shapes);
+        }
+      }
     }
-    setIsButtonDisabled(this.#self, Tools_List.MOVE, true);
-    this.#selectedShape = null;
-    this.#selectedTool?.destroy();
-    this.#setAreFieldsEnabled(Object.values(SVGParamFieldID), false);
-    setTextParamsSourceVisibility(this.#footerFieldsRef, false);
-    this.resetPreview();
     this.redrawShapes();
   };
 }

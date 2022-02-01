@@ -24,6 +24,7 @@ export class Shape {
         _Shape_fontFamily.set(this, void 0);
         this.isLocked = false;
         this.text = textPlaceHolder;
+        this.calculationCenter = [-1, -1];
         this.index = 0;
         this.moveTransformMatrix = (x, y) => {
             const { a, b, c, d, e, f } = this.transformMatrix || new DOMMatrix();
@@ -77,10 +78,15 @@ export class Shape {
             return __classPrivateFieldGet(this, _Shape_id, "f");
         };
         this.getCenter = () => {
-            throw new Error('not implemented');
+            return this.calculationCenter;
         };
-        this.moveTo = (coodinates) => {
-            throw new Error('not implemented');
+        this.moveTo = (coordinates) => {
+            const [dx, dy] = [
+                coordinates[0] - this.calculationCenter[0],
+                coordinates[1] - this.calculationCenter[1],
+            ];
+            this.calculationCenter = coordinates;
+            this.moveBoundaries([dx, dy]);
         };
         this.toString = () => {
             throw new Error('not implemented');

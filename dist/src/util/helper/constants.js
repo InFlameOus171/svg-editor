@@ -13,17 +13,13 @@ export const highlightStyle = {
     strokeWidth: '5',
 };
 export const textPlaceHolder = 'Input text...';
-/**
-   DRAW
-  LINE
-  RECT
-  ELLIPSE
-  SELECT
-  TEXT
-  MOVE
-  DELETE
-  UNSELECT
-*/
+export const defaultSVGParams = {
+    strokeWidth: '1',
+    stroke: 'rgba(0,0,0,1)',
+    fill: 'rgba(0,0,0,0)',
+    lineDash: [0],
+    text: textPlaceHolder,
+};
 export var Tools_List;
 (function (Tools_List) {
     Tools_List["DRAW"] = "draw-tool";

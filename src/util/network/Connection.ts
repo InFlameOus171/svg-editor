@@ -5,11 +5,13 @@ import {
   WS_EVENTS,
 } from '../../types/network.types';
 import type { ShapeType } from '../../types/typeGuards.types';
+import { CallbackFunction, ChatEntry } from '../../types/types';
+import { ChatLogType } from './Connection.types';
 import { ConnectionMonitor } from './ConnectionMonitor';
 
 export class Connection {
   #userName: string = 'user_' + nanoid(5);
-  #chatLog: Array<{ userName: string; message: string }> = [];
+  #chatLog: ChatLogType[] = [];
   #userId: string;
   #url: string;
   #port: string;
@@ -17,26 +19,24 @@ export class Connection {
   ws: WebSocket | null = null;
   #keeper?: ConnectionMonitor;
   #status?: ConnectionStatus = 'disconnected';
-  #onConnected: (connection: Connection) => void;
-  onDeleteShapes: (ids: string[]) => void;
-  onUpdateShapes: (shapes: Record<string, any>[]) => void;
-  onGetAllShapes: () => ShapeType[];
-  onResetEditor: () => void;
-  onUpdateConnectionStatus: (status: ConnectionStatus) => void;
-  onNewMessage: (chatLog: Array<{ userName: string; message: string }>) => void;
+  #onConnected: CallbackFunction<[Connection]>;
+  onDeleteShapes: CallbackFunction<[string[]]>;
+  onUpdateShapes: CallbackFunction<[Record<string, any>[]]>;
+  onGetAllShapes: CallbackFunction<[], ShapeType[]>;
+  onResetEditor: CallbackFunction<[]>;
+  onUpdateConnectionStatus: CallbackFunction<[ConnectionStatus]>;
+  onNewMessage: CallbackFunction<[ChatEntry[]]>;
 
   constructor(
-    onDeleteShapes: (ids: string[]) => void,
-    onUpdateShapes: (shape: Record<string, any>[]) => void,
-    onGetAllShapes: () => ShapeType[],
-    onResetEditor: () => void,
-    onUpdateConnectionStatus: (status: ConnectionStatus) => void,
-    onNewMessage: (
-      chatLog: Array<{ userName: string; message: string }>
-    ) => void,
-    onConnected: (connection: Connection) => void,
-    url: string = 'localhost',
-    port: string = '8080'
+    onDeleteShapes: CallbackFunction<[string[]]>,
+    onUpdateShapes: CallbackFunction<[Record<string, any>[]]>,
+    onGetAllShapes: CallbackFunction<[], ShapeType[]>,
+    onResetEditor: CallbackFunction<[]>,
+    onUpdateConnectionStatus: CallbackFunction<[ConnectionStatus]>,
+    onNewMessage: CallbackFunction<[ChatEntry[]]>,
+    onConnected: CallbackFunction<[Connection]>,
+    url: string,
+    port: string
   ) {
     this.#url = url;
     this.#port = port;
@@ -75,8 +75,9 @@ export class Connection {
     if (
       allParsedData.event === WS_EVENTS.PING ||
       allParsedData.event === WS_EVENTS.PONG
-    )
+    ) {
       return allParsedData;
+    }
     const { value, ...parsedData } = allParsedData;
     const parsedValue =
       typeof value === 'string'
@@ -99,7 +100,7 @@ export class Connection {
     const self = this;
     const ws = new WebSocket(`ws://${this.#url}:${this.#port}`);
     this.ws = ws;
-    ws.onopen = () => {
+    ws.addEventListener('open', () => {
       const payload = {
         event: WS_EVENTS.JOIN_ROOM,
         roomId: self.#roomId,
@@ -111,7 +112,12 @@ export class Connection {
       self.#onConnected(self);
       self.updateStatus('connected');
       ws.send(JSON.stringify(payload));
-    };
+      self.sendChatMessage('Connected to session.');
+    });
+
+    ws.addEventListener('close', () => {
+      this.disconnect();
+    });
 
     ws.addEventListener('message', msg => {
       const data: ParsedData = this.#parseResponse(msg);
@@ -184,7 +190,7 @@ export class Connection {
     this.onUpdateConnectionStatus(this.#status);
   };
 
-  getStatus = () => this.#status;
+  getStatus = (): ConnectionStatus | undefined => this.#status;
 
   deleteShapes = (ids: string[]) => {
     const payload = JSON.stringify({

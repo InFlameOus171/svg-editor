@@ -87,7 +87,9 @@ export class SVGEditor extends LitElement {
           this.editor.resetEditor,
           this.#updateConnection,
           this.#updateChatLog,
-          this.editor.setConnection
+          this.editor.setConnection,
+          'localhost',
+          '8080'
         );
       }
     }

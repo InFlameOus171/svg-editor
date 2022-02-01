@@ -12,7 +12,6 @@ import { Shape } from '../Shape';
 export class Path extends Shape {
   drawPath: SVGDrawPath[];
   #rawDrawPath: SVGDrawPath[];
-  #center: Coordinates = [-1, -1];
 
   constructor(
     drawPath: SVGDrawPath[],
@@ -51,11 +50,11 @@ export class Path extends Shape {
       (acc, curr) => sumOfCoordinates(acc)(curr),
       [0, 0]
     );
-    this.#center = [sumOfBoundaries[0] / 4, sumOfBoundaries[1] / 4];
+    this.calculationCenter = [sumOfBoundaries[0] / 4, sumOfBoundaries[1] / 4];
   }
 
   getCenter: () => Coordinates = () => {
-    return this.#center;
+    return this.calculationCenter;
   };
 
   toSVGPathParams = () => ({
@@ -73,11 +72,14 @@ export class Path extends Shape {
 
   moveTo = (coordinates: Coordinates) => {
     const [dx, dy] = [
-      coordinates[0] - this.#center[0],
-      coordinates[1] - this.#center[1],
+      coordinates[0] - this.calculationCenter[0],
+      coordinates[1] - this.calculationCenter[1],
     ];
     this.moveTransformMatrix(dx, dy);
-    this.#center = [this.#center[0] + dx, this.#center[1] + dy];
+    this.calculationCenter = [
+      this.calculationCenter[0] + dx,
+      this.calculationCenter[1] + dy,
+    ];
     this.boundaries = this.boundaries.map(boundary => [
       boundary[0] + dx,
       boundary[1] + dy,

@@ -8,7 +8,6 @@ import { Shape } from '../Shape';
 
 export class Freehand extends Shape {
   #points: Coordinates[];
-  #center: Coordinates = [-1, -1];
 
   constructor(
     points: Coordinates[],
@@ -34,16 +33,16 @@ export class Freehand extends Shape {
       ],
       [0, 0]
     );
-    this.#center = [sumOfCoordinates[0] / 4, sumOfCoordinates[1] / 4];
+    this.calculationCenter = [sumOfCoordinates[0] / 4, sumOfCoordinates[1] / 4];
   };
 
   getCenter = () => {
-    return this.#center;
+    return this.calculationCenter;
   };
 
   moveTo = (coordinates: Coordinates) => {
-    const xDifference = coordinates[0] - this.#center[0];
-    const yDifference = coordinates[1] - this.#center[1];
+    const xDifference = coordinates[0] - this.calculationCenter[0];
+    const yDifference = coordinates[1] - this.calculationCenter[1];
     this.#points = this.#points.map(point => [
       point[0] + xDifference,
       point[1] + yDifference,

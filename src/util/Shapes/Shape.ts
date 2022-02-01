@@ -24,6 +24,7 @@ export abstract class Shape {
   text: string = textPlaceHolder;
   transformMatrix?: DOMMatrix;
   boundaries: BoundaryCoordinates;
+  calculationCenter: Coordinates = [-1, -1];
   index: number = 0;
 
   constructor(
@@ -118,13 +119,17 @@ export abstract class Shape {
   };
 
   getCenter = (): Coordinates => {
-    throw new Error('not implemented');
+    return this.calculationCenter;
   };
 
-  moveTo = (coodinates: Coordinates): void => {
-    throw new Error('not implemented');
+  moveTo = (coordinates: Coordinates) => {
+    const [dx, dy] = [
+      coordinates[0] - this.calculationCenter[0],
+      coordinates[1] - this.calculationCenter[1],
+    ];
+    this.calculationCenter = coordinates;
+    this.moveBoundaries([dx, dy]);
   };
-
   toString = (): string => {
     throw new Error('not implemented');
   };

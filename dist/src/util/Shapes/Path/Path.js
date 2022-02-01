@@ -1,4 +1,4 @@
-var _Path_rawDrawPath, _Path_center;
+var _Path_rawDrawPath;
 import { __classPrivateFieldGet, __classPrivateFieldSet } from "tslib";
 import { sumOfCoordinates } from '../../helper/coordinates';
 import { singleDirectionCommands } from '../../helper/util';
@@ -8,9 +8,8 @@ export class Path extends Shape {
     constructor(drawPath, svgParams, countShapeCountUp, isLocked = false) {
         super(undefined, svgParams, countShapeCountUp, isLocked);
         _Path_rawDrawPath.set(this, void 0);
-        _Path_center.set(this, [-1, -1]);
         this.getCenter = () => {
-            return __classPrivateFieldGet(this, _Path_center, "f");
+            return this.calculationCenter;
         };
         this.toSVGPathParams = () => (Object.assign({ d: this.toString() }, this.getSvgParams()));
         this.getDeconstructedShapeData = () => ({
@@ -22,11 +21,14 @@ export class Path extends Shape {
         });
         this.moveTo = (coordinates) => {
             const [dx, dy] = [
-                coordinates[0] - __classPrivateFieldGet(this, _Path_center, "f")[0],
-                coordinates[1] - __classPrivateFieldGet(this, _Path_center, "f")[1],
+                coordinates[0] - this.calculationCenter[0],
+                coordinates[1] - this.calculationCenter[1],
             ];
             this.moveTransformMatrix(dx, dy);
-            __classPrivateFieldSet(this, _Path_center, [__classPrivateFieldGet(this, _Path_center, "f")[0] + dx, __classPrivateFieldGet(this, _Path_center, "f")[1] + dy], "f");
+            this.calculationCenter = [
+                this.calculationCenter[0] + dx,
+                this.calculationCenter[1] + dy,
+            ];
             this.boundaries = this.boundaries.map(boundary => [
                 boundary[0] + dx,
                 boundary[1] + dy,
@@ -71,8 +73,8 @@ export class Path extends Shape {
             this.boundaries = getPathBoundaries(this.drawPath);
         }
         const sumOfBoundaries = this.boundaries.reduce((acc, curr) => sumOfCoordinates(acc)(curr), [0, 0]);
-        __classPrivateFieldSet(this, _Path_center, [sumOfBoundaries[0] / 4, sumOfBoundaries[1] / 4], "f");
+        this.calculationCenter = [sumOfBoundaries[0] / 4, sumOfBoundaries[1] / 4];
     }
 }
-_Path_rawDrawPath = new WeakMap(), _Path_center = new WeakMap();
+_Path_rawDrawPath = new WeakMap();
 //# sourceMappingURL=Path.js.map

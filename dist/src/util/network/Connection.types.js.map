@@ -1,0 +1,1 @@
+{"version":3,"file":"Connection.types.js","sourceRoot":"","sources":["../../../../src/util/network/Connection.types.ts"],"names":[],"mappings":"","sourcesContent":["export type ChatLogType = { userName: string; message: string };\n"]}

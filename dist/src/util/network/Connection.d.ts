@@ -1,27 +1,20 @@
 import { ConnectionStatus } from '../../types/network.types';
 import type { ShapeType } from '../../types/typeGuards.types';
+import { CallbackFunction, ChatEntry } from '../../types/types';
+import { ChatLogType } from './Connection.types';
 export declare class Connection {
     #private;
     ws: WebSocket | null;
-    onDeleteShapes: (ids: string[]) => void;
-    onUpdateShapes: (shapes: Record<string, any>[]) => void;
-    onGetAllShapes: () => ShapeType[];
-    onResetEditor: () => void;
-    onUpdateConnectionStatus: (status: ConnectionStatus) => void;
-    onNewMessage: (chatLog: Array<{
-        userName: string;
-        message: string;
-    }>) => void;
-    constructor(onDeleteShapes: (ids: string[]) => void, onUpdateShapes: (shape: Record<string, any>[]) => void, onGetAllShapes: () => ShapeType[], onResetEditor: () => void, onUpdateConnectionStatus: (status: ConnectionStatus) => void, onNewMessage: (chatLog: Array<{
-        userName: string;
-        message: string;
-    }>) => void, onConnected: (connection: Connection) => void, url?: string, port?: string);
+    onDeleteShapes: CallbackFunction<[string[]]>;
+    onUpdateShapes: CallbackFunction<[Record<string, any>[]]>;
+    onGetAllShapes: CallbackFunction<[], ShapeType[]>;
+    onResetEditor: CallbackFunction<[]>;
+    onUpdateConnectionStatus: CallbackFunction<[ConnectionStatus]>;
+    onNewMessage: CallbackFunction<[ChatEntry[]]>;
+    constructor(onDeleteShapes: CallbackFunction<[string[]]>, onUpdateShapes: CallbackFunction<[Record<string, any>[]]>, onGetAllShapes: CallbackFunction<[], ShapeType[]>, onResetEditor: CallbackFunction<[]>, onUpdateConnectionStatus: CallbackFunction<[ConnectionStatus]>, onNewMessage: CallbackFunction<[ChatEntry[]]>, onConnected: CallbackFunction<[Connection]>, url: string, port: string);
     disconnect: () => void;
     getRoom: () => string;
-    getChatLog: () => {
-        userName: string;
-        message: string;
-    }[];
+    getChatLog: () => ChatLogType[];
     getUserName: () => string;
     sendChatMessage: (message?: string | undefined) => void;
     lockShapes: (shape: ShapeType | ShapeType[]) => void;

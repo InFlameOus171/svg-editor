@@ -9,7 +9,7 @@ export declare const setLineSVGParams: (svgShape: Element, lineParams: LineSVGPa
 export declare const setFreehandSVGParams: (svgShape: Element, freehandParams: FreehandSVGParams) => void;
 export declare const setPathSVGParams: (svgShape: Element, svgParams: PathSVGParams) => void;
 export declare const setTextSVGParams: (svgShape: Element, textObject: TextShape) => void;
-export declare const appendAsSVGShapeGeneratorFunction: (parent?: SVGGraphicsElement | undefined, svgNameSpace?: string | null) => (shape: ShapeType) => void;
+export declare const shapeToSVGFuncGenerator: (parent?: SVGGraphicsElement | undefined, svgNameSpace?: string | null) => (shape: ShapeType) => void;
 export declare const convertMatchesToSVGDrawPath: (match: RegExpMatchArray) => SVGDrawPath;
 export declare const getPathCommands: (d: string) => SVGDrawPath[];
 export declare const generateSVGURLFromShapes: (shapes: ShapeType[]) => string;

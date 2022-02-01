@@ -9,7 +9,6 @@ import { getLineBoundaries } from './Line.util';
 
 export class Line extends Shape {
   points: VectorCoordinates;
-  #center: Coordinates;
 
   constructor(
     startPoint: Coordinates,
@@ -25,16 +24,16 @@ export class Line extends Shape {
       isLocked
     );
     this.points = [startPoint, endPoint];
-    this.#center = [
+    this.calculationCenter = [
       (startPoint[0] + endPoint[0]) / 2,
       (startPoint[1] + endPoint[1]) / 2,
     ];
   }
 
   moveTo = (coordinates: Coordinates): void => {
-    const xDifference = coordinates[0] - this.#center[0];
-    const yDifference = coordinates[1] - this.#center[1];
-    this.#center = coordinates;
+    const xDifference = coordinates[0] - this.calculationCenter[0];
+    const yDifference = coordinates[1] - this.calculationCenter[1];
+    this.calculationCenter = coordinates;
     this.points = this.points.map(point => [
       point[0] + xDifference,
       point[1] + yDifference,
@@ -43,7 +42,7 @@ export class Line extends Shape {
   };
 
   getCenter: () => Coordinates = () => {
-    return this.#center;
+    return this.calculationCenter;
   };
 
   toSVGLineParams = (): LineSVGParams => ({

@@ -18,17 +18,14 @@ export const highlightStyle: SVGParamsBase = {
 
 export const textPlaceHolder: string = 'Input text...';
 
-/**
-   DRAW
-  LINE
-  RECT
-  ELLIPSE
-  SELECT
-  TEXT
-  MOVE
-  DELETE
-  UNSELECT 
-*/
+export const defaultSVGParams = {
+  strokeWidth: '1',
+  stroke: 'rgba(0,0,0,1)',
+  fill: 'rgba(0,0,0,0)',
+  lineDash: [0],
+  text: textPlaceHolder,
+};
+
 export enum Tools_List {
   DRAW = 'draw-tool',
   LINE = 'line-tool',

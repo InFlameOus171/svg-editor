@@ -87,6 +87,7 @@ export class MoveTool extends Tool<ShapeType> {
       this.resetPreview();
     }
   };
+
   #onMove = (event: MouseEvent) => {
     if (!this.isDrawing) return;
     this.previousCoordinates = this.currentCoordinates;

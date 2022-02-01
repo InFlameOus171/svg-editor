@@ -1,15 +1,12 @@
-var _Line_center;
-import { __classPrivateFieldGet, __classPrivateFieldSet } from "tslib";
 import { Shape } from '../Shape';
 import { getLineBoundaries } from './Line.util';
 export class Line extends Shape {
     constructor(startPoint, endPoint, svgParams, countShapeCountUp, isLocked = false) {
         super(getLineBoundaries(startPoint, endPoint), svgParams, countShapeCountUp, isLocked);
-        _Line_center.set(this, void 0);
         this.moveTo = (coordinates) => {
-            const xDifference = coordinates[0] - __classPrivateFieldGet(this, _Line_center, "f")[0];
-            const yDifference = coordinates[1] - __classPrivateFieldGet(this, _Line_center, "f")[1];
-            __classPrivateFieldSet(this, _Line_center, coordinates, "f");
+            const xDifference = coordinates[0] - this.calculationCenter[0];
+            const yDifference = coordinates[1] - this.calculationCenter[1];
+            this.calculationCenter = coordinates;
             this.points = this.points.map(point => [
                 point[0] + xDifference,
                 point[1] + yDifference,
@@ -17,7 +14,7 @@ export class Line extends Shape {
             this.moveBoundaries([xDifference, yDifference]);
         };
         this.getCenter = () => {
-            return __classPrivateFieldGet(this, _Line_center, "f");
+            return this.calculationCenter;
         };
         this.toSVGLineParams = () => (Object.assign({ x1: this.points[0][0].toString(), y1: this.points[0][1].toString(), x2: this.points[1][0].toString(), y2: this.points[1][1].toString() }, this.getSvgParams()));
         this.getDeconstructedShapeData = () => ({
@@ -35,11 +32,10 @@ export class Line extends Shape {
             });
         };
         this.points = [startPoint, endPoint];
-        __classPrivateFieldSet(this, _Line_center, [
+        this.calculationCenter = [
             (startPoint[0] + endPoint[0]) / 2,
             (startPoint[1] + endPoint[1]) / 2,
-        ], "f");
+        ];
     }
 }
-_Line_center = new WeakMap();
 //# sourceMappingURL=Line.js.map

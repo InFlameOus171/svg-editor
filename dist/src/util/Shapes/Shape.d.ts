@@ -5,6 +5,7 @@ export declare abstract class Shape {
     text: string;
     transformMatrix?: DOMMatrix;
     boundaries: BoundaryCoordinates;
+    calculationCenter: Coordinates;
     index: number;
     constructor(boundaries?: BoundaryCoordinates, svgParams?: Partial<SVGParamsBase>, countShapecountUp?: boolean, isLocked?: boolean);
     moveTransformMatrix: (x: number, y: number) => void;
@@ -15,7 +16,7 @@ export declare abstract class Shape {
     getSvgParams: () => SVGParamsBase;
     getId: () => string;
     getCenter: () => Coordinates;
-    moveTo: (coodinates: Coordinates) => void;
+    moveTo: (coordinates: Coordinates) => void;
     toString: () => string;
     getDeconstructedShapeData: () => any;
 }

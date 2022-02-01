@@ -4,7 +4,7 @@ import { nanoid } from 'nanoid';
 import { WS_EVENTS, } from '../../types/network.types';
 import { ConnectionMonitor } from './ConnectionMonitor';
 export class Connection {
-    constructor(onDeleteShapes, onUpdateShapes, onGetAllShapes, onResetEditor, onUpdateConnectionStatus, onNewMessage, onConnected, url = 'localhost', port = '8080') {
+    constructor(onDeleteShapes, onUpdateShapes, onGetAllShapes, onResetEditor, onUpdateConnectionStatus, onNewMessage, onConnected, url, port) {
         _Connection_userName.set(this, 'user_' + nanoid(5));
         _Connection_chatLog.set(this, []);
         _Connection_userId.set(this, void 0);
@@ -35,8 +35,9 @@ export class Connection {
             var _a;
             const allParsedData = JSON.parse(response.data);
             if (allParsedData.event === WS_EVENTS.PING ||
-                allParsedData.event === WS_EVENTS.PONG)
+                allParsedData.event === WS_EVENTS.PONG) {
                 return allParsedData;
+            }
             const { value } = allParsedData, parsedData = __rest(allParsedData, ["value"]);
             const parsedValue = typeof value === 'string'
                 ? value
@@ -54,7 +55,7 @@ export class Connection {
             const self = this;
             const ws = new WebSocket(`ws://${__classPrivateFieldGet(this, _Connection_url, "f")}:${__classPrivateFieldGet(this, _Connection_port, "f")}`);
             this.ws = ws;
-            ws.onopen = () => {
+            ws.addEventListener('open', () => {
                 const payload = {
                     event: WS_EVENTS.JOIN_ROOM,
                     roomId: __classPrivateFieldGet(self, _Connection_roomId, "f"),
@@ -64,7 +65,11 @@ export class Connection {
                 __classPrivateFieldGet(self, _Connection_onConnected, "f").call(self, self);
                 self.updateStatus('connected');
                 ws.send(JSON.stringify(payload));
-            };
+                self.sendChatMessage('Connected to session.');
+            });
+            ws.addEventListener('close', () => {
+                this.disconnect();
+            });
             ws.addEventListener('message', msg => {
                 var _a, _b;
                 const data = __classPrivateFieldGet(this, _Connection_parseResponse, "f").call(this, msg);

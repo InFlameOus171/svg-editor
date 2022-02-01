@@ -71,7 +71,7 @@ export const setTextSVGParams = (svgShape, textObject) => {
         setSVGStyleParams(svgShape, lineDash, lineCap, fill, stroke, strokeWidth, transformMatrix);
     }
 };
-export const appendAsSVGShapeGeneratorFunction = (parent, svgNameSpace = null) => (shape) => {
+export const shapeToSVGFuncGenerator = (parent, svgNameSpace = null) => (shape) => {
     switch (typeOfShape(shape)) {
         case 'Rectangle': {
             const rectangleObject = shape;
@@ -179,16 +179,13 @@ export const generateSVGURLFromShapes = (shapes) => {
     svg.setAttribute('width', (minMaxCoordinates.xMax - horizontalOffset).toString());
     g.setAttribute('transform', 'translate(' + -minMaxCoordinates.xMin + ',' + -minMaxCoordinates.yMin + ')');
     svg.appendChild(g);
-    const appendAsSVGShape = appendAsSVGShapeGeneratorFunction(g, svgNS);
+    const appendAsSVGShape = shapeToSVGFuncGenerator(g, svgNS);
     shapes.forEach(appendAsSVGShape);
     let source = xmlSerializer.serializeToString(svg);
     //add name spaces.
     //https://stackoverflow.com/questions/23218174/how-do-i-save-export-an-svg-file-after-creating-an-svg-with-d3-js-ie-safari-an
     if (!source.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)) {
         source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
-    }
-    if (!source.match(/^<svg[^>]+"http\:\/\/www\.w3\.org\/1999\/xlink"/)) {
-        source = source.replace(/^<svg/, '<svg xmlns:xlink="http://www.w3.org/1999/xlink"');
     }
     source = '<?xml version="1.0" standalone="no"?>\r\n' + source;
     return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(source);

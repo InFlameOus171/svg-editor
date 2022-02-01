@@ -7,7 +7,6 @@ import { getTextBoundaries } from '../../helper/coordinates';
 import { Shape } from '../Shape';
 
 export class TextShape extends Shape {
-  #position: Coordinates;
   #height: number;
   #width: number;
   constructor(
@@ -26,7 +25,7 @@ export class TextShape extends Shape {
     );
     this.#width = width;
     this.#height = height;
-    this.#position = position;
+    this.calculationCenter = position;
   }
 
   getText = () => {
@@ -43,28 +42,28 @@ export class TextShape extends Shape {
 
   moveTo = (coordinates: Coordinates) => {
     const [dx, dy] = [
-      coordinates[0] - this.#position[0],
-      coordinates[1] - this.#position[1],
+      coordinates[0] - this.calculationCenter[0],
+      coordinates[1] - this.calculationCenter[1],
     ];
-    this.#position = coordinates;
+    this.calculationCenter = coordinates;
     this.moveBoundaries([dx, dy]);
   };
 
-  getCenter = (): Coordinates => this.#position;
+  getCenter = (): Coordinates => this.calculationCenter;
 
   getDeconstructedShapeData = () => ({
     id: this.getId(),
     type: 'TextShape',
     width: this.#width,
     height: this.#height,
-    position: this.#position,
+    position: this.calculationCenter,
     isLocked: this.isLocked,
     svgParams: this.getSvgParams(),
   });
 
   toSVGTextParams = (): TextSVGParams => {
     return {
-      position: this.#position,
+      position: this.calculationCenter,
       ...this.getSvgParams(),
     };
   };

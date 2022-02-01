@@ -1,8 +1,8 @@
-var _Editor_selectedTool, _Editor_drawLayer, _Editor_previewLayer, _Editor_connection, _Editor_self, _Editor_footerFieldsRef, _Editor_offset, _Editor_shapes, _Editor_currentParams, _Editor_isShapeOnlyBeingSelected, _Editor_setAreFieldsEnabled, _Editor_selectedShape, _Editor_drawContext, _Editor_previewContext, _Editor_createShape, _Editor_handleUpdateShapes, _Editor_onHandleSelectShape, _Editor_onMoveShape, _Editor_openDownloadDialog, _Editor_deleteShapeById;
+var _Editor_selectedTool, _Editor_drawLayer, _Editor_previewLayer, _Editor_connection, _Editor_self, _Editor_footerFieldsRef, _Editor_offset, _Editor_shapes, _Editor_currentParams, _Editor_isShapeOnlyBeingSelected, _Editor_setAreFieldsEnabled, _Editor_selectedShape, _Editor_drawContext, _Editor_previewContext, _Editor_createShape, _Editor_deleteShapeById, _Editor_handleUpdateShapes, _Editor_onHandleSelectShape, _Editor_onMoveShape, _Editor_openDownloadDialog;
 import { __classPrivateFieldGet, __classPrivateFieldSet } from "tslib";
 import { updateStyleInputFields } from '../components/molecules/FooterFields/FooterFields.util';
 import { setIsButtonDisabled, setIsButtonActive, } from '../components/molecules/ToolBox/ToolBox.util';
-import { highlightStyle, SVGParamFieldID, textPlaceHolder, Tools_List, } from './helper/constants';
+import { defaultSVGParams, highlightStyle, SVGParamFieldID, textPlaceHolder, Tools_List, } from './helper/constants';
 import { generateSVGURLFromShapes, importSVG } from './helper/svgUtil';
 import { isMoveTool, isShapeType, isText, typeOfShape, } from './helper/typeguards';
 import { Pen } from './Pen';
@@ -30,19 +30,12 @@ export class Editor {
         _Editor_footerFieldsRef.set(this, void 0);
         _Editor_offset.set(this, void 0);
         _Editor_shapes.set(this, []);
-        _Editor_currentParams.set(this, {
-            strokeWidth: '1',
-            stroke: 'rgba(0,0,0,1)',
-            fill: 'rgba(0,0,0,0)',
-            lineDash: [0],
-            text: textPlaceHolder,
-        });
+        _Editor_currentParams.set(this, defaultSVGParams);
         _Editor_isShapeOnlyBeingSelected.set(this, false);
         _Editor_setAreFieldsEnabled.set(this, void 0);
         _Editor_selectedShape.set(this, null);
         _Editor_drawContext.set(this, void 0);
         _Editor_previewContext.set(this, void 0);
-        this.getSVGParams = () => (Object.assign({}, __classPrivateFieldGet(this, _Editor_currentParams, "f")));
         _Editor_createShape.set(this, (shapeRecord) => {
             switch (shapeRecord.type) {
                 case 'Ellipse': {
@@ -68,47 +61,12 @@ export class Editor {
                     break;
             }
         });
-        this.updateShapes = (shapes) => {
+        _Editor_deleteShapeById.set(this, (shapeId) => {
             var _a;
-            console.log(shapes);
-            if (!shapes.length) {
-                __classPrivateFieldSet(this, _Editor_shapes, [], "f");
-                __classPrivateFieldSet(this, _Editor_selectedShape, null, "f");
-            }
-            else {
-                if (!isShapeType(shapes[0])) {
-                    const newShapes = shapes
-                        .map(__classPrivateFieldGet(this, _Editor_createShape, "f"))
-                        .filter(shape => !!shape);
-                    __classPrivateFieldSet(this, _Editor_shapes, newShapes, "f");
-                    console.log(__classPrivateFieldGet(this, _Editor_shapes, "f"));
-                }
-                else {
-                    shapes.forEach(shape => {
-                        const index = __classPrivateFieldGet(this, _Editor_shapes, "f").findIndex(innerShape => innerShape.getId() === (shape === null || shape === void 0 ? void 0 : shape.getId()));
-                        if (index >= 0) {
-                            __classPrivateFieldGet(this, _Editor_shapes, "f")[index] = shape;
-                        }
-                        else {
-                            __classPrivateFieldGet(this, _Editor_shapes, "f").push(shape);
-                        }
-                        __classPrivateFieldSet(this, _Editor_currentParams, shape.getSvgParams(), "f");
-                    });
-                    if (((_a = __classPrivateFieldGet(this, _Editor_selectedTool, "f")) === null || _a === void 0 ? void 0 : _a.toolName) === Tools_List.SELECT) {
-                        __classPrivateFieldGet(this, _Editor_selectedTool, "f").updateAllShapes(__classPrivateFieldGet(this, _Editor_shapes, "f"));
-                    }
-                }
-            }
-            this.redrawShapes();
-        };
-        this.resetEditor = () => {
-            if (__classPrivateFieldGet(this, _Editor_drawLayer, "f")) {
-                Pen.clearCanvas(__classPrivateFieldGet(this, _Editor_drawLayer, "f"));
-            }
-            if (__classPrivateFieldGet(this, _Editor_previewLayer, "f")) {
-                Pen.clearCanvas(__classPrivateFieldGet(this, _Editor_previewLayer, "f"));
-            }
-        };
+            const index = __classPrivateFieldGet(this, _Editor_shapes, "f").findIndex(shape => shape.getId() === shapeId);
+            __classPrivateFieldGet(this, _Editor_shapes, "f").splice(index, 1);
+            (_a = __classPrivateFieldGet(this, _Editor_connection, "f")) === null || _a === void 0 ? void 0 : _a.deleteShapes([shapeId]);
+        });
         _Editor_handleUpdateShapes.set(this, (toBeAppended) => {
             var _a;
             if (toBeAppended === undefined) {
@@ -180,53 +138,13 @@ export class Editor {
             downloadLink.click();
             document.body.removeChild(downloadLink);
         });
-        this.resetPreview = () => {
+        this.applyStyles = () => {
             var _a;
-            const renderingContext = (_a = __classPrivateFieldGet(this, _Editor_previewLayer, "f")) === null || _a === void 0 ? void 0 : _a.getContext('2d');
-            if (__classPrivateFieldGet(this, _Editor_previewLayer, "f") && renderingContext) {
-                Pen.clearCanvas(__classPrivateFieldGet(this, _Editor_previewLayer, "f"), renderingContext);
+            if (__classPrivateFieldGet(this, _Editor_selectedShape, "f") && __classPrivateFieldGet(this, _Editor_drawLayer, "f")) {
+                this.redrawShapes();
+                (_a = __classPrivateFieldGet(this, _Editor_connection, "f")) === null || _a === void 0 ? void 0 : _a.updateShapes(__classPrivateFieldGet(this, _Editor_shapes, "f"));
             }
         };
-        this.redrawShapes = () => {
-            if (__classPrivateFieldGet(this, _Editor_drawContext, "f") &&
-                __classPrivateFieldGet(this, _Editor_drawLayer, "f") &&
-                __classPrivateFieldGet(this, _Editor_previewLayer, "f") &&
-                __classPrivateFieldGet(this, _Editor_previewContext, "f")) {
-                Pen.clearCanvas(__classPrivateFieldGet(this, _Editor_drawLayer, "f"), __classPrivateFieldGet(this, _Editor_drawContext, "f"));
-                Pen.clearCanvas(__classPrivateFieldGet(this, _Editor_previewLayer, "f"), __classPrivateFieldGet(this, _Editor_previewContext, "f"));
-                if (__classPrivateFieldGet(this, _Editor_selectedShape, "f")) {
-                    if (typeOfShape(__classPrivateFieldGet(this, _Editor_selectedShape, "f")) === 'TextShape') {
-                        Pen.draw(__classPrivateFieldGet(this, _Editor_selectedShape, "f"), Object.assign(Object.assign(Object.assign(Object.assign({}, __classPrivateFieldGet(this, _Editor_selectedShape, "f").getSvgParams()), __classPrivateFieldGet(this, _Editor_currentParams, "f")), highlightStyle), { lineDash: [0] }), __classPrivateFieldGet(this, _Editor_previewContext, "f"));
-                    }
-                    else {
-                        Pen.draw(__classPrivateFieldGet(this, _Editor_selectedShape, "f"), Object.assign(Object.assign(Object.assign({}, __classPrivateFieldGet(this, _Editor_selectedShape, "f").getSvgParams()), __classPrivateFieldGet(this, _Editor_currentParams, "f")), highlightStyle), __classPrivateFieldGet(this, _Editor_previewContext, "f"));
-                    }
-                }
-                __classPrivateFieldGet(this, _Editor_drawContext, "f") &&
-                    __classPrivateFieldGet(this, _Editor_shapes, "f").forEach(shape => {
-                        // Impossible to be null here when in line 281 drawContext is checked
-                        Pen.draw(shape, undefined, __classPrivateFieldGet(this, _Editor_drawContext, "f"));
-                    });
-            }
-        };
-        this.onUpdateStyleInputFields = () => {
-            var _a, _b;
-            updateStyleInputFields(__classPrivateFieldGet(this, _Editor_footerFieldsRef, "f"), (_b = (_a = __classPrivateFieldGet(this, _Editor_selectedShape, "f")) === null || _a === void 0 ? void 0 : _a.getSvgParams()) !== null && _b !== void 0 ? _b : __classPrivateFieldGet(this, _Editor_currentParams, "f"));
-        };
-        this.onSave = () => {
-            this.onUnselectTool();
-            __classPrivateFieldGet(this, _Editor_openDownloadDialog, "f").call(this, generateSVGURLFromShapes(__classPrivateFieldGet(this, _Editor_shapes, "f")));
-        };
-        this.onImportSVG = (data) => {
-            __classPrivateFieldGet(this, _Editor_handleUpdateShapes, "f").call(this, importSVG(data));
-        };
-        this.getAllShapes = () => __classPrivateFieldGet(this, _Editor_shapes, "f");
-        _Editor_deleteShapeById.set(this, (shapeId) => {
-            var _a;
-            const index = __classPrivateFieldGet(this, _Editor_shapes, "f").findIndex(shape => shape.getId() === shapeId);
-            __classPrivateFieldGet(this, _Editor_shapes, "f").splice(index, 1);
-            (_a = __classPrivateFieldGet(this, _Editor_connection, "f")) === null || _a === void 0 ? void 0 : _a.deleteShapes([shapeId]);
-        });
         this.deleteFromShapes = (shapeIdData) => {
             if (Array.isArray(shapeIdData)) {
                 shapeIdData.forEach(__classPrivateFieldGet(this, _Editor_deleteShapeById, "f"));
@@ -235,11 +153,24 @@ export class Editor {
                 __classPrivateFieldGet(this, _Editor_deleteShapeById, "f").call(this, shapeIdData);
             }
         };
+        this.getAllShapes = () => __classPrivateFieldGet(this, _Editor_shapes, "f");
+        this.getSVGParams = () => __classPrivateFieldGet(this, _Editor_currentParams, "f");
+        this.onUpdateStyleInputFields = () => {
+            var _a, _b;
+            updateStyleInputFields(__classPrivateFieldGet(this, _Editor_footerFieldsRef, "f"), (_b = (_a = __classPrivateFieldGet(this, _Editor_selectedShape, "f")) === null || _a === void 0 ? void 0 : _a.getSvgParams()) !== null && _b !== void 0 ? _b : __classPrivateFieldGet(this, _Editor_currentParams, "f"));
+        };
         this.onDeleteSelectedShape = () => {
             if (__classPrivateFieldGet(this, _Editor_selectedShape, "f")) {
                 this.deleteFromShapes(__classPrivateFieldGet(this, _Editor_selectedShape, "f").getId());
                 __classPrivateFieldSet(this, _Editor_selectedShape, null, "f");
             }
+        };
+        this.onImportSVG = (data) => {
+            __classPrivateFieldGet(this, _Editor_handleUpdateShapes, "f").call(this, importSVG(data));
+        };
+        this.onSave = () => {
+            this.onUnselectTool();
+            __classPrivateFieldGet(this, _Editor_openDownloadDialog, "f").call(this, generateSVGURLFromShapes(__classPrivateFieldGet(this, _Editor_shapes, "f")));
         };
         this.onSelectTool = (tool) => {
             var _a, _b, _c, _d, _e, _f;
@@ -326,12 +257,61 @@ export class Editor {
                 (_f = __classPrivateFieldGet(this, _Editor_selectedTool, "f")) === null || _f === void 0 ? void 0 : _f.executeAction();
             }
         };
-        this.applyStyles = () => {
-            var _a;
-            if (__classPrivateFieldGet(this, _Editor_selectedShape, "f") && __classPrivateFieldGet(this, _Editor_drawLayer, "f")) {
-                this.redrawShapes();
-                (_a = __classPrivateFieldGet(this, _Editor_connection, "f")) === null || _a === void 0 ? void 0 : _a.updateShapes(__classPrivateFieldGet(this, _Editor_shapes, "f"));
+        this.onUnselectTool = () => {
+            var _a, _b;
+            if (__classPrivateFieldGet(this, _Editor_selectedShape, "f")) {
+                (_a = __classPrivateFieldGet(this, _Editor_connection, "f")) === null || _a === void 0 ? void 0 : _a.unlockShapes(__classPrivateFieldGet(this, _Editor_selectedShape, "f"));
             }
+            setIsButtonDisabled(__classPrivateFieldGet(this, _Editor_self, "f"), Tools_List.MOVE, true);
+            __classPrivateFieldSet(this, _Editor_selectedShape, null, "f");
+            (_b = __classPrivateFieldGet(this, _Editor_selectedTool, "f")) === null || _b === void 0 ? void 0 : _b.destroy();
+            __classPrivateFieldGet(this, _Editor_setAreFieldsEnabled, "f").call(this, Object.values(SVGParamFieldID), false);
+            setTextParamsSourceVisibility(__classPrivateFieldGet(this, _Editor_footerFieldsRef, "f"), false);
+            this.resetPreview();
+            this.redrawShapes();
+        };
+        this.redrawShapes = () => {
+            if (__classPrivateFieldGet(this, _Editor_drawContext, "f") &&
+                __classPrivateFieldGet(this, _Editor_drawLayer, "f") &&
+                __classPrivateFieldGet(this, _Editor_previewLayer, "f") &&
+                __classPrivateFieldGet(this, _Editor_previewContext, "f")) {
+                Pen.clearCanvas(__classPrivateFieldGet(this, _Editor_drawLayer, "f"), __classPrivateFieldGet(this, _Editor_drawContext, "f"));
+                Pen.clearCanvas(__classPrivateFieldGet(this, _Editor_previewLayer, "f"), __classPrivateFieldGet(this, _Editor_previewContext, "f"));
+                if (__classPrivateFieldGet(this, _Editor_selectedShape, "f")) {
+                    if (typeOfShape(__classPrivateFieldGet(this, _Editor_selectedShape, "f")) === 'TextShape') {
+                        Pen.draw(__classPrivateFieldGet(this, _Editor_selectedShape, "f"), Object.assign(Object.assign(Object.assign(Object.assign({}, __classPrivateFieldGet(this, _Editor_selectedShape, "f").getSvgParams()), __classPrivateFieldGet(this, _Editor_currentParams, "f")), highlightStyle), { lineDash: [0] }), __classPrivateFieldGet(this, _Editor_previewContext, "f"));
+                    }
+                    else {
+                        Pen.draw(__classPrivateFieldGet(this, _Editor_selectedShape, "f"), Object.assign(Object.assign(Object.assign({}, __classPrivateFieldGet(this, _Editor_selectedShape, "f").getSvgParams()), __classPrivateFieldGet(this, _Editor_currentParams, "f")), highlightStyle), __classPrivateFieldGet(this, _Editor_previewContext, "f"));
+                    }
+                }
+                __classPrivateFieldGet(this, _Editor_drawContext, "f") &&
+                    __classPrivateFieldGet(this, _Editor_shapes, "f").forEach(shape => {
+                        // Impossible to be null here when in line 281 drawContext is checked
+                        Pen.draw(shape, undefined, __classPrivateFieldGet(this, _Editor_drawContext, "f"));
+                    });
+            }
+        };
+        this.resetEditor = () => {
+            this.onUnselectTool();
+            __classPrivateFieldSet(this, _Editor_shapes, [], "f");
+            __classPrivateFieldSet(this, _Editor_currentParams, defaultSVGParams, "f");
+            if (__classPrivateFieldGet(this, _Editor_drawLayer, "f")) {
+                Pen.clearCanvas(__classPrivateFieldGet(this, _Editor_drawLayer, "f"));
+            }
+            if (__classPrivateFieldGet(this, _Editor_previewLayer, "f")) {
+                Pen.clearCanvas(__classPrivateFieldGet(this, _Editor_previewLayer, "f"));
+            }
+        };
+        this.resetPreview = () => {
+            var _a;
+            const renderingContext = (_a = __classPrivateFieldGet(this, _Editor_previewLayer, "f")) === null || _a === void 0 ? void 0 : _a.getContext('2d');
+            if (__classPrivateFieldGet(this, _Editor_previewLayer, "f") && renderingContext) {
+                Pen.clearCanvas(__classPrivateFieldGet(this, _Editor_previewLayer, "f"), renderingContext);
+            }
+        };
+        this.setConnection = (newConnection) => {
+            __classPrivateFieldSet(this, _Editor_connection, newConnection, "f");
         };
         this.setShapeParam = (field, value) => {
             var _a;
@@ -360,20 +340,35 @@ export class Editor {
             }, "f");
             (_a = __classPrivateFieldGet(this, _Editor_selectedTool, "f")) === null || _a === void 0 ? void 0 : _a.setSVGParams(__classPrivateFieldGet(this, _Editor_currentParams, "f"));
         };
-        this.setConnection = (newConnection) => {
-            __classPrivateFieldSet(this, _Editor_connection, newConnection, "f");
-        };
-        this.onUnselectTool = () => {
-            var _a, _b;
-            if (__classPrivateFieldGet(this, _Editor_selectedShape, "f")) {
-                (_a = __classPrivateFieldGet(this, _Editor_connection, "f")) === null || _a === void 0 ? void 0 : _a.unlockShapes(__classPrivateFieldGet(this, _Editor_selectedShape, "f"));
+        this.updateShapes = (shapes) => {
+            var _a;
+            if (!shapes.length) {
+                __classPrivateFieldSet(this, _Editor_shapes, [], "f");
+                __classPrivateFieldSet(this, _Editor_selectedShape, null, "f");
             }
-            setIsButtonDisabled(__classPrivateFieldGet(this, _Editor_self, "f"), Tools_List.MOVE, true);
-            __classPrivateFieldSet(this, _Editor_selectedShape, null, "f");
-            (_b = __classPrivateFieldGet(this, _Editor_selectedTool, "f")) === null || _b === void 0 ? void 0 : _b.destroy();
-            __classPrivateFieldGet(this, _Editor_setAreFieldsEnabled, "f").call(this, Object.values(SVGParamFieldID), false);
-            setTextParamsSourceVisibility(__classPrivateFieldGet(this, _Editor_footerFieldsRef, "f"), false);
-            this.resetPreview();
+            else {
+                if (!isShapeType(shapes[0])) {
+                    const newShapes = shapes
+                        .map(__classPrivateFieldGet(this, _Editor_createShape, "f"))
+                        .filter(shape => !!shape);
+                    __classPrivateFieldSet(this, _Editor_shapes, newShapes, "f");
+                }
+                else {
+                    shapes.forEach(shape => {
+                        const index = __classPrivateFieldGet(this, _Editor_shapes, "f").findIndex(innerShape => innerShape.getId() === (shape === null || shape === void 0 ? void 0 : shape.getId()));
+                        if (index >= 0) {
+                            __classPrivateFieldGet(this, _Editor_shapes, "f")[index] = shape;
+                        }
+                        else {
+                            __classPrivateFieldGet(this, _Editor_shapes, "f").push(shape);
+                        }
+                        __classPrivateFieldSet(this, _Editor_currentParams, shape.getSvgParams(), "f");
+                    });
+                    if (((_a = __classPrivateFieldGet(this, _Editor_selectedTool, "f")) === null || _a === void 0 ? void 0 : _a.toolName) === Tools_List.SELECT) {
+                        __classPrivateFieldGet(this, _Editor_selectedTool, "f").updateAllShapes(__classPrivateFieldGet(this, _Editor_shapes, "f"));
+                    }
+                }
+            }
             this.redrawShapes();
         };
         __classPrivateFieldSet(this, _Editor_drawLayer, drawLayer, "f");
@@ -397,5 +392,5 @@ export class Editor {
         });
     }
 }
-_Editor_selectedTool = new WeakMap(), _Editor_drawLayer = new WeakMap(), _Editor_previewLayer = new WeakMap(), _Editor_connection = new WeakMap(), _Editor_self = new WeakMap(), _Editor_footerFieldsRef = new WeakMap(), _Editor_offset = new WeakMap(), _Editor_shapes = new WeakMap(), _Editor_currentParams = new WeakMap(), _Editor_isShapeOnlyBeingSelected = new WeakMap(), _Editor_setAreFieldsEnabled = new WeakMap(), _Editor_selectedShape = new WeakMap(), _Editor_drawContext = new WeakMap(), _Editor_previewContext = new WeakMap(), _Editor_createShape = new WeakMap(), _Editor_handleUpdateShapes = new WeakMap(), _Editor_onHandleSelectShape = new WeakMap(), _Editor_onMoveShape = new WeakMap(), _Editor_openDownloadDialog = new WeakMap(), _Editor_deleteShapeById = new WeakMap();
+_Editor_selectedTool = new WeakMap(), _Editor_drawLayer = new WeakMap(), _Editor_previewLayer = new WeakMap(), _Editor_connection = new WeakMap(), _Editor_self = new WeakMap(), _Editor_footerFieldsRef = new WeakMap(), _Editor_offset = new WeakMap(), _Editor_shapes = new WeakMap(), _Editor_currentParams = new WeakMap(), _Editor_isShapeOnlyBeingSelected = new WeakMap(), _Editor_setAreFieldsEnabled = new WeakMap(), _Editor_selectedShape = new WeakMap(), _Editor_drawContext = new WeakMap(), _Editor_previewContext = new WeakMap(), _Editor_createShape = new WeakMap(), _Editor_deleteShapeById = new WeakMap(), _Editor_handleUpdateShapes = new WeakMap(), _Editor_onHandleSelectShape = new WeakMap(), _Editor_onMoveShape = new WeakMap(), _Editor_openDownloadDialog = new WeakMap();
 //# sourceMappingURL=Editor.js.map

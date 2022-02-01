@@ -7,7 +7,6 @@ import { Shape } from '../Shape';
 import { getCircleBoundaries } from './Ellipse.util';
 
 export class Ellipse extends Shape {
-  #center: Coordinates;
   radiusX: number;
   radiusY: number;
   constructor(
@@ -24,25 +23,18 @@ export class Ellipse extends Shape {
       countShapeCountUp,
       isLocked
     );
-    this.#center = center;
+    this.calculationCenter = center;
     this.radiusX = radiusX;
     this.radiusY = radiusY;
   }
 
-  moveTo = (coordinates: Coordinates) => {
-    const xDifference = coordinates[0] - this.#center[0];
-    const yDifference = coordinates[1] - this.#center[1];
-    this.#center = coordinates;
-    this.moveBoundaries([xDifference, yDifference]);
-  };
-
   getCenter = () => {
-    return this.#center;
+    return this.calculationCenter;
   };
 
   toSVGEllipseParams = (): EllipseSVGParams => ({
-    cx: this.#center[0].toString(),
-    cy: this.#center[1].toString(),
+    cx: this.calculationCenter[0].toString(),
+    cy: this.calculationCenter[1].toString(),
     rx: this.radiusX.toString(),
     ry: this.radiusY.toString(),
     ...this.getSvgParams(),
@@ -51,7 +43,7 @@ export class Ellipse extends Shape {
   getDeconstructedShapeData = () => ({
     type: 'Ellipse',
     id: this.getId(),
-    center: this.#center,
+    center: this.calculationCenter,
     radiusX: this.radiusX,
     radiusY: this.radiusY,
     isLocked: this.isLocked,
@@ -60,7 +52,7 @@ export class Ellipse extends Shape {
 
   toString = () => {
     return JSON.stringify({
-      center: this.#center,
+      center: this.calculationCenter,
       radiusX: this.radiusX,
       radiusY: this.radiusY,
     });

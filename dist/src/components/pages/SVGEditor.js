@@ -58,7 +58,7 @@ let SVGEditor = class SVGEditor extends LitElement {
                 new ResizeObserver(__classPrivateFieldGet(this, _SVGEditor_updateResize, "f")).observe(drawLayer);
                 const footerFields = (_e = svgEditor.shadowRoot) === null || _e === void 0 ? void 0 : _e.querySelector('footer-fields');
                 this.editor = new Editor(drawLayer, previewLayer, [previewLayer.offsetLeft, previewLayer.offsetTop], svgEditor, footerFields);
-                this.connection = new Connection(this.editor.deleteFromShapes, this.editor.updateShapes, this.editor.getAllShapes, this.editor.resetEditor, __classPrivateFieldGet(this, _SVGEditor_updateConnection, "f"), __classPrivateFieldGet(this, _SVGEditor_updateChatLog, "f"), this.editor.setConnection);
+                this.connection = new Connection(this.editor.deleteFromShapes, this.editor.updateShapes, this.editor.getAllShapes, this.editor.resetEditor, __classPrivateFieldGet(this, _SVGEditor_updateConnection, "f"), __classPrivateFieldGet(this, _SVGEditor_updateChatLog, "f"), this.editor.setConnection, 'localhost', '8080');
             }
         }
         if (this.editor && this.connection) {

@@ -50,3 +50,8 @@ export declare type SVGDrawPath = {
     points?: Coordinates[] | string;
 };
 export declare type Partition<T> = [T[], T[]];
+export declare type ChatEntry = {
+    userName: string;
+    message: string;
+};
+export declare type CallbackFunction<ArgumentType extends any[], ReturnType = void> = (...args: ArgumentType) => ReturnType;
