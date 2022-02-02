@@ -9,6 +9,7 @@ export enum WS_EVENTS {
   UNLOCK_SHAPES = 'unlock-shapes',
   JOIN_ROOM = 'join-room',
   DISCONNECT = 'disconnect',
+  ERROR = 'error',
 }
 
 export type ConnectionStatus = 'disconnected' | 'connected' | 'connecting';

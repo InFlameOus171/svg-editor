@@ -135,6 +135,12 @@ export class Connection {
           self.onUpdateShapes(JSON.parse(value as string) ?? []);
           break;
         }
+        case WS_EVENTS.ERROR: {
+          alert(
+            'Error while communicating with the server. Please refresh the connection.'
+          );
+          break;
+        }
       }
     });
     this.#startKeepingConnectionAlive(ws);
