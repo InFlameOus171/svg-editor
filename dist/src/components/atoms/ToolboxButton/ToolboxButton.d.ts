@@ -5,7 +5,7 @@ export declare class ToolboxButton extends LitElement {
     buttonId?: Tools_List;
     onClick?: ToolboxButtonClickFunction;
     toolName?: string;
-    icon?: [string, string];
+    icon?: string;
     disabled?: boolean;
     static styles: import("lit").CSSResult[];
     constructor(props: ToolboxButtonPropsType);

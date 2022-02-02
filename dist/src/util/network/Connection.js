@@ -87,6 +87,10 @@ export class Connection {
                         self.onUpdateShapes((_b = JSON.parse(value)) !== null && _b !== void 0 ? _b : []);
                         break;
                     }
+                    case WS_EVENTS.ERROR: {
+                        alert('Error while communicating with the server. Please refresh the connection.');
+                        break;
+                    }
                 }
             });
             __classPrivateFieldGet(this, _Connection_startKeepingConnectionAlive, "f").call(this, ws);

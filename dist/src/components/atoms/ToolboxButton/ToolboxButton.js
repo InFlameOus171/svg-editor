@@ -1,7 +1,7 @@
 import { __decorate } from "tslib";
 import { html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { toolBoxButtonStyles } from './ToolboxButton.styles';
+import { iconStyles, toolBoxButtonStyles, } from './ToolboxButton.styles';
 let ToolboxButton = class ToolboxButton extends LitElement {
     constructor(props) {
         super();
@@ -31,28 +31,23 @@ let ToolboxButton = class ToolboxButton extends LitElement {
         }
     }
     render() {
-        var _a, _b, _c, _d;
+        var _a, _b;
         return html ` <div class="tooltip" id="button-tooltip">
-      <button
-        id=${(_a = this.buttonId) !== null && _a !== void 0 ? _a : this.toolName + Date.now().toString()}
-        @click=${() => { var _a; return this.buttonId && ((_a = this.onClick) === null || _a === void 0 ? void 0 : _a.call(this, this.buttonId)); }}
-        .disabled=${(_b = this.disabled) !== null && _b !== void 0 ? _b : false}
-      >
+      <label>
         ${this.icon
-            ? html `
-          <img
-          alt=${(_c = this.toolName) !== null && _c !== void 0 ? _c : 'tool'}
-          class=${((_d = this.className) !== null && _d !== void 0 ? _d : '') + 'tool-icon'}
-          onerror=${`this.onerror = null; this.src="public/images/${this.icon[1]}"`}
-          src=${this.icon[0] + this.icon[1]}>
-          </img>`
+            ? html ` <div class=${this.icon + ' icon'}></div>`
             : this.toolName}
-      </button>
+        <button
+          id=${(_a = this.buttonId) !== null && _a !== void 0 ? _a : this.toolName + Date.now().toString()}
+          @click=${() => { var _a; return this.buttonId && ((_a = this.onClick) === null || _a === void 0 ? void 0 : _a.call(this, this.buttonId)); }}
+          .disabled=${(_b = this.disabled) !== null && _b !== void 0 ? _b : false}
+        ></button>
+      </label>
       <span id="tooltiptext"> ${this.toolName} </span>
     </div>`;
     }
 };
-ToolboxButton.styles = [toolBoxButtonStyles];
+ToolboxButton.styles = [toolBoxButtonStyles, ...iconStyles];
 __decorate([
     property({ type: String })
 ], ToolboxButton.prototype, "buttonId", void 0);
@@ -63,7 +58,7 @@ __decorate([
     property({ type: String })
 ], ToolboxButton.prototype, "toolName", void 0);
 __decorate([
-    property({ type: Array })
+    property({ type: String })
 ], ToolboxButton.prototype, "icon", void 0);
 __decorate([
     property({ type: Boolean })

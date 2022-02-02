@@ -2,7 +2,11 @@ import { html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { nanoid } from 'nanoid';
 import { Tools_List } from '../../../util/helper/constants';
-import { toolBoxButtonStyles } from './ToolboxButton.styles';
+import {
+  drawIconStyle,
+  iconStyles,
+  toolBoxButtonStyles,
+} from './ToolboxButton.styles';
 import {
   ToolboxButtonClickFunction,
   ToolboxButtonPropsType,
@@ -18,13 +22,13 @@ export class ToolboxButton extends LitElement {
   @property({ type: String })
   toolName?: string;
 
-  @property({ type: Array })
-  icon?: [string, string];
+  @property({ type: String })
+  icon?: string;
 
   @property({ type: Boolean })
   disabled?: boolean;
 
-  static styles = [toolBoxButtonStyles];
+  static styles = [toolBoxButtonStyles, ...iconStyles];
 
   constructor(props: ToolboxButtonPropsType) {
     super();
@@ -59,21 +63,16 @@ export class ToolboxButton extends LitElement {
 
   render() {
     return html` <div class="tooltip" id="button-tooltip">
-      <button
-        id=${this.buttonId ?? this.toolName + Date.now().toString()}
-        @click=${() => this.buttonId && this.onClick?.(this.buttonId)}
-        .disabled=${this.disabled ?? false}
-      >
+      <label>
         ${this.icon
-          ? html`
-          <img
-          alt=${this.toolName ?? 'tool'}
-          class=${(this.className ?? '') + 'tool-icon'}
-          onerror=${`this.onerror = null; this.src="public/images/${this.icon[1]}"`}
-          src=${this.icon[0] + this.icon[1]}>
-          </img>`
+          ? html` <div class=${this.icon + ' icon'}></div>`
           : this.toolName}
-      </button>
+        <button
+          id=${this.buttonId ?? this.toolName + Date.now().toString()}
+          @click=${() => this.buttonId && this.onClick?.(this.buttonId)}
+          .disabled=${this.disabled ?? false}
+        ></button>
+      </label>
       <span id="tooltiptext"> ${this.toolName} </span>
     </div>`;
   }
