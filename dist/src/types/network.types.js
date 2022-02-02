@@ -10,6 +10,5 @@ export var WS_EVENTS;
     WS_EVENTS["UNLOCK_SHAPES"] = "unlock-shapes";
     WS_EVENTS["JOIN_ROOM"] = "join-room";
     WS_EVENTS["DISCONNECT"] = "disconnect";
-    WS_EVENTS["ERROR"] = "error";
 })(WS_EVENTS || (WS_EVENTS = {}));
 //# sourceMappingURL=network.types.js.map

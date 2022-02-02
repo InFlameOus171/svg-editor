@@ -1,12 +1,2 @@
 export declare const toolBoxButtonStyles: import("lit").CSSResult;
 export declare const selectedButtonStyle: import("lit").CSSResult;
-export declare const drawIconStyle: import("lit").CSSResult;
-export declare const lineIconStyle: import("lit").CSSResult;
-export declare const rectangleIconStyle: import("lit").CSSResult;
-export declare const ellipseIconStyle: import("lit").CSSResult;
-export declare const textIconStyle: import("lit").CSSResult;
-export declare const selectIconStyle: import("lit").CSSResult;
-export declare const moveIconStyle: import("lit").CSSResult;
-export declare const deleteIconStyle: import("lit").CSSResult;
-export declare const unselectIconStyle: import("lit").CSSResult;
-export declare const iconStyles: import("lit").CSSResult[];

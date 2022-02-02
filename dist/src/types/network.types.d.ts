@@ -8,8 +8,7 @@ export declare enum WS_EVENTS {
     LOCK_SHAPES = "lock-shapes",
     UNLOCK_SHAPES = "unlock-shapes",
     JOIN_ROOM = "join-room",
-    DISCONNECT = "disconnect",
-    ERROR = "error"
+    DISCONNECT = "disconnect"
 }
 export declare type ConnectionStatus = 'disconnected' | 'connected' | 'connecting';
 export declare type ParsedData = Record<string, any> & {
